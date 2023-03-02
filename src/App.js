@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 
+//https://react-icons.github.io/react-icons - react-icon docs
 function App() {
   return (
     <div className="App">
