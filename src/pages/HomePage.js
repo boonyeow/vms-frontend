@@ -1,6 +1,11 @@
+import NavBar from "../components/SharedComponents/NavBar";
+
 const HomePage = () => {
-    return <h1>
-        Home
-    </h1>
+    return (
+      <>
+        <NavBar />
+        <h1>Home</h1>
+      </>
+    );
 }
 export default HomePage;
