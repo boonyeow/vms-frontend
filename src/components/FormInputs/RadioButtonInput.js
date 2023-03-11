@@ -6,27 +6,26 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import PropTypes from "prop-types";
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 
 RadioButtonInput.defaultProps = {
   value: "2",
   onChange: () => console.log("default onChange function"),
-  onOptionsChange: () => console.log("default onOptionChange function"),
 };
 
-RadioButtonInput.propTypes = {
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  onOptionsChange: PropTypes.func,
-};
 
-function RadioButtonInput(props) {
+function RadioButtonInput() {
+
+  const [value, setValue] = useState("option1");
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
   const [options, setOptions] = useState([
     { value: "option1", label: "Option 1", editing: true },
     { value: "option2", label: "Option 2", editing: true },
   ]);
   const [label, setLabel] = useState("");
-  const { value, onChange, onOptionsChange } = props;
 
 
   const handleAddOption = () => {
@@ -37,17 +36,21 @@ function RadioButtonInput(props) {
     };
     setOptions([...options, newOption]);
   };
+  const handleDeleteClick = (index) => {
+    const newOptions = options.filter((option, i) => i !== index);
+    setOptions(newOptions);
+  };
 
   const handleOptionChange = (index, key) => (event) => {
     const newOptions = [...options];
     newOptions[index][key] = event.target.value;
-   setOptions(newOptions);
+    setOptions(newOptions);
   };
 
   const handleOptionEdit = (index, key) => () => {
-    const newOptions =[...options];
+    const newOptions = [...options];
     newOptions[index].editing = true;
-   setOptions(newOptions);
+    setOptions(newOptions);
   };
 
   return (
@@ -58,7 +61,7 @@ function RadioButtonInput(props) {
         onChange={(event) => setLabel(event.target.value)}
         label="Question"
       />
-      <RadioGroup value={value} onChange={onChange}>
+      <RadioGroup value={value} onChange={handleChange}>
         {options.map((option, index) => (
           <FormControlLabel
             key={index}
@@ -66,37 +69,33 @@ function RadioButtonInput(props) {
             control={<Radio />}
             label={
               option.editing ? (
-                <TextField
-                  value={option.label}
-                  onChange={handleOptionChange(index, "label")}
-                />
+                <>
+                  <TextField
+                    value={option.label}
+                    onChange={() => handleOptionChange(index, "label")}
+                  />
+                  {index === 0 ? null : (
+                    <IconButton
+                      onClick={() => handleDeleteClick(index)}
+                      aria-label="delete"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
+                </>
               ) : (
                 option.label
               )
             }
-            onClick={handleOptionEdit(index, "label")}
+            onClick={() => handleOptionEdit(index, "label")}
           />
         ))}
-        {/* {extraOptions.map((option, index) => (
-          <FormControlLabel
-            key={index}
-            value={option.value}
-            control={<Radio />}
-            label={
-              option.editing ? (
-                <TextField
-                  value={option.label}
-                  onChange={handleOptionChange(index, "label")}
-                />
-              ) : (
-                option.label
-              )
-            }
-            onClick={handleOptionEdit(index, "extra")}
-          />
-        ))} */}
       </RadioGroup>
-      <Button variant="contained" color="primary" onClick={handleAddOption}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => handleAddOption()}
+      >
         Add Option
       </Button>
     </div>
