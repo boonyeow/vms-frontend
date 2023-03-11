@@ -6,7 +6,6 @@ import { TextField, Button } from "@mui/material";
 
 const UserMgmt = () => {
   var UserSelected = false;
-
   return (
     <>
       <NavBar />

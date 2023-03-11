@@ -81,7 +81,7 @@ function NavBar() {
             variant="h6"
             noWrap
             component="a"
-            href="/"
+            href="/home"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -149,8 +149,10 @@ function NavBar() {
             Quantum VMS
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+           {/* if is admin then use admin list else use vendor list */}
             {isAdmin
               ? admin.map((page) =>
+                // if there is a list then will make dropdown tab
                   page.list ? (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <PopupState variant="popover" popupId="demo-popup-menu">
@@ -184,9 +186,15 @@ function NavBar() {
                   ) : (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <Button>
-                        <Typography textAlign="center" sx={{ color: "white" }}>
-                          {page.name}
-                        </Typography>
+                          <Link to={page.path}>
+                            <Typography
+                              textAlign="center"
+                              sx={{ color: "white" }}
+                            >
+                              {page.name}
+                            </Typography>
+                          </Link>
+
                       </Button>
                     </Box>
                   )
