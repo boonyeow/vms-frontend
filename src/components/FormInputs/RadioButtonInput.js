@@ -55,12 +55,6 @@ function RadioButtonInput() {
 
   return (
     <div>
-      <TextField
-        variant="standard"
-        value={label}
-        onChange={(event) => setLabel(event.target.value)}
-        label="Question"
-      />
       <RadioGroup value={value} onChange={handleChange}>
         {options.map((option, index) => (
           <FormControlLabel
@@ -72,7 +66,7 @@ function RadioButtonInput() {
                 <>
                   <TextField
                     value={option.label}
-                    onChange={() => handleOptionChange(index, "label")}
+                    onChange={handleOptionChange(index, "label")}
                   />
                   {index === 0 ? null : (
                     <IconButton

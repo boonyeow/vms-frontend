@@ -15,6 +15,8 @@ import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import Menu from "@mui/material/Menu";
+import EditIcon from "@mui/icons-material/Edit";
+import { Icon } from "@mui/material";
 
 const FormCreation = () => {
 
@@ -25,12 +27,14 @@ const FormCreation = () => {
     { name: "TextArea", value: 3 },
     // can add more options
   ]);
-  const handleAddInput = () => {
-
+  const handleAddInput = (index, inputType) => {
+       const newSections = [...sections];
+       newSections[index].inputType = inputType;
+       setSections(newSections);
   };
   const [sections, setSections] = useState([]);
   const handleAddSection = () => {
-    const newSection = {};
+    const newSection = {question:null,inputType:null};
     setSections([...sections,newSection])
   }
     const handleDeleteSection = (index) => {
@@ -74,20 +78,38 @@ const FormCreation = () => {
                     <PopupState variant="popover" popupId="demo-popup-menu">
                       {(popupState) => (
                         <React.Fragment>
-                          <IconButton {...bindTrigger(popupState)}>
-                            <AddCircleIcon />
-                          </IconButton>
+                          {!section.inputType ? (
+                            <IconButton {...bindTrigger(popupState)}>
+                              <AddCircleIcon />
+                            </IconButton>
+                          ) : (
+                            <IconButton {...bindTrigger(popupState)}>
+                              <EditIcon />
+                            </IconButton>
+                          )}
                           <Menu {...bindMenu(popupState)}>
-                            {inputTypes.map((input, index) =>
-                              <MenuItem onClick={() => { popupState.close(); handleAddInput(input.name); }}>
-                              <Typography textAlign="center">{input.name}</Typography>
-                            </MenuItem>
+                            {inputTypes.map(
+                              (input, index) =>
+                                section.inputType !== input.name && (
+                                  <MenuItem
+                                    onClick={() => {
+                                      popupState.close();
+                                      handleAddInput(index, input.name);
+                                    }}
+                                    key={index}
+                                  >
+                                    <Typography textAlign="center">
+                                      {input.name}
+                                    </Typography>
+                                  </MenuItem>
+                                )
                             )}
                           </Menu>
                         </React.Fragment>
                       )}
                     </PopupState>
                   </Box>
+                  {section.inputType === "Radiobutton" && <RadioButtonInput />}
                 </Stack>
               </CardContent>
               <CardActions>
