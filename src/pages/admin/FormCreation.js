@@ -1,5 +1,4 @@
 import NavBar from "../../components/SharedComponents/NavBar";
-import RadioButtonInput from "../../components/FormInputs/RadioButtonInput";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -16,31 +15,67 @@ import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import Menu from "@mui/material/Menu";
 import EditIcon from "@mui/icons-material/Edit";
-import { Icon } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import CloseIcon from "@mui/icons-material/Close";
+import ShortTextIcon from "@mui/icons-material/ShortText";
+
 
 const FormCreation = () => {
 
   const [inputTypes, setInputTypes] = useState([
-    { name: "Radiobutton", value: 0 },
-    { name: "CheckBox", value: 1 },
-    { name: "TextField", value: 2 },
-    { name: "TextArea", value: 3 },
+    { name: "Radiobutton", value: "radio" },
+    { name: "CheckBox", value: "checkbox" },
+    { name: "TextField", value: "text" }
     // can add more options
   ]);
   const handleAddInput = (index, inputType) => {
-       const newSections = [...sections];
-       newSections[index].inputType = inputType;
-       setSections(newSections);
+    const newSections = [...sections];
+    newSections[index].inputType = inputType;
+    setSections(newSections);
   };
   const [sections, setSections] = useState([]);
-  const handleAddSection = () => {
-    const newSection = {question:null,inputType:null};
-    setSections([...sections,newSection])
+  const changeQuestion = (text,i) => {
+    let newQuestion = [...sections];
+    newQuestion[i].questionText = text;
+    setSections(newQuestion)
+
   }
-    const handleDeleteSection = (index) => {
+  const handleAddSection = () => {
+    const newSection = {
+      questionText: "Question",
+      inputType: { name: "Radiobutton", value: "radio" },
+      options: [{ optionText: "option" }, { optionText: "option" }],
+    };
+    setSections([...sections, newSection])
+  }
+  const handleDeleteSection = (index) => {
       const newSection = sections.filter((_, i) => i !== index);
       setSections(newSection);
-    };
+  };
+  const handleDeleteOption = (sectionNo, optionNo) => {
+    const newSections = [...sections];
+    if (newSections[sectionNo].options.length > 1) {
+      newSections[sectionNo].options.splice(optionNo, 1);
+      setSections(newSections)
+    }
+    // newSections[sectionNo].options.splice(optionNo, 1)
+  };
+  const changeOptionValue = (text, index,j) => {
+    let newSections = [...sections];
+    newSections[index].options[j].optionText = text;
+    setSections(newSections)
+  }
+
+  const handleAddOption = (index) => {
+    const newSections = [...sections];
+    if (newSections[index].options.length < 10) {
+      newSections[index].options.push({ optionText: "option" });
+    } else {
+      console.log("max 10 options")
+    }
+    setSections(newSections)
+  }
+
   return (
     <>
       <NavBar />
@@ -71,8 +106,10 @@ const FormCreation = () => {
                 <Stack spacing={2} alignItems="flex-start">
                   <TextField
                     id="outlined-basic"
+                    value={section.questionText}
                     label={`Question ${index + 1}`}
                     variant="standard"
+                    onChange={(e) => changeQuestion(e.target.value, index)}
                   />
                   <Box sx={{ flexGrow: 0 }} key={index}>
                     <PopupState variant="popover" popupId="demo-popup-menu">
@@ -89,14 +126,14 @@ const FormCreation = () => {
                           )}
                           <Menu {...bindMenu(popupState)}>
                             {inputTypes.map(
-                              (input, index) =>
+                              (input, k) =>
                                 section.inputType !== input.name && (
                                   <MenuItem
                                     onClick={() => {
                                       popupState.close();
-                                      handleAddInput(index, input.name);
+                                      handleAddInput(index, input);
                                     }}
-                                    key={index}
+                                    key={`${index}-${k}`}
                                   >
                                     <Typography textAlign="center">
                                       {input.name}
@@ -109,7 +146,65 @@ const FormCreation = () => {
                       )}
                     </PopupState>
                   </Box>
-                  {section.inputType === "Radiobutton" && <RadioButtonInput />}
+                  {section.options.map((op, j) => (
+                    <>
+                      <Stack
+                        spacing={2}
+                        direction="row"
+                        key={j}
+                        alignItems="center"
+                      >
+                        {section.inputType.value !== "text" ? (
+                          <input
+                            type={section.inputType.value}
+                            value={op.optionText}
+                            name={
+                              section.inputType.value === "radio"
+                                ? index
+                                : `${index}-${j}`
+                            }
+                          />
+                        ) : (
+                          <ShortTextIcon />
+                        )}
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="option"
+                            value={op.optionText}
+                            onChange={(e) => {
+                              changeOptionValue(e.target.value, index, j);
+                            }}
+                          />
+                        </div>
+                        {/* label=
+                        {section.inputType.value === "text" ? (
+                          ""
+                        ) : (
+                          <Typography>{op.optionText}</Typography>
+                        )} */}
+
+                        {j == 0 ? (
+                          ""
+                        ) : (
+                          <IconButton
+                            aria-label="delete"
+                            onClick={() => handleDeleteOption(index, j)}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </>
+                  ))}
+                  <Button
+                    variant="text"
+                    color="primary"
+                    onClick={() => handleAddOption(index)}
+                  >
+                    Add Option
+                  </Button>
+                  {/* {section.inputType === "Radiobutton" && <RadioButtonInput />} */}
                 </Stack>
               </CardContent>
               <CardActions>
@@ -124,7 +219,7 @@ const FormCreation = () => {
           ))}
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={() => handleAddSection()}>
+          <Button size="small" onClick={handleAddSection}>
             Add Section
           </Button>
         </CardActions>
