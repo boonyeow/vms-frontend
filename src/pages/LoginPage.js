@@ -1,84 +1,121 @@
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  CssBaseline,
+  TextField,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
 import React, { useState } from "react";
-import { FaUserAlt } from "react-icons/fa";
-import { RiLockPasswordFill } from "react-icons/ri";
+import Swal from "sweetalert2";
+import { useAuthStore } from "../store";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
 const LoginPage = () => {
-  const [userId, setUserId] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { token, setToken } = useAuthStore();
 
-  const handleUserIdChange = (event) => {
-    setUserId(event.target.value);
-  };
+  useEffect(() => {
+    // *****to uncomment later on
+    // if (token != null) {
+    //   // not null = we assume they logged in so redirect to home
+    //   // not the proper way to do things but it works...
+    //   navigate("/home");
+    // }
+  });
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Code to submit login form to server
+    axios
+      .post(process.env.REACT_APP_ENDPOINT_URL + "/api/auth/authenticate", {
+        email: userEmail,
+        password: password,
+      })
+      .then((res) => {
+        // Login successful
+        setToken(res.data);
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Redirecting...",
+          showConfirmButton: false,
+          confirmButtonColor: "#262626",
+          timer: 1500,
+        }).then(() => navigate("/home"));
+      })
+      .catch((e) => {
+        console.log(e);
+        // Login failed
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "The email or password is incorrect.",
+          showCloseButton: true,
+          showConfirmButton: false,
+        });
+      });
   };
 
   return (
-    <div className=" vh-100 container-fluid d-flex justify-content-center align-items-center">
-      <section className="row justify-content-center border p-3">
-        <div className="col-12">
-          <h2 className="text-center mb-4">Login</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group row">
-              <div className="input-group mb-3">
-                <div className="input-group-prepend">
-                  <span
-                    className="input-group-text"
-                    id="inputGroup-sizing-default"
-                    style={{ height: "100%" }}
-                  >
-                    <FaUserAlt />
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default"
-                  placeholder="User ID"
-                  value={userId}
-                  onChange={handleUserIdChange}
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-group row mt-2">
-              <div className="input-group mb-3">
-                <div className="input-group-prepend">
-                  <span
-                    className="input-group-text"
-                    id="inputGroup-sizing-default"
-                    style={{ height: "100%" }}
-                  >
-                    <RiLockPasswordFill />
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default"
-                  placeholder="*******"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-group text-end mt-2">
-              <button type="submit" className="btn btn-primary ">
-                Login
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-    </div>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}>
+        <Avatar sx={{ m: 2, width: "75px", height: "75px" }}></Avatar>
+
+        <Typography component="h1" variant="h5" fontWeight="bold">
+          Sign in
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+            />
+          </Box>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="action"
+            size="large"
+            sx={{ mt: 3, mb: 2 }}>
+            Sign In
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 
