@@ -1,4 +1,3 @@
-
 import NavBar from "../../components/SharedComponents/NavBar";
 import { DataGrid } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
@@ -8,30 +7,27 @@ import { Link } from "react-router-dom";
 
 const columns = [
   { field: "id", headerName: "ID", width: 160 },
+  { field: "revision", headerName: "Revision No", width: 180 },
   { field: "title", headerName: "Title", width: 180 },
-  { field: "vendor", headerName: "Vendor", width: 180 },
-  {
-    field: "status",
-    headerName: "Status",
-    width: 180,
-    renderCell: (params) => {
-      let color = "";
-      switch (params.value) {
-        case "waiting":
-          color = "orange";
-          break;
-        case "approved":
-          color = "green";
-          break;
-        case "rejected":
-          color = "red";
-          break;
-        default:
-          break;
-      }
-      return <div style={{ color: color }}>{params.value}</div>;
-    }
-  },
+//   {
+//     field: "status",
+//     headerName: "Status",
+//     width: 180,
+//     renderCell: (params) => {
+//       let color = "";
+//       switch (params.value) {
+//         case "draft":
+//           color = "orange";
+//           break;
+//         case "published":
+//           color = "green";
+//           break;
+//         default:
+//           break;
+//       }
+//       return <div style={{ color: color }}>{params.value}</div>;
+//     },
+//   },
   {
     field: "action",
     headerName: "Action",
@@ -48,11 +44,11 @@ const columns = [
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
-            color="warning"
+            color="primary"
             size="small"
             onClick={onClick}
           >
-            View
+            Edit
           </Button>
           <Button
             variant="outlined"
@@ -69,22 +65,22 @@ const columns = [
 ];
 
 const rows = [
-  { id: 1, title: "Snow", vendor: "Jon", status: "waiting" },
-  { id: 2, title: "Lannister", vendor: "Cersei", status: "approved" },
-  { id: 3, title: "Lannister", vendor: "Jaime", status: "waiting" },
-  { id: 4, title: "Stark", vendor: "Arya", status: "waiting" },
-  { id: 5, title: "Targaryen", vendor: "Daenerys", status: "approved" },
-  { id: 6, title: "Melisandre", vendor: "Daenerys", status: "approved" },
-  { id: 7, title: "Clifford", vendor: "Ferrara", status: "approved" },
-  { id: 8, title: "Frances", vendor: "Rossini", status: "rejected" },
-  { id: 9, title: "Roxie", vendor: "Harvey", status: "rejected" },
+  { id: 1, revision: "Snow", title: "Jon", status: "published" },
+  { id: 2, revision: "Lannister", title: "Cersei", status: "draft" },
+  { id: 3, revision: "Lannister", title: "Jaime", status: "published" },
+  { id: 4, revision: "Stark", title: "Arya", status: "published" },
+  { id: 5, revision: "Targaryen", title: "Daenerys", status: "published" },
+  { id: 6, revision: "Melisandre", title: "Daenerys", status: "published" },
+  { id: 7, revision: "Clifford", title: "Ferrara", status: "draft" },
+  { id: 8, revision: "Frances", title: "Rossini", status: "draft" },
+  { id: 9, revision: "Roxie", title: "Harvey", status: "draft" },
 ];
 
-const FormMgmt = () => {
+const FormTemplates = () => {
   return (
     <>
       <NavBar />
-      <h1>Form Management</h1>
+      <h1>Form Templates</h1>
 
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
@@ -100,8 +96,14 @@ const FormMgmt = () => {
           <Button variant="contained" color="secondary" size="small">
             Load Draft
           </Button> */}
-          <Button variant="contained" color="secondary" size="small">
-            Send Form
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            component={Link}
+            to="/FormCreation"
+          >
+            Create Form
           </Button>
         </Stack>
         <div style={{ height: 500, maxWidth: "100%" }}>
@@ -117,4 +119,4 @@ const FormMgmt = () => {
     </>
   );
 };
-export default FormMgmt;
+export default FormTemplates;

@@ -82,6 +82,25 @@ const FormCreation = () => {
       <h1>Form Creation</h1>
       <Card sx={{ maxWidth: 900, margin: "auto" }}>
         <CardContent>
+          <Stack spacing={2} direction="row">
+            <TextField
+              id="outlined-basic"
+              label="Form Number"
+              variant="standard"
+            />
+
+            <TextField
+              id="outlined-basic"
+              label="Revision Number"
+              variant="standard"
+            />
+
+            <TextField
+              id="outlined-basic"
+              label="Effective Date"
+              variant="standard"
+            />
+          </Stack>
           <Stack spacing={2}>
             <TextField
               id="outlined-basic"
