@@ -13,8 +13,8 @@ import TableRow from '@mui/material/TableRow';
 
 const UserList = ()=>{
     const columns = [
-        {field:'Username', headerName: 'Username' },
-        {field:'Email', headerName:'Email'}
+        {field:'userName', headerName: 'Username' },
+        {field:'email', headerName:'Email'}
         // not so sure about the filter
     ];
     // hard-code for demo purpose
@@ -28,8 +28,8 @@ const UserList = ()=>{
             <Table >
                 <TableHead>
                     <TableRow>
-                        <TableCell>{columns[0].field}</TableCell>
-                        <TableCell>{columns[1].field}</TableCell>
+                        <TableCell>{columns[0].headerName}</TableCell>
+                        <TableCell>{columns[1].headerName}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

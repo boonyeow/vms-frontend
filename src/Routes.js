@@ -6,6 +6,7 @@ import FormMgmt from "./pages/admin/FormMgmt";
 import UserMgmt from "./pages/admin/UserMgmt";
 import WorkflowCreation from "./pages/admin/WorkflowCreation";
 import WorkflowMgmt from "./pages/admin/WorkflowMgmt";
+import UserCreation from "./pages/admin/UserCreation";
 
 
 function AppRoutes() {
@@ -18,6 +19,7 @@ function AppRoutes() {
       <Route path="WorkflowCreation" element={<WorkflowCreation />} />
       <Route path="WorkflowMgmt" element={<WorkflowMgmt />} />
       <Route path="UserMgmt" element={<UserMgmt />} />
+      <Route path="UserCreation" element={<UserCreation />} />
     </Routes>
   );
 }
