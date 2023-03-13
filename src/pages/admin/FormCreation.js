@@ -18,10 +18,25 @@ import EditIcon from "@mui/icons-material/Edit";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CloseIcon from "@mui/icons-material/Close";
 import ShortTextIcon from "@mui/icons-material/ShortText";
+import Grid from "@mui/material/Grid";
+import Checkbox from '@mui/material/Checkbox';
 
+
+// import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
+// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+// import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+// import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+// import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+// import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
 
 const FormCreation = () => {
-
+  const handleRequired = (index) => {
+  const newSections = [...sections];
+   newSections[index].required = !newSections[index].required;
+    setSections(newSections);
+    console.log(newSections)
+}
   const [inputTypes, setInputTypes] = useState([
     { name: "Radiobutton", value: "radio" },
     { name: "CheckBox", value: "checkbox" },
@@ -31,6 +46,10 @@ const FormCreation = () => {
   const handleAddInput = (index, inputType) => {
     const newSections = [...sections];
     newSections[index].inputType = inputType;
+    if (inputType.value == 'text') {
+      newSections[index].options[0].optionText = '';
+    }
+    console.log(newSections)
     setSections(newSections);
   };
   const [sections, setSections] = useState([]);
@@ -44,7 +63,8 @@ const FormCreation = () => {
     const newSection = {
       questionText: "Question",
       inputType: { name: "Radiobutton", value: "radio" },
-      options: [{ optionText: "option" }, { optionText: "option" }],
+      options: [{ optionText: "option" }],
+      required:false
     };
     setSections([...sections, newSection])
   }
@@ -83,15 +103,11 @@ const FormCreation = () => {
       <Card sx={{ maxWidth: 900, margin: "auto" }}>
         <CardContent>
           <Stack spacing={2} direction="row">
-            <TextField
-              id="outlined-basic"
-              label="Form Number"
-              variant="standard"
-            />
+            <TextField id="outlined-basic" label="Form ID" variant="standard" />
 
             <TextField
               id="outlined-basic"
-              label="Revision Number"
+              label="Revision #"
               variant="standard"
             />
 
@@ -122,80 +138,107 @@ const FormCreation = () => {
               key={index}
             >
               <CardContent>
-                <Stack spacing={2} alignItems="flex-start">
-                  <TextField
-                    id="outlined-basic"
-                    value={section.questionText}
-                    label={`Question ${index + 1}`}
-                    variant="standard"
-                    onChange={(e) => changeQuestion(e.target.value, index)}
-                  />
-                  <Box sx={{ flexGrow: 0 }} key={index}>
-                    <PopupState variant="popover" popupId="demo-popup-menu">
-                      {(popupState) => (
-                        <React.Fragment>
-                          {!section.inputType ? (
-                            <IconButton {...bindTrigger(popupState)}>
-                              <AddCircleIcon />
-                            </IconButton>
-                          ) : (
-                            <IconButton {...bindTrigger(popupState)}>
-                              <EditIcon />
-                            </IconButton>
-                          )}
-                          <Menu {...bindMenu(popupState)}>
-                            {inputTypes.map(
-                              (input, k) =>
-                                section.inputType !== input.name && (
-                                  <MenuItem
-                                    onClick={() => {
-                                      popupState.close();
-                                      handleAddInput(index, input);
-                                    }}
-                                    key={`${index}-${k}`}
-                                  >
-                                    <Typography textAlign="center">
-                                      {input.name}
-                                    </Typography>
-                                  </MenuItem>
-                                )
+                <Stack spacing={2}>
+                  <Stack
+                    spacing={2}
+                    direction="row"
+                    justifyContent="space-between"
+                  >
+                    <TextField
+                      id="outlined-basic"
+                      value={section.questionText}
+                      label={`Question ${index + 1}`}
+                      variant="standard"
+                      onChange={(e) => changeQuestion(e.target.value, index)}
+                    />
+                    <Box sx={{ flexGrow: 0 }} key={index}>
+                      <PopupState variant="popover" popupId="demo-popup-menu">
+                        {(popupState) => (
+                          <React.Fragment>
+                            {!section.inputType ? (
+                              <IconButton {...bindTrigger(popupState)}>
+                                <AddCircleIcon />
+                              </IconButton>
+                            ) : (
+                              <IconButton {...bindTrigger(popupState)}>
+                                <EditIcon />
+                              </IconButton>
                             )}
-                          </Menu>
-                        </React.Fragment>
-                      )}
-                    </PopupState>
-                  </Box>
+                            <Menu {...bindMenu(popupState)}>
+                              {inputTypes.map(
+                                (input, k) =>
+                                  section.inputType !== input.name && (
+                                    <MenuItem
+                                      onClick={() => {
+                                        popupState.close();
+                                        handleAddInput(index, input);
+                                      }}
+                                      key={`${index}-${k}`}
+                                    >
+                                      <Typography textAlign="center">
+                                        {input.name}
+                                      </Typography>
+                                    </MenuItem>
+                                  )
+                              )}
+                            </Menu>
+                          </React.Fragment>
+                        )}
+                      </PopupState>
+                    </Box>
+                  </Stack>
                   {section.options.map((op, j) => (
                     <>
-                      <Stack
-                        spacing={2}
-                        direction="row"
-                        key={j}
+                      <Grid
+                        container
+                        justifyContent="flex-start"
                         alignItems="center"
                       >
                         {section.inputType.value !== "text" ? (
-                          <input
-                            type={section.inputType.value}
-                            value={op.optionText}
-                            name={
-                              section.inputType.value === "radio"
-                                ? index
-                                : `${index}-${j}`
-                            }
-                          />
+                          <>
+                            <Grid item xs={1}>
+                              <input
+                                type={section.inputType.value}
+                                value={op.optionText}
+                                name={
+                                  section.inputType.value === "radio"
+                                    ? index
+                                    : `${index}-${j}`
+                                }
+                              />
+                            </Grid>
+                            <Grid item xs={3}>
+                              <input
+                                type="text"
+                                placeholder={
+                                  section.inputType.value === "text"
+                                    ? ""
+                                    : "option"
+                                }
+                                value={op.optionText}
+                                onChange={(e) => {
+                                  changeOptionValue(e.target.value, index, j);
+                                }}
+                              />
+                            </Grid>
+                          </>
                         ) : (
-                          <ShortTextIcon />
+                          <>
+                            <Grid item xs={1}>
+                              <ShortTextIcon />
+                            </Grid>
+                            <Grid item xs={11}>
+                              <TextField
+                                variant="outlined"
+                                value={op.optionText}
+                                onChange={(e) => {
+                                  changeOptionValue(e.target.value, index, j);
+                                }}
+                                sx={{ minWidth: "80%" }}
+                              />
+                            </Grid>
+                          </>
                         )}
-                        <div>
-                          <input
-                            type="text"
-                            placeholder="option"
-                            value={op.optionText}
-                            onChange={(e) => {
-                              changeOptionValue(e.target.value, index, j);
-                            }}
-                          />
-                        </div>
                         {/* label=
                         {section.inputType.value === "text" ? (
                           ""
@@ -206,33 +249,53 @@ const FormCreation = () => {
                         {j == 0 ? (
                           ""
                         ) : (
-                          <IconButton
-                            aria-label="delete"
-                            onClick={() => handleDeleteOption(index, j)}
-                          >
-                            <CloseIcon />
-                          </IconButton>
+                          <Grid item xs={1}>
+                            <IconButton
+                              aria-label="delete"
+                              onClick={() => handleDeleteOption(index, j)}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Grid>
                         )}
-                      </Stack>
+                      </Grid>
                     </>
                   ))}
-                  <Button
-                    variant="text"
-                    color="primary"
-                    onClick={() => handleAddOption(index)}
-                  >
-                    Add Option
-                  </Button>
+
+                  {section.inputType.value !== "text" ? (
+                    <Stack alignItems="flex-start">
+                      <Button
+                        variant="text"
+                        color="primary"
+                        onClick={() => handleAddOption(index)}
+                      >
+                        Add Option
+                      </Button>
+                    </Stack>
+                  ) : (
+                    ""
+                  )}
+
                   {/* {section.inputType === "Radiobutton" && <RadioButtonInput />} */}
                 </Stack>
               </CardContent>
               <CardActions>
-                <IconButton
-                  sx={{ marginLeft: "auto" }}
-                  onClick={() => handleDeleteSection(index)}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
                 >
-                  <DeleteIcon />
-                </IconButton>
+                  <FormControlLabel
+                    onChange={() => handleRequired(index)}
+                    control={<Checkbox />}
+                    label="Required"
+                  />
+                  <IconButton onClick={() => handleDeleteSection(index)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
               </CardActions>
             </Card>
           ))}
