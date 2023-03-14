@@ -20,8 +20,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import ShortTextIcon from "@mui/icons-material/ShortText";
 import Grid from "@mui/material/Grid";
 import Checkbox from '@mui/material/Checkbox';
-
-
+import AddIcon from "@mui/icons-material/Add";
+import Tooltip from "@mui/material/Tooltip";
 // import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 // import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 // import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -29,6 +29,10 @@ import Checkbox from '@mui/material/Checkbox';
 // import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 // import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 // import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+
+const handleAddNextField = (sectionNo,optionNo) => {
+
+}
 
 const FormCreation = () => {
   const handleRequired = (index) => {
@@ -49,24 +53,60 @@ const FormCreation = () => {
     if (inputType.value == 'text') {
       newSections[index].options[0].optionText = '';
     }
-    console.log(newSections)
     setSections(newSections);
   };
+  const [formData, setFormData] = useState({
+    id: null,
+    name: null,
+    description: null,
+    isFinal: false,
+    fields: [],
+    authorizedAccountIds:[]
+  })
   const [sections, setSections] = useState([]);
   const changeQuestion = (text,i) => {
     let newQuestion = [...sections];
     newQuestion[i].questionText = text;
     setSections(newQuestion)
+  }
+  const handleSaveDraft = () => {
+   const newFormData = {
+     ...formData, // copy existing formData properties
+     fields: sections, // add fields property with the value of sections
+     isFinal: false, // set isFinal to false
+    };
+    console.log(newFormData)
+    //save form
+  }
+  const handleSubmitForm = () => {
+    const newFormData = {
+      ...formData, // copy existing formData properties
+      fields: sections, // add fields property with the value of sections
+      isFinal: true, // set isFinal to false
+    };
+  }
 
+  const changeRegexValue = (regex, index) => {
+    let newQuestion = [...sections];
+    newQuestion[index].regex = regex;
+    setSections(newQuestion);
   }
   const handleAddSection = () => {
     const newSection = {
-      questionText: "Question",
+      questionText: "",
       inputType: { name: "Radiobutton", value: "radio" },
-      options: [{ optionText: "option" }],
-      required:false
+      options: [{ optionText: "" }],
+      required: false,
+      regex: null,
+      revision:null,
     };
     setSections([...sections, newSection])
+  }
+  const changeData = (data, type) => {
+ setFormData((prevData) => ({
+   ...prevData,
+   [type]: data,
+ }));
   }
   const handleDeleteSection = (index) => {
       const newSection = sections.filter((_, i) => i !== index);
@@ -89,7 +129,7 @@ const FormCreation = () => {
   const handleAddOption = (index) => {
     const newSections = [...sections];
     if (newSections[index].options.length < 10) {
-      newSections[index].options.push({ optionText: "option" });
+      newSections[index].options.push({ optionText: "" });
     } else {
       console.log("max 10 options")
     }
@@ -99,29 +139,35 @@ const FormCreation = () => {
   return (
     <>
       <NavBar />
-      <h1>Form Creation</h1>
+      <h1 style={{ textAlign: "center" }}>Form Creation</h1>
       <Card sx={{ maxWidth: 900, margin: "auto" }}>
         <CardContent>
           <Stack spacing={2} direction="row">
-            <TextField id="outlined-basic" label="Form ID" variant="standard" />
+            <TextField
+              label="Form ID"
+              variant="standard"
+              onChange={(e) => changeData(e.target.value, "id")}
+            />
 
             <TextField
               id="outlined-basic"
               label="Revision #"
               variant="standard"
+              onChange={(e) => changeData(e.target.value, "revision")}
             />
-
+            {/*
             <TextField
               id="outlined-basic"
               label="Effective Date"
               variant="standard"
-            />
+              onChange={(e) => changeData(e.target.value, "date")}
+            /> */}
           </Stack>
           <Stack spacing={2}>
             <TextField
-              id="outlined-basic"
               label="Form Title"
               variant="standard"
+              onChange={(e) => changeData(e.target.value, "name")}
             />
 
             <TextField
@@ -130,6 +176,7 @@ const FormCreation = () => {
               multiline
               rows={4}
               variant="outlined"
+              onChange={(e) => changeData(e.target.value, "description")}
             />
           </Stack>
           {sections.map((section, index) => (
@@ -245,7 +292,16 @@ const FormCreation = () => {
                         ) : (
                           <Typography>{op.optionText}</Typography>
                         )} */}
-
+                        <Grid item xs={1}>
+                          <Tooltip title="Add textfield">
+                            <IconButton
+                              aria-label="add"
+                              onClick={() => handleAddNextField(index, j)}
+                            >
+                              <AddIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Grid>
                         {j == 0 ? (
                           ""
                         ) : (
@@ -280,6 +336,14 @@ const FormCreation = () => {
                 </Stack>
               </CardContent>
               <CardActions>
+                <TextField
+                  label="Regex Rules (optional)"
+                  onChange={(e) => {
+                    changeRegexValue(e.target.value, index);
+                  }}
+                  sx={{ width: "40%" }}
+                  size="small"
+                />
                 <div
                   style={{
                     display: "flex",
@@ -304,6 +368,31 @@ const FormCreation = () => {
           <Button size="small" onClick={handleAddSection}>
             Add Section
           </Button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              width: "85%",
+              gap: 10,
+            }}
+          >
+            <Button
+              size="small"
+              variant="contained"
+              style={{ backgroundColor: "grey" }}
+              onClick={handleSaveDraft}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={handleSubmitForm}
+            >
+              Done
+            </Button>
+          </div>
         </CardActions>
       </Card>
 
