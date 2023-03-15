@@ -1,3 +1,4 @@
+// MAJOR WIP
 import DataTable from "../SharedComponents/DataTable";
 
 import React, { useState } from "react";
@@ -32,7 +33,7 @@ const columns = [
  },
 ]
 
-const UserAccMgmtList = () => {
+const UserWFMgmtList = () => {
     const [selectedRow, setSelectedRow] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
    
@@ -157,56 +158,4 @@ const UserAccMgmtList = () => {
       </>
     );
     }
-export default UserAccMgmtList;
-
-
-
-
-
-/*
-
-const UserList = ()=>{
-    const columns = [
-        {field:'Username', headerName: 'Username' },
-        {field:'Email', headerName:'Email'}
-        // not so sure about the filter
-    ];
-    // hard-code for demo purpose
-    const rows = [
-        {username:'abc', email:'abc@gmail.com'},
-        {username:'def', email:'def@gmail.com'}
-    ];
-    return (
-        <>
-        <TableContainer>
-            <Table >
-                <TableHead>
-                    <TableRow>
-                        <TableCell>{columns[0].field}</TableCell>
-                        <TableCell>{columns[1].field}</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                {rows.map((row) => (
-                    <TableRow
-                        key={row.username}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                        <TableCell component="th" scope="row">
-                            {row.username}
-                        </TableCell>
-                        <TableCell>{row.email}</TableCell>
-                    </TableRow>
-          ))}
-                    <TableRow>
-                        
-                    </TableRow>
-
-                </TableBody>
-            </Table>
-        </TableContainer>
-        </>
-    );
-};
-export default UserList;
-*/
+export default UserWFMgmtList;

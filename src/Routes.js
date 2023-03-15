@@ -3,7 +3,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import FormCreation from "./pages/admin/FormCreation";
 import FormMgmt from "./pages/admin/FormMgmt";
-import UserMgmt from "./pages/admin/UserMgmt";
+import UserAccMgmt from "./pages/admin/UserAccMgmt";
+import UserWFMgmt from "./pages/admin/UserWFMgmt";
 import WorkflowCreation from "./pages/admin/WorkflowCreation";
 import WorkflowMgmt from "./pages/admin/WorkflowMgmt";
 
@@ -17,7 +18,8 @@ function AppRoutes() {
       <Route path="FormMgmt" element={<FormMgmt />} />
       <Route path="WorkflowCreation" element={<WorkflowCreation />} />
       <Route path="WorkflowMgmt" element={<WorkflowMgmt />} />
-      <Route path="UserMgmt" element={<UserMgmt />} />
+      <Route path="UserAccMgmt" element={<UserAccMgmt />} />
+      <Route path="UserWFMgmt" element={<UserWFMgmt />} />
     </Routes>
   );
 }
