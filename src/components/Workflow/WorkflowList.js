@@ -1,6 +1,6 @@
 import DataTable from "../SharedComponents/DataTable";
 
-import React, { useState } from "react"
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 
@@ -50,28 +50,17 @@ const WorkflowList = () => {
         }
      
     }
-   
-    function SampleButton() {
-   
-        function handleClick() {
-            // doSomething();
-        }
-
-        return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>Insert Text</a></Button>
-        )
-    }
 
     function CreateNewButton() {
    
         const navigate = useNavigate();
         
         function handleClick() {
-          navigate("/WorkflowCreation");
+            navigate("/WorkflowCreation");
         }
 
         return (
-            <Button variant='outlined' sx={{mr:3}} onclick={handleClick}><a href='/home'>Create New</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Create New</Button>
         )
 
     }
@@ -84,7 +73,7 @@ const WorkflowList = () => {
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>Edit Workflow</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Edit Workflow</Button>
         )
     }
 
@@ -96,7 +85,7 @@ const WorkflowList = () => {
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>See Responses</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>See Responses</Button>
         )
     }
 
@@ -108,7 +97,7 @@ const WorkflowList = () => {
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>Delete Workflow</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Delete Workflow</Button>
         )
         }
    
