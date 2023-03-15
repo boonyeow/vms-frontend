@@ -22,8 +22,8 @@ const vendor = ["Forms", "Workflows"];
 const admin = [
   {
     name: "User",
-    list: null,
-    path: "/UserMgmt",
+    list: ["Manage User Accounts", "View User List"],
+    path: ["/UserAccMgmt", "/UserWFMgmt"],
   },
   {
     name: "Forms",
