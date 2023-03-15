@@ -50,7 +50,6 @@ export default function DataTable(props) {
                 selectableRows: 'single',
                 selectableRowsOnClick: true,
                 selectableRowsHideCheckboxes: true,
-                selectableRowsOnClick: true,
                 viewColumns: false,
                 // selectToolbarPlacement: 'above', commented out as we *want* to use replace instead!
                 download: false,
