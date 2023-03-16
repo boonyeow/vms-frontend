@@ -1,0 +1,10 @@
+.option-text{
+  border: none;
+  border-bottom: 1px solid #ccc;
+  outline: none;
+}
+
+
+.option-text:focus {
+  border-bottom: 1px solid black;
+}

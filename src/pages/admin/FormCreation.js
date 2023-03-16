@@ -22,24 +22,24 @@ import Grid from "@mui/material/Grid";
 import Checkbox from '@mui/material/Checkbox';
 import AddIcon from "@mui/icons-material/Add";
 import Tooltip from "@mui/material/Tooltip";
-// import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-// import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-// import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-// import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-// import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
-
-const handleAddNextField = (sectionNo,optionNo) => {
-
-}
+import "../../form.css";
+import InputAdornment from "@mui/material/InputAdornment";
 
 const FormCreation = () => {
+  const handleAddNextField = (sectionNo,optionNo) => {
+     let newQuestion = [...sections];
+     newQuestion[sectionNo].options[optionNo].nextFieldId = 'text';
+     setSections(newQuestion);
+  }
+  const handleDeleteNextField = (sectionNo, optionNo) => {
+     let newQuestion = [...sections];
+     newQuestion[sectionNo].options[optionNo].nextFieldId = null;
+     setSections(newQuestion);
+  }
   const handleRequired = (index) => {
   const newSections = [...sections];
    newSections[index].required = !newSections[index].required;
     setSections(newSections);
-    console.log(newSections)
 }
   const [inputTypes, setInputTypes] = useState([
     { name: "Radiobutton", value: "radio" },
@@ -49,9 +49,9 @@ const FormCreation = () => {
   ]);
   const handleAddInput = (index, inputType) => {
     const newSections = [...sections];
-    newSections[index].inputType = inputType;
-    if (inputType.value == 'text') {
-      newSections[index].options[0].optionText = '';
+    newSections[index].inputType = inputType.value;
+    if (inputType == 'text') {
+      newSections[index].options[0].options_value = '';
     }
     setSections(newSections);
   };
@@ -84,18 +84,32 @@ const FormCreation = () => {
       fields: sections, // add fields property with the value of sections
       isFinal: true, // set isFinal to false
     };
-  }
+     const formErrors = validateForm(newFormData);
+      setErrors(formErrors);
 
+      if (Object.keys(formErrors).length === 0) {
+        // Form submission logic
+        console.log("Form submitted:", formData);
+      }
+  }
+const validateForm = (data) => {
+  const errors = {};
+  if (!data.id) errors.id = "Form ID is required.";
+  if (!data.revision) errors.revision = "Revision # is required.";
+  if (!data.name) errors.name = "Form Title is required.";
+  return errors;
+};
   const changeRegexValue = (regex, index) => {
     let newQuestion = [...sections];
     newQuestion[index].regex = regex;
     setSections(newQuestion);
   }
+  const [errors, setErrors] = useState({});
   const handleAddSection = () => {
     const newSection = {
       questionText: "",
-      inputType: { name: "Radiobutton", value: "radio" },
-      options: [{ optionText: "" }],
+      inputType: "radio" ,
+      options: [{ options_value: "", nextFieldId:null}],
       required: false,
       regex: null,
       revision:null,
@@ -122,14 +136,14 @@ const FormCreation = () => {
   };
   const changeOptionValue = (text, index,j) => {
     let newSections = [...sections];
-    newSections[index].options[j].optionText = text;
+    newSections[index].options[j].options_value = text;
     setSections(newSections)
   }
 
   const handleAddOption = (index) => {
     const newSections = [...sections];
     if (newSections[index].options.length < 10) {
-      newSections[index].options.push({ optionText: "" });
+      newSections[index].options.push({ options_value: "" });
     } else {
       console.log("max 10 options")
     }
@@ -147,6 +161,9 @@ const FormCreation = () => {
               label="Form ID"
               variant="standard"
               onChange={(e) => changeData(e.target.value, "id")}
+              required
+              error={errors.id ? true : false}
+              helperText={errors.id ? errors.id : ""}
             />
 
             <TextField
@@ -154,6 +171,9 @@ const FormCreation = () => {
               label="Revision #"
               variant="standard"
               onChange={(e) => changeData(e.target.value, "revision")}
+              required
+              error={errors.revision ? true : false}
+              helperText={errors.revision ? errors.revision : ""}
             />
             {/*
             <TextField
@@ -168,6 +188,9 @@ const FormCreation = () => {
               label="Form Title"
               variant="standard"
               onChange={(e) => changeData(e.target.value, "name")}
+              required
+              error={errors.name ? true : false}
+              helperText={errors.name ? errors.name : ""}
             />
 
             <TextField
@@ -214,7 +237,7 @@ const FormCreation = () => {
                             <Menu {...bindMenu(popupState)}>
                               {inputTypes.map(
                                 (input, k) =>
-                                  section.inputType !== input.name && (
+                                  section.inputType !== input.value && (
                                     <MenuItem
                                       onClick={() => {
                                         popupState.close();
@@ -241,14 +264,14 @@ const FormCreation = () => {
                         justifyContent="flex-start"
                         alignItems="center"
                       >
-                        {section.inputType.value !== "text" ? (
+                        {section.inputType !== "text" ? (
                           <>
                             <Grid item xs={1}>
                               <input
-                                type={section.inputType.value}
-                                value={op.optionText}
+                                type={section.inputType}
+                                value={op.options_value}
                                 name={
-                                  section.inputType.value === "radio"
+                                  section.inputType === "radio"
                                     ? index
                                     : `${index}-${j}`
                                 }
@@ -257,12 +280,9 @@ const FormCreation = () => {
                             <Grid item xs={3}>
                               <input
                                 type="text"
-                                placeholder={
-                                  section.inputType.value === "text"
-                                    ? ""
-                                    : "option"
-                                }
-                                value={op.optionText}
+                                placeholder=""
+                                className="option-text"
+                                value={op.options_value}
                                 onChange={(e) => {
                                   changeOptionValue(e.target.value, index, j);
                                 }}
@@ -277,7 +297,7 @@ const FormCreation = () => {
                             <Grid item xs={11}>
                               <TextField
                                 variant="outlined"
-                                value={op.optionText}
+                                value={op.options_value}
                                 onChange={(e) => {
                                   changeOptionValue(e.target.value, index, j);
                                 }}
@@ -286,22 +306,50 @@ const FormCreation = () => {
                             </Grid>
                           </>
                         )}
+                        {op.nextFieldId === "text" ? (
+                          <>
+                            <TextField
+                              variant="outlined"
+                              size="small"
+                              InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      aria-label="delete"
+                                      onClick={() =>
+                                        handleDeleteNextField(index, j)
+                                      }
+                                    >
+                                      <CloseIcon />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </>
+                        ) : (
+                          ""
+                        )}
                         {/* label=
                         {section.inputType.value === "text" ? (
                           ""
                         ) : (
-                          <Typography>{op.optionText}</Typography>
+                          <Typography>{op.options_value}</Typography>
                         )} */}
-                        <Grid item xs={1}>
-                          <Tooltip title="Add textfield">
-                            <IconButton
-                              aria-label="add"
-                              onClick={() => handleAddNextField(index, j)}
-                            >
-                              <AddIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Grid>
+                        {section.inputType === "text" ? (
+                          ""
+                        ) : (
+                          <Grid item xs={1}>
+                            <Tooltip title="Add textfield">
+                              <IconButton
+                                aria-label="add"
+                                onClick={() => handleAddNextField(index, j)}
+                              >
+                                <AddIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </Grid>
+                        )}
                         {j == 0 ? (
                           ""
                         ) : (
@@ -318,7 +366,7 @@ const FormCreation = () => {
                     </>
                   ))}
 
-                  {section.inputType.value !== "text" ? (
+                  {section.inputType !== "text" ? (
                     <Stack alignItems="flex-start">
                       <Button
                         variant="text"
