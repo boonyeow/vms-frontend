@@ -1,5 +1,5 @@
+// this is the table to view many users' progress for ONE workflow.
 import DataTable from "../SharedComponents/DataTable";
-import AssignWorkflowModal from "../Users/AssignWorkflowModal";
 
 import React, { useEffect, useState } from "react"
 import Box from "@mui/material/Box";
@@ -13,30 +13,13 @@ import axios from "axios";
 import { TroubleshootSharp, Construction, LibraryAddCheck } from "@mui/icons-material";
 
 // to settle
-const WorkflowList = () => {
+const WorkflowResponseList = () => {
 
     const [selectedRow, setSelectedRow] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
 
     const { token } = useAuthStore();
     const [workflowList, setWorkflowList] = useState([]);
-
-    const [sUMOpen, setSUMOpen] = useState(false);
-
-    const selectUserHandleClickOpen = () => {
-        setSUMOpen(true);
-    };
-    
-    const selectUserHandleClose = (event, reason) => {
-        if (reason && reason == "backdropClick") return;
-        setSUMOpen(false);
-    };
-
-    const selectUserHandleSubmit = (id, value) => {
-        console.log(id);
-        console.log(value);
-        setSUMOpen(false);
-    };
 
     const fetchWorkflowList = async () => {
         axios
@@ -66,17 +49,14 @@ const WorkflowList = () => {
     };
 
     const publishWorkflow = async () => {
-        // console.log(workflowList[selectedRow].id);
-        console.log(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowList[selectedRow].id + "/publishWorkflow");
         axios
             .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowList[selectedRow].id + "/publishWorkflow", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            .then((response) => {
+            .then(() => {
                 // 
-                console.log(response.data);
             })
             .catch((e) => console.error(e));
     };
@@ -90,7 +70,7 @@ const WorkflowList = () => {
             label: "ID",
             options: {
                 filter: true,
-                sort: true,
+                sort: TroubleshootSharp,
             }
         },
         {
@@ -98,7 +78,7 @@ const WorkflowList = () => {
             label: "NAME",
             options: {
                 filter: true,
-                sort: true,
+                sort: TroubleshootSharp,
                 }
         },
         {
@@ -110,7 +90,7 @@ const WorkflowList = () => {
                 filterOptions: {
                     renderValue: (value) => ((value) ? "Published" : "Edit Mode"),
                 },
-                sort: true,
+                sort: TroubleshootSharp,
                 customBodyRenderLite: (row) => {
                     return(
                         <>
@@ -165,14 +145,14 @@ const WorkflowList = () => {
     }
 
     // to do
-    function AssignWorkflowButton() {
+    function SeeResponsesButton() {
    
         function handleClick() {
-            selectUserHandleClickOpen(); // immediately opens the user select menu
+            // doSomething();
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Assign Workflow</Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>See Responses</a></Button>
         )
     }
 
@@ -217,7 +197,7 @@ const WorkflowList = () => {
                   <CreateNewButton />
                   <EditWorkflowButton />
                   {/* <SeeResponsesButton /> */}
-                  { selectedRow.final == "true" ? <AssignWorkflowButton /> : <PublishWorkflowButton />}
+                  { selectedRow.final == "true" ? <SeeResponsesButton /> : <PublishWorkflowButton />}
                   <DeleteWorkflowButton />
               </Box>
           </React.Fragment>
@@ -235,14 +215,8 @@ const WorkflowList = () => {
           SelectToolbar={SelectToolbar}
           whenRowSelected={SelectDealer}
           rowsSelected={selectedRows}/>
-        
-        <AssignWorkflowModal
-            open={sUMOpen}
-            onClose={selectUserHandleClose}
-            handleSubmit={selectUserHandleSubmit}
-            workflow={workflowList[selectedRow]} /* see comment in AssignWorkflowModal */
-          />
+
       </>
     );
     }
-export default WorkflowList;
+export default WorkflowResponseList;
