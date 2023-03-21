@@ -27,8 +27,8 @@ const admin = [
   },
   {
     name: "Forms",
-    list: ["Create Form", "Manage Forms", "Form Templates"],
-    path: ["/FormCreation", "/FormMgmt","/FormTemplates"],
+    list: [ "Manage Forms", "Form Templates"],
+    path: [ "/FormMgmt","/FormTemplates"],
   },
   {
     name: "Workflows",

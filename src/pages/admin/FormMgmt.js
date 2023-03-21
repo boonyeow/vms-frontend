@@ -1,11 +1,13 @@
-
 import NavBar from "../../components/SharedComponents/NavBar";
 import { DataGrid } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store";
 const columns = [
   { field: "id", headerName: "ID", width: 160 },
   { field: "title", headerName: "Title", width: 180 },
@@ -30,7 +32,7 @@ const columns = [
           break;
       }
       return <div style={{ color: color }}>{params.value}</div>;
-    }
+    },
   },
   {
     field: "action",
@@ -81,30 +83,55 @@ const rows = [
 ];
 
 const FormMgmt = () => {
+  const { token } = useAuthStore();
+  const [userForm, setUserForm] = useState([]);
+  const navigate = useNavigate();
+  console.log(token);
+  const handleCreateForm = async () => {
+    await axios
+      .post(process.env.REACT_APP_ENDPOINT_URL + "/api/forms", {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        // Login successful
+
+        setUserForm(res.data);
+        console.log("success", res.data);
+        navigate("/FormCreation/" + res.data.id + "/" + res.data.revisionNo);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
   return (
     <>
       <NavBar />
-      <h1>Form Management</h1>
+      <h1 style={{ textAlign: "center" }}>Form Management</h1>
 
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
-          {/* <Button
+          <Button
             variant="contained"
             color="primary"
             size="small"
-            component={Link}
-            to="/FormCreation"
+            onClick={handleCreateForm}
+            // component={Link}
+            // to="/FormCreation"
           >
             Create New
           </Button>
           <Button variant="contained" color="secondary" size="small">
             Load Draft
-          </Button> */}
-          <Button variant="contained" color="secondary" size="small">
+          </Button>
+          <Button variant="contained" color="warning" size="small">
             Send Form
           </Button>
         </Stack>
-        <div style={{ height: 500, maxWidth: "100%" }}>
+        <div
+          style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
+        >
           <DataGrid
             rows={rows}
             columns={columns}

@@ -26,129 +26,134 @@ import "../../form.css";
 import InputAdornment from "@mui/material/InputAdornment";
 
 const FormCreation = () => {
-  const handleAddNextField = (sectionNo,optionNo) => {
-     let newQuestion = [...sections];
-     newQuestion[sectionNo].options[optionNo].nextFieldId = 'text';
-     setSections(newQuestion);
+ const url = new URL(window.location.href);
+ const id = url.pathname.split("/")[2];
+  const revisionNo = url.pathname.split("/")[3];
+//   {
+//   "name": "Site Evaluation Results",
+//   "helpText": "laurent",
+//   "isRequired": true,
+//   "fieldType": "CHECKBOX",
+//   "optionsWithNextFields": {
+//     "Site Evaluation Results": {
+//       "name": "",
+//       "helpText": "",
+//       "isRequired": false,
+//       "fieldType": "RADIOBUTTON",
+//       "optionsWithNextFields": {
+//         "Satisfactory": null,
+//         "Unsatisfactory": null
+//       }
+//     }
+//   }
+// }
+ const nextField={
+           name: "",
+           helpText: "",
+           isRequired: false,
+           fieldType: "",
+           optionsWithNextFields: {
+           },
   }
-  const handleDeleteNextField = (sectionNo, optionNo) => {
-     let newQuestion = [...sections];
-     newQuestion[sectionNo].options[optionNo].nextFieldId = null;
-     setSections(newQuestion);
-  }
-  const handleRequired = (index) => {
-  const newSections = [...sections];
-   newSections[index].required = !newSections[index].required;
-    setSections(newSections);
-}
-  const [inputTypes, setInputTypes] = useState([
-    { name: "Radiobutton", value: "radio" },
-    { name: "CheckBox", value: "checkbox" },
-    { name: "TextField", value: "text" }
-    // can add more options
-  ]);
-  const handleAddInput = (index, inputType) => {
-    const newSections = [...sections];
-    newSections[index].inputType = inputType.value;
-    if (inputType == 'text') {
-      newSections[index].options[0].options_value = '';
-    }
-    setSections(newSections);
-  };
-  const [formData, setFormData] = useState({
-    id: null,
-    name: null,
-    description: null,
-    isFinal: false,
-    fields: [],
-    authorizedAccountIds:[]
-  })
-  const [sections, setSections] = useState([]);
-  const changeQuestion = (text,i) => {
-    let newQuestion = [...sections];
-    newQuestion[i].questionText = text;
-    setSections(newQuestion)
-  }
-  const handleSaveDraft = () => {
-   const newFormData = {
-     ...formData, // copy existing formData properties
-     fields: sections, // add fields property with the value of sections
-     isFinal: false, // set isFinal to false
+    const changeData = (data, type) => {
+      setFormData((prevData) => ({
+        ...prevData,
+        [type]: data,
+      }));
     };
-    console.log(newFormData)
-    //save form
-  }
-  const handleSubmitForm = () => {
-    const newFormData = {
-      ...formData, // copy existing formData properties
-      fields: sections, // add fields property with the value of sections
-      isFinal: true, // set isFinal to false
-    };
-     const formErrors = validateForm(newFormData);
-      setErrors(formErrors);
 
-      if (Object.keys(formErrors).length === 0) {
-        // Form submission logic
-        console.log("Form submitted:", formData);
-      }
-  }
-const validateForm = (data) => {
-  const errors = {};
-  if (!data.id) errors.id = "Form ID is required.";
-  if (!data.revision) errors.revision = "Revision # is required.";
-  if (!data.name) errors.name = "Form Title is required.";
-  return errors;
-};
-  const changeRegexValue = (regex, index) => {
-    let newQuestion = [...sections];
-    newQuestion[index].regex = regex;
-    setSections(newQuestion);
-  }
-  const [errors, setErrors] = useState({});
-  const handleAddSection = () => {
-    const newSection = {
-      questionText: "",
-      inputType: "radio" ,
-      options: [{ options_value: "", nextFieldId:null}],
-      required: false,
-      regex: null,
-      revision:null,
+ const [formData, setFormData] = useState({
+   name: '',
+   description: null,
+   isFinal: false,
+   fields: [
+     {
+       name: "",
+       helpText: "",
+       isRequired: true,
+       fieldType: "radio",
+       optionsWithNextFields: {},
+     }
+   ],
+   authorizedAccountIds: [],
+ });
+    const [inputTypes, setInputTypes] = useState([
+      { name: "Radiobutton", value: "radio" },
+      { name: "CheckBox", value: "checkbox" },
+      { name: "TextField", value: "text" },
+      // can add more options
+    ]);
+  const handleChangeFieldType = (index, inputType) => {
+    const newSections = [...formData.fields];
+    newSections[index] = {
+      ...newSections[index],
+      fieldType: inputType.value,
     };
-    setSections([...sections, newSection])
-  }
-  const changeData = (data, type) => {
- setFormData((prevData) => ({
-   ...prevData,
-   [type]: data,
- }));
-  }
-  const handleDeleteSection = (index) => {
-      const newSection = sections.filter((_, i) => i !== index);
-      setSections(newSection);
+    setFormData((prevState) => ({
+      ...prevState,
+      fields: newSections,
+    }));
   };
-  const handleDeleteOption = (sectionNo, optionNo) => {
-    const newSections = [...sections];
-    if (newSections[sectionNo].options.length > 1) {
-      newSections[sectionNo].options.splice(optionNo, 1);
-      setSections(newSections)
+  const handleAddNextField = (index, input) => {
+    console.log(input)
+    const nextField = {
+      name: "",
+      helpText: "",
+      isRequired: false,
+      fieldType: ''
+    };
+    nextField.fieldType = input.value;
+    if (input.value !== 'text') {
+      nextField.optionsWithNextFields = {};
     }
-    // newSections[sectionNo].options.splice(optionNo, 1)
+   const newFields = [...formData.fields];
+   newFields[index].optionsWithNextFields[formData.fields[index].name] = nextField;
+   setFormData((prevState) => ({
+     ...prevState,
+     fields: newFields,
+   }));
+    console.log(formData)
+ };
+  const handleAddField = () => {
+    const newField = {
+      name: "",
+      helpText: "",
+      isRequired: true,
+      fieldType: "text",
+      optionsWithNextFields: {},
+    };
+    setFormData(prevState => ({
+      ...prevState,
+      fields: [...prevState.fields, newField]
+    }));
   };
-  const changeOptionValue = (text, index,j) => {
-    let newSections = [...sections];
-    newSections[index].options[j].options_value = text;
-    setSections(newSections)
-  }
 
-  const handleAddOption = (index) => {
-    const newSections = [...sections];
-    if (newSections[index].options.length < 10) {
-      newSections[index].options.push({ options_value: "" });
-    } else {
-      console.log("max 10 options")
-    }
-    setSections(newSections)
-  }
+ const handleFieldNameChange = (value, index) => {
+   const newFields = [...formData.fields];
+   const prevName = newFields[index].name;
+
+   newFields[index].name = value;
+
+     if (newFields[index].optionsWithNextFields[prevName]) {
+       newFields[index].optionsWithNextFields[value] =
+         newFields[index].optionsWithNextFields[prevName];
+       delete newFields[index].optionsWithNextFields[prevName];
+     }
+
+   setFormData((prevData) => ({
+     ...prevData,
+     fields: newFields,
+   }));
+ };
+
+  const validateForm = (data) => {
+    const errors = {};
+    if (!data.id) errors.id = "Form ID is required.";
+    if (!data.revision) errors.revision = "Revision # is required.";
+    if (!data.name) errors.name = "Form Title is required.";
+    return errors;
+  };
+    const [errors, setErrors] = useState({});
 
   return (
     <>
@@ -160,28 +165,22 @@ const validateForm = (data) => {
             <TextField
               label="Form ID"
               variant="standard"
-              onChange={(e) => changeData(e.target.value, "id")}
-              required
-              error={errors.id ? true : false}
-              helperText={errors.id ? errors.id : ""}
+              defaultValue={id}
+              InputProps={{
+                readOnly: true,
+              }}
             />
 
             <TextField
               id="outlined-basic"
               label="Revision #"
               variant="standard"
-              onChange={(e) => changeData(e.target.value, "revision")}
-              required
-              error={errors.revision ? true : false}
-              helperText={errors.revision ? errors.revision : ""}
+              defaultValue={revisionNo}
+              InputProps={{
+                readOnly: true,
+              }}
+
             />
-            {/*
-            <TextField
-              id="outlined-basic"
-              label="Effective Date"
-              variant="standard"
-              onChange={(e) => changeData(e.target.value, "date")}
-            /> */}
           </Stack>
           <Stack spacing={2}>
             <TextField
@@ -202,220 +201,132 @@ const validateForm = (data) => {
               onChange={(e) => changeData(e.target.value, "description")}
             />
           </Stack>
-          {sections.map((section, index) => (
-            <Card
-              sx={{ maxWidth: 900, margin: "auto", marginTop: 2 }}
-              key={index}
-            >
-              <CardContent>
-                <Stack spacing={2}>
-                  <Stack
-                    spacing={2}
-                    direction="row"
-                    justifyContent="space-between"
+          <Card sx={{ maxWidth: 900, margin: "auto", marginTop: 2 }}>
+            <CardContent>
+              <Stack spacing={2} direction="row" justifyContent="space-between">
+                <Button variant="text" color="primary" onClick={handleAddField}>
+                  Add Field
+                </Button>
+              </Stack>
+              {formData.fields.map((field, index) => (
+                <>
+                  <Grid
+                    container
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    key={index}
                   >
-                    <TextField
-                      id="outlined-basic"
-                      value={section.questionText}
-                      label={`Question ${index + 1}`}
-                      variant="standard"
-                      onChange={(e) => changeQuestion(e.target.value, index)}
-                    />
-                    <Box sx={{ flexGrow: 0 }} key={index}>
-                      <PopupState variant="popover" popupId="demo-popup-menu">
-                        {(popupState) => (
-                          <React.Fragment>
-                            {!section.inputType ? (
-                              <IconButton {...bindTrigger(popupState)}>
-                                <AddCircleIcon />
-                              </IconButton>
-                            ) : (
+                    <Grid item xs={1}>
+                      <Box sx={{ flexGrow: 0 }}>
+                        <PopupState variant="popover" popupId="demo-popup-menu">
+                          {(popupState) => (
+                            <React.Fragment>
                               <IconButton {...bindTrigger(popupState)}>
                                 <EditIcon />
                               </IconButton>
-                            )}
-                            <Menu {...bindMenu(popupState)}>
-                              {inputTypes.map(
-                                (input, k) =>
-                                  section.inputType !== input.value && (
+
+                              <Menu {...bindMenu(popupState)}>
+                                {inputTypes.map((input, k) => (
+                                  <MenuItem
+                                    onClick={() => {
+                                      popupState.close();
+                                      handleChangeFieldType(index, input);
+                                    }}
+                                    key={`${k}`}
+                                  >
+                                    <Typography textAlign="center">
+                                      {input.name}
+                                    </Typography>
+                                  </MenuItem>
+                                ))}
+                              </Menu>
+                            </React.Fragment>
+                          )}
+                        </PopupState>
+                      </Box>
+                    </Grid>
+                    {field.fieldType === "text" ? (
+                      <Grid item xs={3}>
+                        <div>
+                          <input type={field.fieldType} key={index} />
+                          {/* render additional input fields based on field type */}
+                        </div>
+                      </Grid>
+                    ) : (
+                      <Grid item xs={1}>
+                        <div>
+                          <input type={field.fieldType} key={index} />
+                          {/* render additional input fields based on field type */}
+                        </div>
+                      </Grid>
+                    )}
+                    <Grid item xs={4}>
+                      <input
+                        type="text"
+                        placeholder=""
+                        className="option-text"
+                        value={field.name}
+                        onChange={(e) => handleFieldNameChange(e.target.value,index)}
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Tooltip title="Add Field Beside">
+                        <Box sx={{ flexGrow: 0 }}>
+                          <PopupState
+                            variant="popover"
+                            popupId="demo-popup-menu"
+                          >
+                            {(popupState) => (
+                              <React.Fragment>
+                                <IconButton
+                                  aria-label="add"
+                                  {...bindTrigger(popupState)}
+                                >
+                                  <AddIcon />
+                                </IconButton>
+
+                                <Menu {...bindMenu(popupState)}>
+                                  {inputTypes.map((input, k) => (
                                     <MenuItem
                                       onClick={() => {
                                         popupState.close();
-                                        handleAddInput(index, input);
+                                        handleAddNextField(index, input);
                                       }}
-                                      key={`${index}-${k}`}
+                                      key={`${k}`}
                                     >
                                       <Typography textAlign="center">
                                         {input.name}
                                       </Typography>
                                     </MenuItem>
-                                  )
-                              )}
-                            </Menu>
-                          </React.Fragment>
-                        )}
-                      </PopupState>
-                    </Box>
-                  </Stack>
-                  {section.options.map((op, j) => (
-                    <>
-                      <Grid
-                        container
-                        justifyContent="flex-start"
-                        alignItems="center"
-                      >
-                        {section.inputType !== "text" ? (
-                          <>
-                            <Grid item xs={1}>
-                              <input
-                                type={section.inputType}
-                                value={op.options_value}
-                                name={
-                                  section.inputType === "radio"
-                                    ? index
-                                    : `${index}-${j}`
-                                }
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <input
-                                type="text"
-                                placeholder=""
-                                className="option-text"
-                                value={op.options_value}
-                                onChange={(e) => {
-                                  changeOptionValue(e.target.value, index, j);
-                                }}
-                              />
-                            </Grid>
-                          </>
-                        ) : (
-                          <>
-                            <Grid item xs={1}>
-                              <ShortTextIcon />
-                            </Grid>
-                            <Grid item xs={11}>
-                              <TextField
-                                variant="outlined"
-                                value={op.options_value}
-                                onChange={(e) => {
-                                  changeOptionValue(e.target.value, index, j);
-                                }}
-                                sx={{ minWidth: "80%" }}
-                              />
-                            </Grid>
-                          </>
-                        )}
-                        {op.nextFieldId === "text" ? (
-                          <>
-                            <TextField
-                              variant="outlined"
-                              size="small"
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <IconButton
-                                      aria-label="delete"
-                                      onClick={() =>
-                                        handleDeleteNextField(index, j)
-                                      }
-                                    >
-                                      <CloseIcon />
-                                    </IconButton>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </>
-                        ) : (
-                          ""
-                        )}
-                        {/* label=
-                        {section.inputType.value === "text" ? (
-                          ""
-                        ) : (
-                          <Typography>{op.options_value}</Typography>
-                        )} */}
-                        {section.inputType === "text" ? (
-                          ""
-                        ) : (
-                          <Grid item xs={1}>
-                            <Tooltip title="Add textfield">
-                              <IconButton
-                                aria-label="add"
-                                onClick={() => handleAddNextField(index, j)}
-                              >
-                                <AddIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Grid>
-                        )}
-                        {j == 0 ? (
-                          ""
-                        ) : (
-                          <Grid item xs={1}>
-                            <IconButton
-                              aria-label="delete"
-                              onClick={() => handleDeleteOption(index, j)}
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          </Grid>
-                        )}
+                                  ))}
+                                </Menu>
+                              </React.Fragment>
+                            )}
+                          </PopupState>
+                        </Box>
+                      </Tooltip>
+                    </Grid>
+                    {Object.keys(field.optionsWithNextFields).length !== 0 ? (
+                      <Grid>
+                        <input
+                          type={
+                            field.optionsWithNextFields[field.name].fieldType
+                          }
+                        />
                       </Grid>
-                    </>
-                  ))}
-
-                  {section.inputType !== "text" ? (
-                    <Stack alignItems="flex-start">
-                      <Button
-                        variant="text"
-                        color="primary"
-                        onClick={() => handleAddOption(index)}
-                      >
-                        Add Option
-                      </Button>
-                    </Stack>
-                  ) : (
-                    ""
-                  )}
-
-                  {/* {section.inputType === "Radiobutton" && <RadioButtonInput />} */}
-                </Stack>
-              </CardContent>
-              <CardActions>
-                <TextField
-                  label="Regex Rules (optional)"
-                  onChange={(e) => {
-                    changeRegexValue(e.target.value, index);
-                  }}
-                  sx={{ width: "40%" }}
-                  size="small"
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    width: "100%",
-                  }}
-                >
-                  <FormControlLabel
-                    onChange={() => handleRequired(index)}
-                    control={<Checkbox />}
-                    label="Required"
-                  />
-                  <IconButton onClick={() => handleDeleteSection(index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </div>
-              </CardActions>
-            </Card>
-          ))}
+                    ) : (
+                      ""
+                    )}
+                  </Grid>
+                </>
+              ))}
+            </CardContent>
+          </Card>
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={handleAddSection}>
+          {/* <Button size="small" onClick={handleAddSection}>
             Add Section
-          </Button>
+          </Button> */}
           <div
             style={{
               display: "flex",
@@ -428,16 +339,10 @@ const validateForm = (data) => {
               size="small"
               variant="contained"
               style={{ backgroundColor: "grey" }}
-              onClick={handleSaveDraft}
             >
               Save as Draft
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={handleSubmitForm}
-            >
+            <Button size="small" variant="contained" color="primary">
               Done
             </Button>
           </div>

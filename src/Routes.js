@@ -14,7 +14,7 @@ function AppRoutes() {
     <Routes>
       <Route exact path="/" element={<LoginPage />} />
       <Route path="home" element={<HomePage />} />
-      <Route path="FormCreation" element={<FormCreation />} />
+      <Route path="FormCreation/:id/:revisionNo" element={<FormCreation />} />
       <Route path="FormMgmt" element={<FormMgmt />} />
       <Route path="WorkflowCreation" element={<WorkflowCreation />} />
       <Route path="WorkflowMgmt" element={<WorkflowMgmt />} />
