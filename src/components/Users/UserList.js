@@ -11,6 +11,7 @@ import EditUserModal from "../Users/EditUserModal";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Box } from "@mui/system";
+import { Subject } from "@mui/icons-material";
 
 const UserList = ({ data, onUserUpdate }) => {
   const { email } = useAuthStore();
@@ -67,7 +68,7 @@ const UserList = ({ data, onUserUpdate }) => {
                       {row.name}
                     </TableCell>
                     <TableCell sx={{ fontWeight: "500" }}>
-                      <Link href={"mailto:" + row.email} underline="none">
+                      <Link href={"mailto:"+row.email+"?subject=Welcome to XXX &body=Hi there! Welcome to XXX. Please follow the instructions below to verify your registration."} underline="none">
                         {row.email}
                       </Link>
                     </TableCell>
