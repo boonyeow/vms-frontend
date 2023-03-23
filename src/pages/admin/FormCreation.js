@@ -56,9 +56,26 @@ const FormCreation = () => {
     fetchUserList();
   }, []);
 
-  const handleSubmitForm = (final) => {
+  const handleSubmitForm = async (final) => {
     changeData(final, "isFinal");
     console.log(formData);
+    await axios
+   .put(
+     process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`, {formData},
+     {
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     }
+   )
+   .then((res) => {
+     // Login successful
+     navigate("/FormTemplates");
+     console.log("deleted", res.data);
+   })
+   .catch((e) => {
+     console.log(e);
+   });
   };
 
 const fetchUserList = async () => {
@@ -171,7 +188,7 @@ const handleChange = (event) => {
        helpText: "",
        isRequired: true,
        fieldType: "radio",
-       optionsWithNextFields: {},
+      //  optionsWithNextFields: {},
      }
    ],
    authorizedAccountIds: [],
@@ -195,15 +212,13 @@ const handleChange = (event) => {
      console.log(e);
    });
   }
-    const [inputTypes, setInputTypes] = useState([
-      { name: "Radiobutton", value: "radio" },
-      { name: "CheckBox", value: "checkbox" },
-      { name: "TextField", value: "text" },
-      // can add more options
-    ]);
+
   const handleChangeFieldType = (index, input, isNextField) => {
     const newFields = [...formData.fields];
     if (isNextField) {
+      if (!newFields[index].optionsWithNextFields) {
+        newFields[index].optionsWithNextFields={};
+      }
       const nextField = {
            name: "",
            helpText: "",
@@ -234,7 +249,7 @@ const handleChange = (event) => {
       helpText: "",
       isRequired: true,
       fieldType: "text",
-      optionsWithNextFields: {},
+
     };
     setFormData(prevState => ({
       ...prevState,
@@ -264,7 +279,10 @@ const handleChange = (event) => {
     console.log(formData.fields)
    newFields[index].name = value;
 
-     if (newFields[index].optionsWithNextFields[prevName]) {
+     if (
+       newFields[index].optionsWithNextFields && newFields[index]
+         .optionsWithNextFields[prevName]
+     ) {
        newFields[index].optionsWithNextFields[value] =
          newFields[index].optionsWithNextFields[prevName];
        delete newFields[index].optionsWithNextFields[prevName];
@@ -278,9 +296,7 @@ const handleChange = (event) => {
 
   const validateForm = (data) => {
     const errors = {};
-    if (!data.id) errors.id = "Form ID is required.";
-    if (!data.revision) errors.revision = "Revision # is required.";
-    if (!data.name) errors.name = "Form Title is required.";
+    if (!data.name) errors.name = "Form Name is required.";
     return errors;
   };
   const [errors, setErrors] = useState({});
@@ -334,7 +350,7 @@ const handleChange = (event) => {
           </Stack>
           <Stack spacing={2}>
             <TextField
-              label="Form Title"
+              label="Form Name"
               variant="standard"
               onChange={(e) => changeData(e.target.value, "name")}
               required
@@ -394,9 +410,7 @@ const handleChange = (event) => {
                     key={index}
                   >
                     <Grid item xs={1}>
-
                       <FieldTypeMenu
-                        inputTypes={inputTypes}
                         handleChangeFieldType={handleChangeFieldType}
                         index={index}
                         isNextField={false}
@@ -439,6 +453,7 @@ const handleChange = (event) => {
                         </div>
                       </Grid>
                     )}
+
                     <RequiredCheckBox
                       fields={field}
                       nextField={false}
@@ -449,18 +464,35 @@ const handleChange = (event) => {
                     <Grid item xs={1}>
                       <Tooltip title="Add Field Beside">
                         <div>
-                        <FieldTypeMenu
-                          inputTypes={inputTypes}
-                          handleChangeFieldType={handleChangeFieldType}
-                          index={index}
-                          isNextField={true}
+                          <FieldTypeMenu
+                            handleChangeFieldType={handleChangeFieldType}
+                            index={index}
+                            isNextField={true}
                           />
-                          </div>
+                        </div>
                       </Tooltip>
                     </Grid>
-                    {Object.keys(field.optionsWithNextFields).length !== 0 ? (
+
+                    {field.optionsWithNextFields && Object.keys(
+                      field.optionsWithNextFields
+                    ).length !== 0 ? (
                       <>
-                        <Grid>
+                        <Grid item xs={3}>
+                          <TextField
+                            id="outlined-basic"
+                            label="Name"
+                            variant="standard"
+                            onChange={(e) => {
+                              const newFields = [...formData.fields];
+                              newFields[index].optionsWithNextFields[
+                                newFields[index].name
+                              ].name = e.target.value;
+                              setFormData((prevState) => ({
+                                ...prevState,
+                                fields: newFields,
+                              }));
+                            }}
+                          />
                           <NextFields
                             field={field}
                             index={index}
@@ -468,6 +500,8 @@ const handleChange = (event) => {
                             addNextFieldOptions={addNextFieldOptions}
                             deleteNextFieldOptions={deleteNextFieldOptions}
                           />
+                        </Grid>
+                        <Grid item>
                           <RequiredCheckBox
                             fields={field.optionsWithNextFields[field.name]}
                             nextField={true}
@@ -479,21 +513,20 @@ const handleChange = (event) => {
                     ) : (
                       ""
                     )}
-
-                    <Grid
-                      container
-                      direction="column"
-                      justifyContent="flex-start"
-                      alignItems="flex-end"
-                    >
-                      {index !== 0 ? (
-                        <IconButton onClick={() => deleteField(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      ) : (
-                        ""
-                      )}
-                    </Grid>
+                  </Grid>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="flex-end"
+                    alignItems="flex-end"
+                  >
+                    {index !== 0 ? (
+                      <IconButton onClick={() => deleteField(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    ) : (
+                      ""
+                    )}
                   </Grid>
                   <Divider sx={{ marginY: 3 }} />
                 </>

@@ -4,7 +4,13 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 
-const FieldTypeMenu = ({ inputTypes, handleChangeFieldType, index , isNextField}) => {
+const FieldTypeMenu = ({ handleChangeFieldType, index, isNextField }) => {
+      const inputTypes=[
+        { name: "Radiobutton", value: "radio" },
+        { name: "CheckBox", value: "checkbox" },
+        { name: "TextField", value: "text" },
+        // can add more options
+      ];
   return (
     <Box sx={{ flexGrow: 0 }}>
       <PopupState variant="popover" popupId="demo-popup-menu">

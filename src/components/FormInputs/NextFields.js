@@ -38,7 +38,7 @@ export default function NextFields({
         {Object.entries(
           field.optionsWithNextFields[field.name].optionsWithNextFields
         ).map(([key, value], j) => (
-          <Stack direction="row" sx={{ padding: 1 }} key={key}>
+          <Stack direction="row" sx={{ paddingY: 1 }} key={key}>
             <input
               type={
                 field.optionsWithNextFields[field.name].fieldType === "radio"
@@ -77,11 +77,13 @@ export default function NextFields({
         {field.optionsWithNextFields[field.name].fieldType !== "text" && (
           <>
             <Button
-              variant="flat"
+              variant="text"
+              color="secondary"
               onClick={async () => {
                 addOptionValue();
                 await addNextFieldOptions(index);
               }}
+                sx={{ paddingX: 0 }}
             >
               Add Option
             </Button>
