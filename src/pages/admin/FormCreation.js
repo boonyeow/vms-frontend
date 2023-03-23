@@ -1,38 +1,43 @@
 import NavBar from "../../components/SharedComponents/NavBar";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
+import NextFields from "../../components/FormInputs/NextFields"
+import {
+  Button,
+  Box,
+  Card,
+  CardActions,
+  CardContent,
+  Typography,
+  TextField,
+  IconButton,
+  Stack,
+  MenuItem,
+  Menu,
+  FormControlLabel,
+  Grid,
+  Checkbox,
+  Tooltip,
+  InputAdornment,
+  OutlinedInput,
+  InputLabel,
+  FormControl,
+  ListItemText,
+  Chip,
+} from "@mui/material";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
+
+import DeleteIcon from "@mui/icons-material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import Stack from "@mui/material/Stack";
-import MenuItem from "@mui/material/MenuItem";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-import Menu from "@mui/material/Menu";
 import EditIcon from "@mui/icons-material/Edit";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import CloseIcon from "@mui/icons-material/Close";
 import ShortTextIcon from "@mui/icons-material/ShortText";
-import Grid from "@mui/material/Grid";
-import Checkbox from '@mui/material/Checkbox';
 import AddIcon from "@mui/icons-material/Add";
-import Tooltip from "@mui/material/Tooltip";
 import "../../form.css";
-import InputAdornment from "@mui/material/InputAdornment";
 import { useAuthStore } from "../../store";
 import { useNavigate } from "react-router-dom";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import ListItemText from "@mui/material/ListItemText";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import Chip from "@mui/material/Chip";
+
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -79,10 +84,23 @@ const fetchUserList = async () => {
     })
     .then((res) => {
       setUserList(res.data);
-      console.log(res.data)
     })
     .catch((e) => console.error(e));
 };
+
+  const nextFieldOptionChange = (value, key, index) => {
+    const newFields = [...formData.fields];
+    const object =
+      newFields[index].optionsWithNextFields[newFields[index].name];
+      object.optionsWithNextFields[value] = object.optionsWithNextFields[key];
+      delete object.optionsWithNextFields[key];
+
+        setFormData((prevData) => ({
+         ...prevData,
+         fields: newFields,
+       }));
+}
+
 const handleChange = (event) => {
   const {
     target: { value },
@@ -195,7 +213,6 @@ const handleChange = (event) => {
     }));
   };
   const handleAddNextField = (index, input) => {
-    console.log(input)
     const nextField = {
       name: "",
       helpText: "",
@@ -204,7 +221,7 @@ const handleChange = (event) => {
     };
     nextField.fieldType = input.value;
     if (input.value !== 'text') {
-      nextField.optionsWithNextFields = {};
+      nextField.optionsWithNextFields = { option1: null };
     }
    const newFields = [...formData.fields];
    newFields[index].optionsWithNextFields[formData.fields[index].name] = nextField;
@@ -228,10 +245,26 @@ const handleChange = (event) => {
     }));
   };
 
- const handleFieldNameChange = (value, index) => {
+  const addNextFieldOptions = (index) => {
+    const newFields = [...formData.fields];
+     const length = Object.keys(
+       newFields[index].optionsWithNextFields[newFields[index].name]
+         .optionsWithNextFields
+     ).length;
+    newFields[index].optionsWithNextFields[
+      newFields[index].name
+    ].optionsWithNextFields[`option${length+1}`] = null;
+    setFormData((prevData) => ({
+      ...prevData,
+      fields: newFields,
+    }));
+    console.log(newFields)
+  };
+  const handleFieldNameChange = (value, index) => {
+   console.log(formData)
    const newFields = [...formData.fields];
    const prevName = newFields[index].name;
-
+    console.log(formData.fields)
    newFields[index].name = value;
 
      if (newFields[index].optionsWithNextFields[prevName]) {
@@ -253,13 +286,34 @@ const handleChange = (event) => {
     if (!data.name) errors.name = "Form Title is required.";
     return errors;
   };
-    const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
+  const deleteNextFieldOptions = (index, key, isText) => {
+
+    const newFields = [...formData.fields];
+    if (!isText) {
+
+      delete newFields[index].optionsWithNextFields[newFields[index].name].optionsWithNextFields[key];
+    }
+    if (
+       isText ||
+      Object.keys(
+        newFields[index].optionsWithNextFields[newFields[index].name]
+          .optionsWithNextFields
+      ).length === 0
+    ) {
+      newFields[index].optionsWithNextFields = {};
+    }
+      setFormData((prevData) => ({
+        ...prevData,
+        fields: newFields,
+      }));
+}
   return (
     <>
       <NavBar />
       <h1 style={{ textAlign: "center" }}>Form Creation</h1>
-      <Card sx={{ maxWidth: 900, margin: "auto" }}>
+      <Card sx={{ maxWidth: 1100, margin: "auto" }}>
         <CardContent>
           <Stack spacing={2} direction="row">
             <TextField
@@ -332,7 +386,7 @@ const handleChange = (event) => {
               </FormControl>
             </div>
           </Stack>
-          <Card sx={{ maxWidth: 900, margin: "auto", marginTop: 2 }}>
+          <Card sx={{ maxWidth: 1100, margin: "auto", marginTop: 2 }}>
             <CardContent>
               <Stack spacing={2} direction="row" justifyContent="space-between">
                 <Button variant="text" color="primary" onClick={handleAddField}>
@@ -380,18 +434,24 @@ const handleChange = (event) => {
                       <Grid item xs={3}>
                         <div>
                           <input type={field.fieldType} key={index} />
-                          {/* render additional input fields based on field type */}
                         </div>
                       </Grid>
                     ) : (
                       <Grid item xs={1}>
                         <div>
-                          <input type={field.fieldType} key={index} />
-                          {/* render additional input fields based on field type */}
+                          <input
+                            type={field.fieldType}
+                            key={index}
+                            name={
+                              field.fieldType === "radio"
+                                ? "radioGroup"
+                                : field.name
+                            }
+                          />
                         </div>
                       </Grid>
                     )}
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                       <input
                         type="text"
                         placeholder=""
@@ -439,17 +499,15 @@ const handleChange = (event) => {
                         </Box>
                       </Tooltip>
                     </Grid>
-                    {Object.keys(field.optionsWithNextFields).length !== 0 ? (
-                      <Grid>
-                        <input
-                          type={
-                            field.optionsWithNextFields[field.name].fieldType
-                          }
-                        />
-                      </Grid>
-                    ) : (
-                      ""
-                    )}
+                    <Grid>
+                      <NextFields
+                        field={field}
+                        index={index}
+                        nextFieldOptionChange={nextFieldOptionChange}
+                        addNextFieldOptions={addNextFieldOptions}
+                        deleteNextFieldOptions={deleteNextFieldOptions}
+                      />
+                    </Grid>
                   </Grid>
                 </>
               ))}
@@ -457,9 +515,6 @@ const handleChange = (event) => {
           </Card>
         </CardContent>
         <CardActions>
-          {/* <Button size="small" onClick={handleAddSection}>
-            Add Section
-          </Button> */}
           <div
             style={{
               display: "flex",
@@ -471,17 +526,17 @@ const handleChange = (event) => {
             <Button
               size="small"
               variant="contained"
-              style={{ backgroundColor: "orange" }}
-            >
-              Save as Draft
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
               style={{ backgroundColor: "grey" }}
               onClick={handleCancelForm}
             >
               Cancel
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              style={{ backgroundColor: "orange" }}
+            >
+              Save as Draft
             </Button>
             <Button size="small" variant="contained" color="primary">
               Done
@@ -490,8 +545,6 @@ const handleChange = (event) => {
         </CardActions>
       </Card>
 
-      {/* <Button variant="contained">Add RadioButtons</Button>
-      <RadioButtonInput /> */}
     </>
   );
 };
