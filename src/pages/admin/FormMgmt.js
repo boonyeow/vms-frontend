@@ -82,11 +82,28 @@ const rows = [
   { id: 9, title: "Roxie", vendor: "Harvey", status: "rejected" },
 ];
 
-const FormMgmt = () => {
+  const FormMgmt = () => {
   const { token } = useAuthStore();
-  const [userForm, setUserForm] = useState([]);
   const navigate = useNavigate();
-  console.log(token);
+  const [formList, setFormList] = useState([]);
+  const fetchFormsList = async () => {
+   axios
+     .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms", {
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     })
+     .then((res) => {
+       setFormList(res.data);
+       console.log(res.data)
+     })
+     .catch((e) => console.error(e));
+ };
+
+ useEffect(() => {
+   fetchFormsList();
+ }, []);
+
   const handleCreateForm = async () => {
     await axios
       .post(process.env.REACT_APP_ENDPOINT_URL + "/api/forms", {}, {
@@ -95,9 +112,7 @@ const FormMgmt = () => {
         },
       })
       .then((res) => {
-        // Login successful
-
-        setUserForm(res.data);
+        // Create form  successful
         console.log("success", res.data);
         navigate("/FormCreation/" + res.data.id + "/" + res.data.revisionNo);
       })

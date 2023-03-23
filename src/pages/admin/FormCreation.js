@@ -6,7 +6,8 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -24,11 +25,91 @@ import AddIcon from "@mui/icons-material/Add";
 import Tooltip from "@mui/material/Tooltip";
 import "../../form.css";
 import InputAdornment from "@mui/material/InputAdornment";
+import { useAuthStore } from "../../store";
+import { useNavigate } from "react-router-dom";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import ListItemText from "@mui/material/ListItemText";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 const FormCreation = () => {
+  const names = [
+    "Oliver Hansen",
+    "Van Henry",
+    "April Tucker",
+    "Ralph Hubbard",
+    "Omar Alexander",
+    "Carlos Abbott",
+    "Miriam Wagner",
+    "Bradley Wilkerson",
+    "Virginia Andrews",
+    "Kelly Snyder",
+  ];
+  const { token } = useAuthStore();
  const url = new URL(window.location.href);
  const id = url.pathname.split("/")[2];
   const revisionNo = url.pathname.split("/")[3];
+  const navigate = useNavigate();
+  const [userList, setUserList] = useState([]);
+  const [authorizedUserList, setAuthorizedUserList] = useState([]);
+
+  useEffect(() => {
+    fetchUserList();
+  }, []);
+
+const fetchUserList = async () => {
+  axios
+    .get(process.env.REACT_APP_ENDPOINT_URL + "/api/accounts", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setUserList(res.data);
+      console.log(res.data)
+    })
+    .catch((e) => console.error(e));
+};
+const handleChange = (event) => {
+  const {
+    target: { value },
+  } = event;
+  const newAuthorizedUserList = [...authorizedUserList];
+
+  value.forEach((selectedOption) => {
+    if (!newAuthorizedUserList.includes(selectedOption)) {
+      newAuthorizedUserList.push(selectedOption);
+    }
+  });
+
+  newAuthorizedUserList.forEach((existingOption, index) => {
+    if (!value.includes(existingOption)) {
+      newAuthorizedUserList.splice(index, 1);
+    }
+  });
+
+  const newAuthorizedAccountIds = newAuthorizedUserList.map((user) => user.id);
+
+  setAuthorizedUserList(newAuthorizedUserList);
+  setFormData((prevFormData) => ({
+    ...prevFormData,
+    authorizedAccountIds: newAuthorizedAccountIds,
+  }));
+};
+
 //   {
 //   "name": "Site Evaluation Results",
 //   "helpText": "laurent",
@@ -77,6 +158,25 @@ const FormCreation = () => {
    ],
    authorizedAccountIds: [],
  });
+  const handleCancelForm = async () => {
+ await axios
+   .delete(
+     process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
+     {
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     }
+   )
+   .then((res) => {
+     // Login successful
+     navigate("/FormTemplates");
+     console.log("deleted", res.data);
+   })
+   .catch((e) => {
+     console.log(e);
+   });
+  }
     const [inputTypes, setInputTypes] = useState([
       { name: "Radiobutton", value: "radio" },
       { name: "CheckBox", value: "checkbox" },
@@ -179,7 +279,6 @@ const FormCreation = () => {
               InputProps={{
                 readOnly: true,
               }}
-
             />
           </Stack>
           <Stack spacing={2}>
@@ -200,6 +299,38 @@ const FormCreation = () => {
               variant="outlined"
               onChange={(e) => changeData(e.target.value, "description")}
             />
+            <div>
+              <FormControl sx={{ m: 1, width: 300 }}>
+                <InputLabel id="demo-multiple-checkbox-label">
+                  Authorized Accounts
+                </InputLabel>
+                <Select
+                  labelId="demo-multiple-checkbox-label"
+                  id="demo-multiple-checkbox"
+                  multiple
+                  value={authorizedUserList}
+                  onChange={handleChange}
+                  input={<OutlinedInput label="AuthorizedAccounts" />}
+                  renderValue={(selected) => (
+                    <div>
+                      {selected.map((value) => (
+                        <Chip key={value.name} label={value.name} />
+                      ))}
+                    </div>
+                  )}
+                  MenuProps={MenuProps}
+                >
+                  {userList.map((user) => (
+                    <MenuItem key={user.id} value={user}>
+                      <Checkbox
+                        checked={authorizedUserList.indexOf(user) > -1}
+                      />
+                      <ListItemText primary={user.name} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
           </Stack>
           <Card sx={{ maxWidth: 900, margin: "auto", marginTop: 2 }}>
             <CardContent>
@@ -266,7 +397,9 @@ const FormCreation = () => {
                         placeholder=""
                         className="option-text"
                         value={field.name}
-                        onChange={(e) => handleFieldNameChange(e.target.value,index)}
+                        onChange={(e) =>
+                          handleFieldNameChange(e.target.value, index)
+                        }
                       />
                     </Grid>
                     <Grid item xs={1}>
@@ -338,9 +471,17 @@ const FormCreation = () => {
             <Button
               size="small"
               variant="contained"
-              style={{ backgroundColor: "grey" }}
+              style={{ backgroundColor: "orange" }}
             >
               Save as Draft
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              style={{ backgroundColor: "grey" }}
+              onClick={handleCancelForm}
+            >
+              Cancel
             </Button>
             <Button size="small" variant="contained" color="primary">
               Done
