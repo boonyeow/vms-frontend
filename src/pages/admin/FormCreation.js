@@ -1,42 +1,34 @@
 import NavBar from "../../components/SharedComponents/NavBar";
 import NextFields from "../../components/FormInputs/NextFields"
+import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
+import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
 import {
   Button,
-  Box,
   Card,
   CardActions,
   CardContent,
-  Typography,
   TextField,
   IconButton,
   Stack,
   MenuItem,
-  Menu,
-  FormControlLabel,
   Grid,
   Checkbox,
   Tooltip,
-  InputAdornment,
   OutlinedInput,
   InputLabel,
   FormControl,
   ListItemText,
   Chip,
+  Divider
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import DeleteIcon from "@mui/icons-material";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
-import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
-import ShortTextIcon from "@mui/icons-material/ShortText";
-import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import "../../form.css";
 import { useAuthStore } from "../../store";
 import { useNavigate } from "react-router-dom";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 
 
 const ITEM_HEIGHT = 48;
@@ -51,18 +43,7 @@ const MenuProps = {
 };
 
 const FormCreation = () => {
-  const names = [
-    "Oliver Hansen",
-    "Van Henry",
-    "April Tucker",
-    "Ralph Hubbard",
-    "Omar Alexander",
-    "Carlos Abbott",
-    "Miriam Wagner",
-    "Bradley Wilkerson",
-    "Virginia Andrews",
-    "Kelly Snyder",
-  ];
+
   const { token } = useAuthStore();
  const url = new URL(window.location.href);
  const id = url.pathname.split("/")[2];
@@ -74,6 +55,11 @@ const FormCreation = () => {
   useEffect(() => {
     fetchUserList();
   }, []);
+
+  const handleSubmitForm = (final) => {
+    changeData(final, "isFinal");
+    console.log(formData);
+  };
 
 const fetchUserList = async () => {
   axios
@@ -146,21 +132,35 @@ const handleChange = (event) => {
 //     }
 //   }
 // }
- const nextField={
-           name: "",
-           helpText: "",
-           isRequired: false,
-           fieldType: "",
-           optionsWithNextFields: {
-           },
-  }
+
     const changeData = (data, type) => {
       setFormData((prevData) => ({
         ...prevData,
         [type]: data,
       }));
     };
+  const deleteField = (index) => {
+    const newFields = [...formData.fields];
+    newFields.splice(index,1)
+    console.log(newFields)
+    setFormData((prevState) => ({
+      ...prevState,
+      fields: newFields,
+    }));
+  }
+  const handleIsRequiredChange = (value, isNextField, index) => {
+    const newFields = [...formData.fields];
+    if (isNextField) {
+      newFields[index].optionsWithNextFields[newFields[index].name].isRequired=value;
+    } else {
+      newFields[index].isRequired=value
+    }
+    setFormData((prevState) => ({
+      ...prevState,
+      fields: newFields,
+    }));
 
+  };
  const [formData, setFormData] = useState({
    name: '',
    description: null,
@@ -201,36 +201,33 @@ const handleChange = (event) => {
       { name: "TextField", value: "text" },
       // can add more options
     ]);
-  const handleChangeFieldType = (index, inputType) => {
-    const newSections = [...formData.fields];
-    newSections[index] = {
-      ...newSections[index],
-      fieldType: inputType.value,
-    };
+  const handleChangeFieldType = (index, input, isNextField) => {
+    const newFields = [...formData.fields];
+    if (isNextField) {
+      const nextField = {
+           name: "",
+           helpText: "",
+           isRequired: false,
+           fieldType: "",
+      };
+      nextField.fieldType = input.value;
+      if (input.value !== "text") {
+        nextField.optionsWithNextFields = { option1: null };
+      }
+      newFields[index].optionsWithNextFields[formData.fields[index].name] =
+        nextField;
+    } else {
+      newFields[index] = {
+        ...newFields[index],
+        fieldType: input.value,
+      };
+    }
     setFormData((prevState) => ({
       ...prevState,
-      fields: newSections,
+      fields: newFields,
     }));
   };
-  const handleAddNextField = (index, input) => {
-    const nextField = {
-      name: "",
-      helpText: "",
-      isRequired: false,
-      fieldType: ''
-    };
-    nextField.fieldType = input.value;
-    if (input.value !== 'text') {
-      nextField.optionsWithNextFields = { option1: null };
-    }
-   const newFields = [...formData.fields];
-   newFields[index].optionsWithNextFields[formData.fields[index].name] = nextField;
-   setFormData((prevState) => ({
-     ...prevState,
-     fields: newFields,
-   }));
-    console.log(formData)
- };
+
   const handleAddField = () => {
     const newField = {
       name: "",
@@ -388,11 +385,6 @@ const handleChange = (event) => {
           </Stack>
           <Card sx={{ maxWidth: 1100, margin: "auto", marginTop: 2 }}>
             <CardContent>
-              <Stack spacing={2} direction="row" justifyContent="space-between">
-                <Button variant="text" color="primary" onClick={handleAddField}>
-                  Add Field
-                </Button>
-              </Stack>
               {formData.fields.map((field, index) => (
                 <>
                   <Grid
@@ -402,40 +394,16 @@ const handleChange = (event) => {
                     key={index}
                   >
                     <Grid item xs={1}>
-                      <Box sx={{ flexGrow: 0 }}>
-                        <PopupState variant="popover" popupId="demo-popup-menu">
-                          {(popupState) => (
-                            <React.Fragment>
-                              <IconButton {...bindTrigger(popupState)}>
-                                <EditIcon />
-                              </IconButton>
 
-                              <Menu {...bindMenu(popupState)}>
-                                {inputTypes.map((input, k) => (
-                                  <MenuItem
-                                    onClick={() => {
-                                      popupState.close();
-                                      handleChangeFieldType(index, input);
-                                    }}
-                                    key={`${k}`}
-                                  >
-                                    <Typography textAlign="center">
-                                      {input.name}
-                                    </Typography>
-                                  </MenuItem>
-                                ))}
-                              </Menu>
-                            </React.Fragment>
-                          )}
-                        </PopupState>
-                      </Box>
+                      <FieldTypeMenu
+                        inputTypes={inputTypes}
+                        handleChangeFieldType={handleChangeFieldType}
+                        index={index}
+                        isNextField={false}
+                      />
                     </Grid>
                     {field.fieldType === "text" ? (
-                      <Grid item xs={3}>
-                        <div>
-                          <input type={field.fieldType} key={index} />
-                        </div>
-                      </Grid>
+                      ""
                     ) : (
                       <Grid item xs={1}>
                         <div>
@@ -451,7 +419,7 @@ const handleChange = (event) => {
                         </div>
                       </Grid>
                     )}
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                       <input
                         type="text"
                         placeholder=""
@@ -462,55 +430,79 @@ const handleChange = (event) => {
                         }
                       />
                     </Grid>
+                    {field.fieldType !== "text" ? (
+                      ""
+                    ) : (
+                      <Grid item xs={2}>
+                        <div>
+                          <input type={field.fieldType} key={index} />
+                        </div>
+                      </Grid>
+                    )}
+                    <RequiredCheckBox
+                      fields={field}
+                      nextField={false}
+                      index={index}
+                      handleIsRequiredChange={handleIsRequiredChange}
+                    />
+
                     <Grid item xs={1}>
                       <Tooltip title="Add Field Beside">
-                        <Box sx={{ flexGrow: 0 }}>
-                          <PopupState
-                            variant="popover"
-                            popupId="demo-popup-menu"
-                          >
-                            {(popupState) => (
-                              <React.Fragment>
-                                <IconButton
-                                  aria-label="add"
-                                  {...bindTrigger(popupState)}
-                                >
-                                  <AddIcon />
-                                </IconButton>
-
-                                <Menu {...bindMenu(popupState)}>
-                                  {inputTypes.map((input, k) => (
-                                    <MenuItem
-                                      onClick={() => {
-                                        popupState.close();
-                                        handleAddNextField(index, input);
-                                      }}
-                                      key={`${k}`}
-                                    >
-                                      <Typography textAlign="center">
-                                        {input.name}
-                                      </Typography>
-                                    </MenuItem>
-                                  ))}
-                                </Menu>
-                              </React.Fragment>
-                            )}
-                          </PopupState>
-                        </Box>
+                        <div>
+                        <FieldTypeMenu
+                          inputTypes={inputTypes}
+                          handleChangeFieldType={handleChangeFieldType}
+                          index={index}
+                          isNextField={true}
+                          />
+                          </div>
                       </Tooltip>
                     </Grid>
-                    <Grid>
-                      <NextFields
-                        field={field}
-                        index={index}
-                        nextFieldOptionChange={nextFieldOptionChange}
-                        addNextFieldOptions={addNextFieldOptions}
-                        deleteNextFieldOptions={deleteNextFieldOptions}
-                      />
+                    {Object.keys(field.optionsWithNextFields).length !== 0 ? (
+                      <>
+                        <Grid>
+                          <NextFields
+                            field={field}
+                            index={index}
+                            nextFieldOptionChange={nextFieldOptionChange}
+                            addNextFieldOptions={addNextFieldOptions}
+                            deleteNextFieldOptions={deleteNextFieldOptions}
+                          />
+                          <RequiredCheckBox
+                            fields={field.optionsWithNextFields[field.name]}
+                            nextField={true}
+                            index={index}
+                            handleIsRequiredChange={handleIsRequiredChange}
+                          />
+                        </Grid>
+                      </>
+                    ) : (
+                      ""
+                    )}
+
+                    <Grid
+                      container
+                      direction="column"
+                      justifyContent="flex-start"
+                      alignItems="flex-end"
+                    >
+                      {index !== 0 ? (
+                        <IconButton onClick={() => deleteField(index)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      ) : (
+                        ""
+                      )}
                     </Grid>
                   </Grid>
+                  <Divider sx={{ marginY: 3 }} />
                 </>
               ))}
+              <Stack spacing={2} direction="row" justifyContent="space-between">
+                <Button variant="text" color="primary" onClick={handleAddField}>
+                  Add Field
+                </Button>
+              </Stack>
             </CardContent>
           </Card>
         </CardContent>
@@ -535,16 +527,21 @@ const handleChange = (event) => {
               size="small"
               variant="contained"
               style={{ backgroundColor: "orange" }}
+              onClick={(e) => handleSubmitForm(true)}
             >
               Save as Draft
             </Button>
-            <Button size="small" variant="contained" color="primary">
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={(e) => handleSubmitForm(false)}
+            >
               Done
             </Button>
           </div>
         </CardActions>
       </Card>
-
     </>
   );
 };

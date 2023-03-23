@@ -1,6 +1,13 @@
-import { Stack, Button, IconButton } from "@mui/material";
+import {
+  Stack,
+  Button,
+  IconButton,
+  Checkbox,
+  FormControlLabel,
+FormGroup} from "@mui/material";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import RequiredCheckBox from "./RequiredCheckBox";
 export default function NextFields({
   field,
   index,
@@ -8,11 +15,11 @@ export default function NextFields({
   addNextFieldOptions,
   deleteNextFieldOptions,
 }) {
-  const [optionValue, setOptionValue] = useState(["option"]);
+  const [optionValue, setOptionValue] = useState(["option 1"]);
   useEffect(() => {}, []);
-  const addOptionValue = (index) => {
+  const addOptionValue = () => {
     const newOptions = [...optionValue];
-    newOptions.push("option");
+    newOptions.push(`option ${newOptions.length + 1}`);
     setOptionValue(newOptions);
   };
   const onDelete = (j) => {
@@ -22,7 +29,6 @@ export default function NextFields({
   };
 
   if (
-    Object.keys(field.optionsWithNextFields).length !== 0 &&
     field.optionsWithNextFields[field.name].fieldType !== "text" &&
     Object.keys(field.optionsWithNextFields[field.name].optionsWithNextFields)
       .length !== 0
@@ -69,16 +75,19 @@ export default function NextFields({
           </Stack>
         ))}
         {field.optionsWithNextFields[field.name].fieldType !== "text" && (
-          <Button
-            variant="flat"
-            onClick={async () => {
-              addOptionValue(index);
-              await addNextFieldOptions(index);
-            }}
-          >
-            Add Option
-          </Button>
+          <>
+            <Button
+              variant="flat"
+              onClick={async () => {
+                addOptionValue();
+                await addNextFieldOptions(index);
+              }}
+            >
+              Add Option
+            </Button>
+          </>
         )}
+        {/* <RequiredCheckBox field={field.optionsWithNextFields} /> */}
       </>
     );
   } else if (Object.keys(field.optionsWithNextFields).length !== 0) {
@@ -96,6 +105,7 @@ export default function NextFields({
           >
             <CloseIcon fontSize="small" />
           </IconButton>
+          {/* <RequiredCheckBox field={field.optionsWithNextFields} /> */}
         </>
       );
   }
