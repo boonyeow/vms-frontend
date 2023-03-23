@@ -1,5 +1,6 @@
 import NavBar from "../../components/SharedComponents/NavBar";
 import NextFields from "../../components/FormInputs/NextFields"
+import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
 import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
 import {
@@ -56,8 +57,7 @@ const FormCreation = () => {
     fetchUserList();
   }, []);
 
-  const handleSubmitForm = async (final) => {
-    changeData(final, "isFinal");
+  const handleSubmitForm = async () => {
     console.log(formData);
     await axios
    .put(
@@ -188,6 +188,7 @@ const handleChange = (event) => {
        helpText: "",
        isRequired: true,
        fieldType: "radio",
+       regexId:null
       //  optionsWithNextFields: {},
      }
    ],
@@ -220,10 +221,11 @@ const handleChange = (event) => {
         newFields[index].optionsWithNextFields={};
       }
       const nextField = {
-           name: "",
-           helpText: "",
-           isRequired: false,
-           fieldType: "",
+        name: "",
+        helpText: "",
+        isRequired: false,
+        fieldType: "",
+        regexId: null,
       };
       nextField.fieldType = input.value;
       if (input.value !== "text") {
@@ -409,110 +411,125 @@ const handleChange = (event) => {
                     alignItems="center"
                     key={index}
                   >
-                    <Grid item xs={1}>
-                      <FieldTypeMenu
-                        handleChangeFieldType={handleChangeFieldType}
-                        index={index}
-                        isNextField={false}
-                      />
-                    </Grid>
-                    {field.fieldType === "text" ? (
-                      ""
-                    ) : (
-                      <Grid item xs={1}>
-                        <div>
-                          <input
-                            type={field.fieldType}
-                            key={index}
-                            name={
-                              field.fieldType === "radio"
-                                ? "radioGroup"
-                                : field.name
-                            }
-                          />
-                        </div>
-                      </Grid>
-                    )}
-                    <Grid item xs={2}>
-                      <input
-                        type="text"
-                        placeholder=""
-                        className="option-text"
-                        value={field.name}
-                        onChange={(e) =>
-                          handleFieldNameChange(e.target.value, index)
-                        }
-                      />
-                    </Grid>
-                    {field.fieldType !== "text" ? (
-                      ""
-                    ) : (
-                      <Grid item xs={2}>
-                        <div>
-                          <input type={field.fieldType} key={index} />
-                        </div>
-                      </Grid>
-                    )}
-
-                    <RequiredCheckBox
-                      fields={field}
-                      nextField={false}
-                      index={index}
-                      handleIsRequiredChange={handleIsRequiredChange}
-                    />
-
-                    <Grid item xs={1}>
-                      <Tooltip title="Add Field Beside">
-                        <div>
+                    <Grid item xs={6}>
+                      <Stack>
+                        <Stack direction="row" spacing={5}>
                           <FieldTypeMenu
                             handleChangeFieldType={handleChangeFieldType}
                             index={index}
-                            isNextField={true}
+                            isNextField={false}
                           />
-                        </div>
-                      </Tooltip>
-                    </Grid>
 
-                    {field.optionsWithNextFields && Object.keys(
-                      field.optionsWithNextFields
-                    ).length !== 0 ? (
-                      <>
-                        <Grid item xs={3}>
-                          <TextField
-                            id="outlined-basic"
-                            label="Name"
-                            variant="standard"
-                            onChange={(e) => {
-                              const newFields = [...formData.fields];
-                              newFields[index].optionsWithNextFields[
-                                newFields[index].name
-                              ].name = e.target.value;
-                              setFormData((prevState) => ({
-                                ...prevState,
-                                fields: newFields,
-                              }));
-                            }}
+                          {field.fieldType === "text" ? (
+                            ""
+                          ) : (
+                            <div>
+                              <input
+                                type={field.fieldType}
+                                key={index}
+                                name={
+                                  field.fieldType === "radio"
+                                    ? "radioGroup"
+                                    : field.name
+                                }
+                              />
+                            </div>
+                          )}
+
+                          <input
+                            type="text"
+                            placeholder=""
+                            className="option-text"
+                            value={field.name}
+                            onChange={(e) =>
+                              handleFieldNameChange(e.target.value, index)
+                            }
                           />
-                          <NextFields
-                            field={field}
-                            index={index}
-                            nextFieldOptionChange={nextFieldOptionChange}
-                            addNextFieldOptions={addNextFieldOptions}
-                            deleteNextFieldOptions={deleteNextFieldOptions}
-                          />
-                        </Grid>
-                        <Grid item>
+
+                          {field.fieldType !== "text" ? (
+                            ""
+                          ) : (
+                            <div>
+                              <input type={field.fieldType} key={index} />
+                            </div>
+                          )}
+
+                          {/* <Grid item xs={2}>
+                      <RegexSelect />
+                    </Grid> */}
+
+                          <Tooltip title="Add Field Beside">
+                            <div>
+                              <FieldTypeMenu
+                                handleChangeFieldType={handleChangeFieldType}
+                                index={index}
+                                isNextField={true}
+                              />
+                            </div>
+                          </Tooltip>
+                        </Stack>
+                        <Stack
+                          direction="row"
+                          spacing={3}
+                          justifyContent="center"
+                          alignItems="center"
+                          sx={{ marginTop: 3 }}
+                        >
                           <RequiredCheckBox
-                            fields={field.optionsWithNextFields[field.name]}
-                            nextField={true}
+                            fields={field}
+                            nextField={false}
                             index={index}
                             handleIsRequiredChange={handleIsRequiredChange}
                           />
-                        </Grid>
-                      </>
-                    ) : (
-                      ""
-                    )}
+                          <RegexSelect />
+                        </Stack>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={6}>
+                      {field.optionsWithNextFields &&
+                      Object.keys(field.optionsWithNextFields).length !== 0 ? (
+                        <>
+                          <Grid item xs={3}>
+                            <TextField
+                              id="outlined-basic"
+                              label="Name"
+                              variant="standard"
+                              onChange={(e) => {
+                                const newFields = [...formData.fields];
+                                newFields[index].optionsWithNextFields[
+                                  newFields[index].name
+                                ].name = e.target.value;
+                                setFormData((prevState) => ({
+                                  ...prevState,
+                                  fields: newFields,
+                                }));
+                              }}
+                            />
+                            <NextFields
+                              field={field}
+                              index={index}
+                              nextFieldOptionChange={nextFieldOptionChange}
+                              addNextFieldOptions={addNextFieldOptions}
+                              deleteNextFieldOptions={deleteNextFieldOptions}
+                            />
+                          </Grid>
+                          <Grid
+                            item
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <RequiredCheckBox
+                              fields={field.optionsWithNextFields[field.name]}
+                              nextField={true}
+                              index={index}
+                              handleIsRequiredChange={handleIsRequiredChange}
+                            />
+                            <RegexSelect />
+                          </Grid>
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </Grid>
                   </Grid>
                   <Grid
                     container
@@ -556,19 +573,12 @@ const handleChange = (event) => {
             >
               Cancel
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              style={{ backgroundColor: "orange" }}
-              onClick={(e) => handleSubmitForm(true)}
-            >
-              Save as Draft
-            </Button>
+
             <Button
               size="small"
               variant="contained"
               color="primary"
-              onClick={(e) => handleSubmitForm(false)}
+              onClick={(e) => handleSubmitForm()}
             >
               Done
             </Button>
