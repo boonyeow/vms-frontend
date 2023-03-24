@@ -76,12 +76,13 @@ const FormCreation = () => {
         field.fieldType = fieldTypeMatching[field.fieldType];
       }
 
-      // Check if options exists and recursively set its fieldType to null
-      if (field.options) {
-        Object.values(field.options).forEach((nestedField) => {
+      // Check if optionsWithNextFields exists and recursively set its fieldType to null
+      if (field.optionsWithNextFields) {
+        Object.values(field.optionsWithNextFields).forEach((nestedField) => {
           if (nestedField.fieldType) {
             nestedField.fieldType = fieldTypeMatching[nestedField.fieldType];
           }
+
         });
       }
     });
@@ -133,9 +134,9 @@ const FormCreation = () => {
   const nextFieldOptionChange = (value, key, index) => {
     const newFields = [...formData.fields];
     const object =
-      newFields[index].options[newFields[index].name];
-    object.options[value] = object.options[key];
-    delete object.options[key];
+      newFields[index].optionsWithNextFields[newFields[index].name];
+    object.optionsWithNextFields[value] = object.optionsWithNextFields[key];
+    delete object.optionsWithNextFields[key];
 
     setFormData((prevData) => ({
       ...prevData,
@@ -177,13 +178,13 @@ const FormCreation = () => {
   //   "helpText": "laurent",
   //   "isRequired": true,
   //   "fieldType": "CHECKBOX",
-  //   "options": {
+  //   "optionsWithNextFields": {
   //     "Site Evaluation Results": {
   //       "name": "",
   //       "helpText": "",
   //       "isRequired": false,
   //       "fieldType": "RADIOBUTTON",
-  //       "options": {
+  //       "optionsWithNextFields": {
   //         "Satisfactory": null,
   //         "Unsatisfactory": null
   //       }
@@ -203,7 +204,7 @@ const FormCreation = () => {
   const fieldDataChange = (value, index, isNextField, type) => {
     const newFields = [...formData.fields];
     if (isNextField) {
-      newFields[index].options[newFields[index].name][type] =
+      newFields[index].optionsWithNextFields[newFields[index].name][type] =
         value;
     } else {
       newFields[index][type] = value;
@@ -236,7 +237,7 @@ const FormCreation = () => {
         isRequired: true,
         fieldType: "radio",
         regexId: null,
-        //  options: {},
+        //  optionsWithNextFields: {},
       },
     ],
     authorizedAccountIds: [],
@@ -252,14 +253,14 @@ const FormCreation = () => {
     //     isRequired: true,
     //     fieldType: 'text',
     //     regexId: 1,
-    //     options: {
+    //     optionsWithNextFields: {
     //       prp: {
     //         name: 'BOOOO',
     //         helpText: 'test',
     //         isRequired: true,
     //         fieldType: 'checkbox',
     //         regexId: 1,
-    //         options: { oest: null, oyyy: null }
+    //         optionsWithNextFields: { oest: null, oyyy: null }
     //       }
     //     }
     //   },
@@ -295,8 +296,8 @@ const FormCreation = () => {
   const handleChangeFieldType = (index, input, isNextField) => {
     const newFields = [...formData.fields];
     if (isNextField) {
-      if (!newFields[index].options) {
-        newFields[index].options = {};
+      if (!newFields[index].optionsWithNextFields) {
+        newFields[index].optionsWithNextFields = {};
       }
       const nextField = {
         name: "",
@@ -307,9 +308,9 @@ const FormCreation = () => {
       };
       nextField.fieldType = input.value;
       if (input.value !== "text") {
-        nextField.options = { option1: null };
+        nextField.optionsWithNextFields = { option1: null };
       }
-      newFields[index].options[formData.fields[index].name] =
+      newFields[index].optionsWithNextFields[formData.fields[index].name] =
         nextField;
     } else {
       newFields[index] = {
@@ -339,12 +340,12 @@ const FormCreation = () => {
   const addNextFieldOptions = (index) => {
     const newFields = [...formData.fields];
     const length = Object.keys(
-      newFields[index].options[newFields[index].name]
-        .options
+      newFields[index].optionsWithNextFields[newFields[index].name]
+        .optionsWithNextFields
     ).length;
-    newFields[index].options[
+    newFields[index].optionsWithNextFields[
       newFields[index].name
-    ].options[`option${length + 1}`] = null;
+    ].optionsWithNextFields[`option${length + 1}`] = null;
     setFormData((prevData) => ({
       ...prevData,
       fields: newFields,
@@ -359,12 +360,12 @@ const FormCreation = () => {
     newFields[index].name = value;
 
     if (
-      newFields[index].options &&
-      newFields[index].options[prevName]
+      newFields[index].optionsWithNextFields &&
+      newFields[index].optionsWithNextFields[prevName]
     ) {
-      newFields[index].options[value] =
-        newFields[index].options[prevName];
-      delete newFields[index].options[prevName];
+      newFields[index].optionsWithNextFields[value] =
+        newFields[index].optionsWithNextFields[prevName];
+      delete newFields[index].optionsWithNextFields[prevName];
     }
 
     setFormData((prevData) => ({
@@ -383,17 +384,17 @@ const FormCreation = () => {
   const deleteNextFieldOptions = (index, key, isText) => {
     const newFields = [...formData.fields];
     if (!isText) {
-      delete newFields[index].options[newFields[index].name]
-        .options[key];
+      delete newFields[index].optionsWithNextFields[newFields[index].name]
+        .optionsWithNextFields[key];
     }
     if (
       isText ||
       Object.keys(
-        newFields[index].options[newFields[index].name]
-          .options
+        newFields[index].optionsWithNextFields[newFields[index].name]
+          .optionsWithNextFields
       ).length === 0
     ) {
-      newFields[index].options = {};
+      newFields[index].optionsWithNextFields = {};
     }
     setFormData((prevData) => ({
       ...prevData,
@@ -612,20 +613,20 @@ const FormCreation = () => {
                       </Tooltip>
                     </Grid>
                     <Grid item xs={6}>
-                      {field.options &&
-                      Object.keys(field.options).length !== 0 ? (
+                      {field.optionsWithNextFields &&
+                      Object.keys(field.optionsWithNextFields).length !== 0 ? (
                         <>
                           <Stack spacing={2}>
                             <TextField
                               id="outlined-basic"
                               label="Name"
                               value={
-                                field.options[field.name].name
+                                field.optionsWithNextFields[field.name].name
                               }
                               variant="standard"
                               onChange={(e) => {
                                 const newFields = [...formData.fields];
-                                newFields[index].options[
+                                newFields[index].optionsWithNextFields[
                                   newFields[index].name
                                 ].name = e.target.value;
                                 setFormData((prevState) => ({
@@ -644,7 +645,7 @@ const FormCreation = () => {
                               inputProps={{ style: { fontSize: 12 } }}
                               InputLabelProps={{ style: { fontSize: 12 } }}
                               value={
-                                field.options[field.name].helpText
+                                field.optionsWithNextFields[field.name].helpText
                               }
                               label="Help Text (optional)"
                               onBlur={(e) =>
@@ -657,7 +658,7 @@ const FormCreation = () => {
                               }
                             />
                             <NextFields
-                              field={field.options[field.name]}
+                              field={field}
                               index={index}
                               nextFieldOptionChange={nextFieldOptionChange}
                               addNextFieldOptions={addNextFieldOptions}
@@ -669,16 +670,16 @@ const FormCreation = () => {
                             style={{ display: "flex", alignItems: "center" }}
                           >
                             <RequiredCheckBox
-                              fields={field.options[field.name]}
+                              fields={field.optionsWithNextFields[field.name]}
                               nextField={true}
                               index={index}
                               value={
-                                field.options[field.name]
+                                field.optionsWithNextFields[field.name]
                                   .isRequired
                               }
                               fieldDataChange={fieldDataChange}
                             />
-                            {field.options[field.name]
+                            {field.optionsWithNextFields[field.name]
                               .fieldType === "text" ? (
                               <RegexSelect
                                 field={field}

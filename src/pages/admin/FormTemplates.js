@@ -186,7 +186,7 @@ const columns = [
           }, {});
         });
         setFormList(data);
-        console.log(formList)
+        console.log(data)
       })
       .catch((e) => console.error(e));
   };

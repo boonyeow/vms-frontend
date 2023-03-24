@@ -26,20 +26,38 @@ const MenuProps = {
   },
 };
 
-export default function RegexSelect({ index, isNextField, fieldDataChange }) {
+export default function RegexSelect({ field, index, isNextField, fieldDataChange }) {
   const { token } = useAuthStore();
-  const [chosenRegex, setChosenRegex] = useState([]);
   const [regexList, setRegexList] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newRegexName, setNewRegexName] = useState("");
   const [newRegexPattern, setNewRegexPattern] = useState("");
 
   useEffect(() => {
-    fetchRegexList();
-  }, []);
+      fetchRegexList();
+
+    }, []);
+
+    const initialChosenValue =async () => {
+        let initialRegex = '';
+        let regexId = null;
+        if (isNextField && field.options[field.name].regexId) {
+            regexId = field.options[field.name].regexId;
+        } else if (field.regexId) {
+            regexId = field.regexId;
+        }
+            initialRegex = regexList.find((regex) => regex.id === regexId);
+        console.log(initialRegex);
+        return initialRegex;
+
+    }
+    const [chosenRegex, setChosenRegex] = useState(
+      initialChosenValue() || ''
+    );
+
 
   const fetchRegexList = async () => {
-    axios
+    await axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/regex", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -47,13 +65,13 @@ export default function RegexSelect({ index, isNextField, fieldDataChange }) {
       })
       .then((res) => {
         setRegexList(res.data);
-        console.log(res.data);
       })
       .catch((e) => console.error(e));
   };
 
-  const handleChange = (event) => {
-    setChosenRegex(event.target.value);
+    const handleChange = (event) => {
+        setChosenRegex(event.target.value);
+         console.log(chosenRegex);
   };
 
   const handleAddNewRegex = () => {
@@ -98,7 +116,7 @@ export default function RegexSelect({ index, isNextField, fieldDataChange }) {
 
   return (
     <div>
-      <FormControl sx={{  minWidth: 120 }} size="small">
+      <FormControl sx={{ minWidth: 120 }} size="small">
         <InputLabel id="demo-multiple-name-label">Regex</InputLabel>
         <Select
           labelId="demo-multiple-name-label"

@@ -5,10 +5,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 
 const FieldTypeMenu = ({ handleChangeFieldType, index, isNextField }) => {
-      const inputTypes=[
-        { name: "Radiobutton", value: "radio" },
-        { name: "CheckBox", value: "checkbox" },
-        { name: "TextField", value: "text" },
+      const inputTypes = [
+        { name: "Radiobutton", value: "radio", id: "RADIOBUTTON" },
+        { name: "CheckBox", value: "checkbox", id: "CHECKBOX" },
+        { name: "TextField", value: "text", id: "TEXTBOX" },
         // can add more options
       ];
   return (

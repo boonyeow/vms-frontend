@@ -17,7 +17,12 @@ export default function NextFields({
   addNextFieldOptions,
   deleteNextFieldOptions,
 }) {
-  const [optionValue, setOptionValue] = useState(["option 1"]);
+
+ const initialOptionValue = field.options
+
+   ? Object.keys(field.options)
+   : ["option1"];
+ const [optionValue, setOptionValue] = useState(initialOptionValue);
   useEffect(() => {}, []);
   const addOptionValue = () => {
     const newOptions = [...optionValue];
@@ -31,24 +36,24 @@ export default function NextFields({
   };
 
   if (
-    field.optionsWithNextFields[field.name].fieldType !== "text" &&
-    Object.keys(field.optionsWithNextFields[field.name].optionsWithNextFields)
+    field.fieldType !== "text" &&
+    Object.keys(field.options)
       .length !== 0
   ) {
     return (
       <>
         {Object.entries(
-          field.optionsWithNextFields[field.name].optionsWithNextFields
+          field.options
         ).map(([key, value], j) => (
           <Stack direction="row" sx={{ paddingY: 1 }} key={key}>
             <input
               type={
-                field.optionsWithNextFields[field.name].fieldType === "radio"
+                field.fieldType === "radio"
                   ? "radio"
-                  : field.optionsWithNextFields[field.name].fieldType
+                  : field.fieldType
               }
               name={
-                field.optionsWithNextFields[field.name].fieldType === "radio"
+                field.fieldType === "radio"
                   ? "nextFieldRadioGroup"
                   : key
               }
@@ -76,7 +81,7 @@ export default function NextFields({
             </IconButton>
           </Stack>
         ))}
-        {field.optionsWithNextFields[field.name].fieldType !== "text" && (
+        {field.fieldType !== "text" && (
           <>
             <Button
               variant="text"
@@ -94,7 +99,7 @@ export default function NextFields({
 
       </>
     );
-  } else if (Object.keys(field.optionsWithNextFields).length !== 0) {
+  } else {
       return (
         <Grid container direction="row">
           <Grid item xs={10}>

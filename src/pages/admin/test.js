@@ -132,9 +132,19 @@ const FormCreation = () => {
 
   const nextFieldOptionChange = (value, key, index) => {
     const newFields = [...formData.fields];
-    const object =
-      newFields[index].options[newFields[index].name];
+    const object = newFields[index].options[newFields[index].name];
     object.options[value] = object.options[key];
+    delete object.options[key];
+
+    setFormData((prevData) => ({
+      ...prevData,
+      fields: newFields,
+    }));
+  };
+  const fieldOptionChange = (value, key, index) => {
+    const newFields = [...formData.fields];
+    const object = newFields[index].options[newFields[index].name];
+    object = object.options[key];
     delete object.options[key];
 
     setFormData((prevData) => ({
@@ -203,8 +213,7 @@ const FormCreation = () => {
   const fieldDataChange = (value, index, isNextField, type) => {
     const newFields = [...formData.fields];
     if (isNextField) {
-      newFields[index].options[newFields[index].name][type] =
-        value;
+      newFields[index].options[newFields[index].name][type] = value;
     } else {
       newFields[index][type] = value;
     }
@@ -236,7 +245,7 @@ const FormCreation = () => {
         isRequired: true,
         fieldType: "radio",
         regexId: null,
-        //  options: {},
+        options: {},
       },
     ],
     authorizedAccountIds: [],
@@ -304,17 +313,18 @@ const FormCreation = () => {
         isRequired: false,
         fieldType: "",
         regexId: null,
+        options: {},
       };
       nextField.fieldType = input.value;
       if (input.value !== "text") {
         nextField.options = { option1: null };
       }
-      newFields[index].options[formData.fields[index].name] =
-        nextField;
+      newFields[index].options[formData.fields[index].name] = nextField;
     } else {
       newFields[index] = {
         ...newFields[index],
         fieldType: input.value,
+        options: { option1: null },
       };
     }
     setFormData((prevState) => ({
@@ -339,12 +349,21 @@ const FormCreation = () => {
   const addNextFieldOptions = (index) => {
     const newFields = [...formData.fields];
     const length = Object.keys(
-      newFields[index].options[newFields[index].name]
-        .options
+      newFields[index].options[newFields[index].name].options
     ).length;
-    newFields[index].options[
-      newFields[index].name
-    ].options[`option${length + 1}`] = null;
+    newFields[index].options[newFields[index].name].options[
+      `option${length + 1}`
+    ] = null;
+    setFormData((prevData) => ({
+      ...prevData,
+      fields: newFields,
+    }));
+    console.log(newFields);
+  };
+  const addFieldOptions = (index) => {
+    const newFields = [...formData.fields];
+    const length = Object.keys(newFields[index].options).length;
+    newFields[index].options[`option${length + 1}`] = null;
     setFormData((prevData) => ({
       ...prevData,
       fields: newFields,
@@ -358,12 +377,8 @@ const FormCreation = () => {
     console.log(formData.fields);
     newFields[index].name = value;
 
-    if (
-      newFields[index].options &&
-      newFields[index].options[prevName]
-    ) {
-      newFields[index].options[value] =
-        newFields[index].options[prevName];
+    if (newFields[index].options && newFields[index].options[prevName]) {
+      newFields[index].options[value] = newFields[index].options[prevName];
       delete newFields[index].options[prevName];
     }
 
@@ -383,15 +398,12 @@ const FormCreation = () => {
   const deleteNextFieldOptions = (index, key, isText) => {
     const newFields = [...formData.fields];
     if (!isText) {
-      delete newFields[index].options[newFields[index].name]
-        .options[key];
+      delete newFields[index].options[newFields[index].name].options[key];
     }
     if (
       isText ||
-      Object.keys(
-        newFields[index].options[newFields[index].name]
-          .options
-      ).length === 0
+      Object.keys(newFields[index].options[newFields[index].name].options)
+        .length === 0
     ) {
       newFields[index].options = {};
     }
@@ -503,50 +515,14 @@ const FormCreation = () => {
                             isNextField={false}
                           />
 
-                          {field.fieldType === "text" ? (
-                            ""
-                          ) : (
-                            <div>
-                              <input
-                                type={field.fieldType}
-                                key={index}
-                                name={
-                                  field.fieldType === "radio"
-                                    ? "radioGroup"
-                                    : field.name
-                                }
-                              />
-                            </div>
-                          )}
-
-                          <input
-                            type="text"
-                            placeholder=""
-                            className="option-text"
-                            value={field.name}
-                            onChange={(e) =>
-                              handleFieldNameChange(e.target.value, index)
-                            }
+                          <NextFields
+                            field={field}
+                            index={index}
+                            nextFieldOptionChange={fieldOptionChange}
+                            addNextFieldOptions={addFieldOptions}
+                            deleteNextFieldOptions={deleteNextFieldOptions}
                           />
                         </Stack>
-                        {field.fieldType !== "text" ? (
-                          ""
-                        ) : (
-                          <Stack>
-                            <TextField
-                              fullWidth
-                              variant="outlined"
-                              key={index}
-                              size="small"
-                              sx={{
-                                marginTop: 2,
-                                paddingX: 3,
-                                maxWidth: "70%",
-                              }}
-                              placeholder="User Input"
-                            />
-                          </Stack>
-                        )}
                         <Stack
                           justifyContent="flex-start"
                           alignItems="flex-end"
@@ -619,9 +595,7 @@ const FormCreation = () => {
                             <TextField
                               id="outlined-basic"
                               label="Name"
-                              value={
-                                field.options[field.name].name
-                              }
+                              value={field.options[field.name].name}
                               variant="standard"
                               onChange={(e) => {
                                 const newFields = [...formData.fields];
@@ -643,9 +617,7 @@ const FormCreation = () => {
                               }}
                               inputProps={{ style: { fontSize: 12 } }}
                               InputLabelProps={{ style: { fontSize: 12 } }}
-                              value={
-                                field.options[field.name].helpText
-                              }
+                              value={field.options[field.name].helpText}
                               label="Help Text (optional)"
                               onBlur={(e) =>
                                 fieldDataChange(
@@ -672,14 +644,10 @@ const FormCreation = () => {
                               fields={field.options[field.name]}
                               nextField={true}
                               index={index}
-                              value={
-                                field.options[field.name]
-                                  .isRequired
-                              }
+                              value={field.options[field.name].isRequired}
                               fieldDataChange={fieldDataChange}
                             />
-                            {field.options[field.name]
-                              .fieldType === "text" ? (
+                            {field.options[field.name].fieldType === "text" ? (
                               <RegexSelect
                                 field={field}
                                 index={index}
