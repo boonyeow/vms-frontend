@@ -27,11 +27,11 @@ function AuthorizedAccountsCell({ value }) {
   const chips = value.map((account, index) => (
     <>
       {index < 2 ? (
-        <Chip size="small" key={account.id} label={account.name} />
+        <Chip size="small" key={index} label={account.name} />
       ) : index === 3 ? (
         <Chip
           size="small"
-          key={account.id}
+          key={index}
           label={`${value.length - 3} more`}
           onClick={handleChipClick}
           aria-controls={open ? "basic-menu" : undefined}
@@ -113,9 +113,9 @@ const columns = [
         const targetForm = params.row;
 
         await axios
-          .delete(
+          .post(
             process.env.REACT_APP_ENDPOINT_URL +
-              `/api/forms/${targetForm.id}/${targetForm.revisionNo}`,
+            `/api/forms/${targetForm.id}/${targetForm.revisionNo}/duplicate`, {},
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -123,7 +123,7 @@ const columns = [
             }
           )
           .then((res) => {
-            console.log("deleted", res.data);
+            console.log("duplicated", res.data);
             fetchFormsList();
           })
           .catch((e) => {
@@ -162,23 +162,7 @@ const columns = [
     },
   },
 ];
-  const [formList, setFormList] = useState([
-    // {
-    //   id: 1,
-    //   revisionNo: 2,
-    //   name: "test",
-    //   authorizedAccounts: [
-    //     { id: 1, name: "test", email: "eee@fdfd.com" },
-    //     { id: 2, name: "test1", email: "12@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //     { id: 3, name: "test2", email: "43@fdfd.com" },
-    //   ],
-    // },
-  ]);
+  const [formList, setFormList] = useState([]);
   const [formListOriginal, setFormListOriginal] = useState([]);
   const fetchFormsList = async () => {
     axios
@@ -189,7 +173,6 @@ const columns = [
       })
       .then((res) => {
         setFormListOriginal(res.data)
-
         const data = res.data.map((obj) => {
           return Object.entries(obj).reduce((acc, [key, value]) => {
             if (typeof value === "object" && !Array.isArray(value)) {
@@ -203,6 +186,7 @@ const columns = [
           }, {});
         });
         setFormList(data);
+        console.log(formList)
       })
       .catch((e) => console.error(e));
   };
@@ -237,7 +221,7 @@ const columns = [
       <h1 style={{ textAlign: "center" }}>Form Templates</h1>
 
       <Stack spacing={2} alignItems="center">
-        <Stack direction="row" spacing={2} >
+        <Stack direction="row" spacing={2}>
           <Button
             variant="contained"
             color="primary"
@@ -246,7 +230,6 @@ const columns = [
           >
             Create New
           </Button>
-
         </Stack>
         <div
           style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
@@ -256,8 +239,8 @@ const columns = [
             columns={columns}
             pageSize={5}
             rowsPerPageOptions={[5]}
-            checkboxSelection
             autoHeight
+            getRowId={(row) => row.id + row.revisionNo}
             slots={{
               toolbar: GridToolbar,
             }}
