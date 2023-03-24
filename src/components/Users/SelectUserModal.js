@@ -1,4 +1,5 @@
 // dead code. not currently in use - my attempt at implementing response hook kept breaking.
+// Derived locations: AssignWorkflowModal
 // you can see my very optimistic props.onSubmit
 import {
   Button,
@@ -72,13 +73,13 @@ const SelectUserModal = (props) => {
       <DialogTitle>Select An User</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Pick an user from the list.
+          Choose user(s) from the list.
         </DialogContentText>
         <TableContainer>
           <Table size="small"> {/*sx={{ minWidth: 650 }}*/}
             <TableBody>
-              {userList.map((user) => (
-                (props.userTypes.includes(user.accountType)) ? <TableRow
+              {userList.map((user) => 
+                {props.userTypes.includes(user.accountType) && <TableRow
                 hover
                 onClick={(event) => handleClick(event, user.id)}
                 role="checkbox"
@@ -86,12 +87,9 @@ const SelectUserModal = (props) => {
                 key={user.id}
                 selected={selected.includes(user.id)}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">{user.name}</TableCell>
-                <TableCell align="right">{user.id}</TableCell>
-              </TableRow>
-              : null
-              ))}
+              ><TableCell component="th" scope="row">{user.name}</TableCell><TableCell align="right">{user.id}</TableCell></TableRow>
+                }
+              )}
             </TableBody>
           </Table>
         </TableContainer>

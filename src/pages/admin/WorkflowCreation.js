@@ -85,65 +85,59 @@ const WorkflowCreation = () => {
     newQuestion[i].questionText = text;
     setSections(newQuestion)
   }
+
   const handleSaveDraft = () => {
-   const newFormData = {
-     ...formData, // copy existing formData properties
-     fields: sections, // add fields property with the value of sections
-     isFinal: false, // set isFinal to false
-    };
-    console.log(newFormData)
-    //save form
+    handleSubmitWorkflow(true);
   }
 
-  // seb look here
-  // i tried with the empty and it didn't seem to work either
-  // const handleSubmitWorkflow = () => {
-  //   const newFormData = {
-  //     ...formData, // copy existing formData properties
-  //     fields: sections, // add fields property with the value of sections
-  //     isFinal: true, // set isFinal to false
-  //   };
-  //    const formErrors = validateForm(newFormData);
-  //     setErrors(formErrors);
-    // 
-  //     if (Object.keys(formErrors).length === 0) {
-  //       axios
-  //         .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
-  //              headers: {
-  //                  Authorization: `Bearer ${token}`,
-  //               },
-  //           })
-  //         .then(() => {
-  //         })
-  //         .catch((e) => console.error(e));
-  //     };
-  //       console.log("Form submitted:", formData);
-  //     }
-
-  // let me try remember which was the other thing
-  // - post to create new workflow (works)
-  // - assign workflow to user (components -> users -> assignworkflowmodal -> line 65, also on workflowmgmt page (click workflow then assign, select user, okay))
-  // - publish existing workflow (workflowlist -> line 68, on workflowmgmt page)
-      const handleSubmitWorkflow = () => {
-         axios
-           .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
+  const handleSubmitWorkflow = (draft = false) => {
+    const newFormData = {
+      ...formData, // copy existing formData properties
+      fields: sections, // add fields property with the value of sections
+      isFinal: !draft, // set isFinal to false
+    };
+      const formErrors = validateForm(newFormData);
+      setErrors(formErrors);
+      if (Object.keys(formErrors).length === 0) {
+        
+        axios
+          .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", null, {
+               headers: {
+                   Authorization: `Bearer ${token}`,
+                },
+            })
+          .then((response) => {
+            console.log("Posting...");
+            console.log(response.data);
+        
+            axios
+              .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data, {
+            
+                name: formData.name,
+                isFinal: true,
+            
+              }, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                 },
-             })
-           .then((response) => {
-            console.log(response);
-           })
-           .catch((e) => console.error(e));
-       };
+                  Authorization: `Bearer ${token}`,
+                },
+              })
+              .then((response) => {
+                console.log("Putting...");
+                console.log(response.data);
+              })
+              .catch((e) => console.error(e));
+            })
+          .catch((e) => console.error(e));
+            }}
   
-const validateForm = (data) => {
-  const errors = {};
-  if (!data.id) errors.id = "Workflow ID is required.";
-  // if (!data.revision) errors.revision = "Revision # is required.";
-  if (!data.name) errors.name = "Workflow Title is required.";
-  return errors;
-};
+  const validateForm = (data) => {
+    const errors = {};
+    if (!data.id) errors.id = "Workflow ID is required.";
+    // if (!data.revision) errors.revision = "Revision # is required.";
+    if (!data.name) errors.name = "Workflow Title is required.";
+    return errors;
+  };
+
   const [errors, setErrors] = useState({});
   const handleAddSection = () => {
     const newSection = {

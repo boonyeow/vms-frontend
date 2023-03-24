@@ -69,16 +69,16 @@ const WorkflowList = () => {
         // console.log(workflowList[selectedRow].id);
         console.log(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowList[selectedRow].id + "/publishWorkflow");
         axios
-            .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowList[selectedRow].id + "/publishWorkflow", {
+            .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowList[selectedRow].id + "/publishWorkflow", null, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
             .then((response) => {
-                // 
                 console.log(response.data);
             })
             .catch((e) => console.error(e));
+        
     };
 
 
@@ -111,10 +111,10 @@ const WorkflowList = () => {
                     renderValue: (value) => ((value) ? "Published" : "Edit Mode"),
                 },
                 sort: true,
-                customBodyRenderLite: (row) => {
+                customBodyRenderLite: (d, row) => {
                     return(
                         <>
-                            {(row.final) ? <Tooltip disableFocusListener title="Published And Accepting Responses"><LibraryAddCheck /></Tooltip> : <Tooltip disableFocusListener title="Edit Mode / Unpublished"><Construction /></Tooltip> }
+                            {(workflowList[row].final) ? <Tooltip disableFocusListener title="Published And Accepting Responses"><LibraryAddCheck /></Tooltip> : <Tooltip disableFocusListener title="Edit Mode / Unpublished"><Construction /></Tooltip> }
                         </>
                     )
                 },
@@ -181,6 +181,7 @@ const WorkflowList = () => {
    
         function handleClick() {
             publishWorkflow();
+            fetchWorkflowList();
         }
     
         return (
@@ -217,7 +218,7 @@ const WorkflowList = () => {
                   <CreateNewButton />
                   <EditWorkflowButton />
                   {/* <SeeResponsesButton /> */}
-                  { selectedRow.final == "true" ? <AssignWorkflowButton /> : <PublishWorkflowButton />}
+                  { workflowList[selectedRow].final ? <AssignWorkflowButton /> : <PublishWorkflowButton />}
                   <DeleteWorkflowButton />
               </Box>
           </React.Fragment>
