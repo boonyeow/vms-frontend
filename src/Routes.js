@@ -7,7 +7,7 @@ import UserMgmt from "./pages/admin/UserMgmt";
 import WorkflowCreation from "./pages/admin/WorkflowCreation";
 import WorkflowMgmt from "./pages/admin/WorkflowMgmt";
 import FormTemplates from "./pages/admin/FormTemplates";
-
+import ViewForm from "./pages/ViewForm";
 
 function AppRoutes() {
   return (
@@ -20,6 +20,8 @@ function AppRoutes() {
       <Route path="WorkflowMgmt" element={<WorkflowMgmt />} />
       <Route path="UserMgmt" element={<UserMgmt />} />
       <Route path="FormTemplates" element={<FormTemplates />} />
+      {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
+      <Route path="form/:id" element={<ViewForm />} />
     </Routes>
   );
 }
