@@ -26,7 +26,7 @@ const MenuProps = {
   },
 };
 
-export default function RegexSelect() {
+export default function RegexSelect({ index, isNextField, fieldDataChange }) {
   const { token } = useAuthStore();
   const [chosenRegex, setChosenRegex] = useState([]);
   const [regexList, setRegexList] = useState([]);
@@ -46,8 +46,8 @@ export default function RegexSelect() {
         },
       })
       .then((res) => {
-          setRegexList(res.data);
-          console.log(res.data)
+        setRegexList(res.data);
+        console.log(res.data);
       })
       .catch((e) => console.error(e));
   };
@@ -98,13 +98,16 @@ export default function RegexSelect() {
 
   return (
     <div>
-      <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+      <FormControl sx={{  minWidth: 120 }} size="small">
         <InputLabel id="demo-multiple-name-label">Regex</InputLabel>
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"
           value={chosenRegex}
-          onChange={handleChange}
+          onChange={(e) => {
+            fieldDataChange(e.target.value.id, index, isNextField, "regexId");
+            handleChange(e);
+          }}
           input={<OutlinedInput label="Regex" />}
           MenuProps={MenuProps}
         >
@@ -122,7 +125,7 @@ export default function RegexSelect() {
             </MenuItem>
           )}
           {regexList.map((regex, index) => (
-            <MenuItem key={regex.id} value={regex.pattern}>
+            <MenuItem key={regex.id} value={regex}>
               {regex.name}
             </MenuItem>
           ))}

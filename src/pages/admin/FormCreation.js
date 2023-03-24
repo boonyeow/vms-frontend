@@ -20,7 +20,9 @@ import {
   FormControl,
   ListItemText,
   Chip,
-  Divider
+  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -52,6 +54,7 @@ const FormCreation = () => {
   const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
   const [authorizedUserList, setAuthorizedUserList] = useState([]);
+
 
   useEffect(() => {
     fetchUserList();
@@ -150,12 +153,29 @@ const handleChange = (event) => {
 //   }
 // }
 
-    const changeData = (data, type) => {
+  const changeData = (data, type) => {
+      console.log(data)
       setFormData((prevData) => ({
         ...prevData,
         [type]: data,
       }));
-    };
+      console.log(formData)
+  };
+
+  const fieldDataChange = (value, index, isNextField, type)=>{
+      const newFields = [...formData.fields];
+      if (isNextField) {
+        newFields[index].optionsWithNextFields[newFields[index].name][type] =
+          value;
+      } else {
+        newFields[index][type]  = value;
+      }
+      console.log(newFields)
+      setFormData((prevState) => ({
+        ...prevState,
+        fields: newFields,
+      }));
+  }
   const deleteField = (index) => {
     const newFields = [...formData.fields];
     newFields.splice(index,1)
@@ -165,19 +185,7 @@ const handleChange = (event) => {
       fields: newFields,
     }));
   }
-  const handleIsRequiredChange = (value, isNextField, index) => {
-    const newFields = [...formData.fields];
-    if (isNextField) {
-      newFields[index].optionsWithNextFields[newFields[index].name].isRequired=value;
-    } else {
-      newFields[index].isRequired=value
-    }
-    setFormData((prevState) => ({
-      ...prevState,
-      fields: newFields,
-    }));
 
-  };
  const [formData, setFormData] = useState({
    name: '',
    description: null,
@@ -411,9 +419,14 @@ const handleChange = (event) => {
                     alignItems="center"
                     key={index}
                   >
-                    <Grid item xs={6}>
+                    <Grid item xs={5}>
                       <Stack>
-                        <Stack direction="row" spacing={5}>
+                        <Stack
+                          direction="row"
+                          spacing={3}
+                          justifyContent="flex-start"
+                          alignItems="center"
+                        >
                           <FieldTypeMenu
                             handleChangeFieldType={handleChangeFieldType}
                             index={index}
@@ -445,51 +458,87 @@ const handleChange = (event) => {
                               handleFieldNameChange(e.target.value, index)
                             }
                           />
-
-                          {field.fieldType !== "text" ? (
-                            ""
-                          ) : (
-                            <div>
-                              <input type={field.fieldType} key={index} />
-                            </div>
-                          )}
-
-                          {/* <Grid item xs={2}>
-                      <RegexSelect />
-                    </Grid> */}
-
-                          <Tooltip title="Add Field Beside">
-                            <div>
-                              <FieldTypeMenu
-                                handleChangeFieldType={handleChangeFieldType}
-                                index={index}
-                                isNextField={true}
-                              />
-                            </div>
-                          </Tooltip>
                         </Stack>
+                        {field.fieldType !== "text" ? (
+                          ""
+                        ) : (
+                          <Stack>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              key={index}
+                              size="small"
+                              sx={{
+                                marginTop: 2,
+                                paddingX: 3,
+                                maxWidth: "70%",
+                              }}
+                              placeholder="User Input"
+                            />
+                          </Stack>
+                        )}
+                        <Stack
+                          justifyContent="flex-start"
+                          alignItems="flex-end"
+                          direction="row"
+                          spacing={2}
+                          sx={{ marginLeft: 8 }}
+                        >
+                          <TextField
+                            size="small"
+                            variant="standard"
+                            sx={{ marginTop: 2 }}
+                            inputProps={{ style: { fontSize: 12 } }}
+                            InputLabelProps={{ style: { fontSize: 12 } }}
+                            label="Help Text (optional)"
+                            onBlur={(e) =>
+                              fieldDataChange(
+                                e.target.value,
+                                index,
+                                false,
+                                "helpText"
+                              )
+                            }
+                          />
+                        </Stack>
+
                         <Stack
                           direction="row"
                           spacing={3}
-                          justifyContent="center"
+                          justifyContent="flex-start"
                           alignItems="center"
-                          sx={{ marginTop: 3 }}
+                          sx={{ marginTop: 3, marginLeft: 8 }}
                         >
                           <RequiredCheckBox
                             fields={field}
                             nextField={false}
                             index={index}
-                            handleIsRequiredChange={handleIsRequiredChange}
+                            fieldDataChange={fieldDataChange}
                           />
-                          <RegexSelect />
+                          <RegexSelect
+                            index={index}
+                            isNextField={false}
+                            fieldDataChange={fieldDataChange}
+                          />
                         </Stack>
                       </Stack>
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Tooltip title="Add Field Beside">
+                        <div>
+                          <FieldTypeMenu
+                            handleChangeFieldType={handleChangeFieldType}
+                            index={index}
+                            isNextField={true}
+                          />
+                        </div>
+                      </Tooltip>
                     </Grid>
                     <Grid item xs={6}>
                       {field.optionsWithNextFields &&
                       Object.keys(field.optionsWithNextFields).length !== 0 ? (
                         <>
-                          <Grid item xs={3}>
+                          <Stack spacing={2}>
                             <TextField
                               id="outlined-basic"
                               label="Name"
@@ -505,6 +554,25 @@ const handleChange = (event) => {
                                 }));
                               }}
                             />
+                            <TextField
+                              size="small"
+                              variant="standard"
+                              sx={{
+                                marginTop: 2,
+                                maxWidth: "50%",
+                              }}
+                              inputProps={{ style: { fontSize: 12 } }}
+                              InputLabelProps={{ style: { fontSize: 12 } }}
+                              label="Help Text (optional)"
+                              onBlur={(e) =>
+                                fieldDataChange(
+                                  e.target.value,
+                                  index,
+                                  false,
+                                  "helpText"
+                                )
+                              }
+                            />
                             <NextFields
                               field={field}
                               index={index}
@@ -512,7 +580,7 @@ const handleChange = (event) => {
                               addNextFieldOptions={addNextFieldOptions}
                               deleteNextFieldOptions={deleteNextFieldOptions}
                             />
-                          </Grid>
+                          </Stack>
                           <Grid
                             item
                             style={{ display: "flex", alignItems: "center" }}
@@ -521,9 +589,18 @@ const handleChange = (event) => {
                               fields={field.optionsWithNextFields[field.name]}
                               nextField={true}
                               index={index}
-                              handleIsRequiredChange={handleIsRequiredChange}
+                              fieldDataChange={fieldDataChange}
                             />
-                            <RegexSelect />
+                            {field.optionsWithNextFields[field.name]
+                              .fieldType === "text" ? (
+                              <RegexSelect
+                                index={index}
+                                isNextField={true}
+                                fieldDataChange={fieldDataChange}
+                              />
+                            ) : (
+                              ""
+                            )}
                           </Grid>
                         </>
                       ) : (
@@ -565,6 +642,16 @@ const handleChange = (event) => {
               gap: 10,
             }}
           >
+            <ToggleButtonGroup
+              color="primary"
+              exclusive
+              value={formData.isFinal}
+              onChange={(e) => changeData(e.target.value,'isFinal')}
+              aria-label="Platform"
+            >
+              <ToggleButton value={true} >Final</ToggleButton>
+              <ToggleButton value={false}>Not Final</ToggleButton>
+            </ToggleButtonGroup>
             <Button
               size="small"
               variant="contained"

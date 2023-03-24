@@ -3,7 +3,9 @@ import {
   Button,
   IconButton,
   Checkbox,
-  FormControlLabel,
+    FormControlLabel,
+    Grid,
+  TextField,
 FormGroup} from "@mui/material";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
@@ -89,26 +91,31 @@ export default function NextFields({
             </Button>
           </>
         )}
-        {/* <RequiredCheckBox field={field.optionsWithNextFields} /> */}
+
       </>
     );
   } else if (Object.keys(field.optionsWithNextFields).length !== 0) {
       return (
-        <>
-          <input
-            type={field.optionsWithNextFields[field.name].fieldType}
-            name={field.name}
-            key={field.name}
-          />
-          <IconButton
-            onClick={() => {
-              deleteNextFieldOptions(index, null, true);
-            }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-          {/* <RequiredCheckBox field={field.optionsWithNextFields} /> */}
-        </>
+        <Grid container direction="row">
+          <Grid item xs={10}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              key={field.name}
+              size="small"
+              placeholder="User Input"
+           />
+          </Grid>
+          <Grid item xs={2}>
+            <IconButton
+              onClick={() => {
+                deleteNextFieldOptions(index, null, true);
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Grid>
+        </Grid>
       );
   }
 }
