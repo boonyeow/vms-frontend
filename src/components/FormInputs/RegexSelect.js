@@ -47,7 +47,6 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
             regexId = field.regexId;
         }
             initialRegex = regexList.find((regex) => regex.id === regexId);
-        console.log(initialRegex);
         return initialRegex;
 
     }
@@ -71,7 +70,6 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
 
     const handleChange = (event) => {
         setChosenRegex(event.target.value);
-         console.log(chosenRegex);
   };
 
   const handleAddNewRegex = () => {

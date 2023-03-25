@@ -15,6 +15,7 @@ import {
   Grid,
   Checkbox,
   Tooltip,
+  Alert ,
   OutlinedInput,
   InputLabel,
   FormControl,
@@ -23,10 +24,11 @@ import {
   Divider,
   ToggleButton,
   ToggleButtonGroup,
+  Snackbar,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import "../../form.css";
 import { useAuthStore } from "../../store";
@@ -49,6 +51,9 @@ const fieldTypeMatching = {
   text: "TEXTBOX",
   radio: "RADIOBUTTON",
   checkbox: "CHECKBOX",
+  TEXTBOX: 'text',
+  RADIOBUTTON: 'radio',
+  CHECKBOX:'checkbox'
 };
 
 const FormCreation = () => {
@@ -58,18 +63,145 @@ const FormCreation = () => {
   const revisionNo = url.pathname.split("/")[3];
   const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
-  const [authorizedUserList, setAuthorizedUserList] = useState([]);
 
+ const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState(null);
   useEffect(() => {
     fetchUserList();
+    getFormData();
   }, []);
+  const [authorizedUserList, setAuthorizedUserList] = useState(null);
+const handleClose = (event, reason) => {
+  if (reason === "clickaway") {
+    return;
+  }
+  setOpen(false);
+};
+  const getFormData = async () => {
+    let data = {
+      name: "",
+      description: null,
+      isFinal: false,
+      workflows: [],
+      fields: [
+        {
+          name: "",
+          helpText: "",
+          isRequired: true,
+          fieldType: "radio",
+          regexId: null,
+          nextFieldsId:{}
+        },
+      ],
+      authorizedAccounts: [],
+    };
+    await axios
+      .get(
+        process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(async (res) => {
+        //console.log(res.data)
+        data = { ...data, ...res.data };
 
+        let user = userList.filter((user) => data.authorizedAccounts.includes(user.id));
+        setAuthorizedUserList(user)
+
+        await axios
+          .get(
+            process.env.REACT_APP_ENDPOINT_URL +
+              `/api/forms/${id}/${revisionNo}/fields`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then(async (res) => {
+           //  console.log(res.data)
+            data.fields = res.data;
+            const promises = [];
+            res.data.forEach((field, index) => {
+              if (field.nextFieldsId) {
+                for (const [key, value] of Object.entries(field.nextFieldsId)) {
+                  promises.push(
+                    axios
+                      .get(
+                        process.env.REACT_APP_ENDPOINT_URL +
+                          `/api/fields/dto/${value}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        data.fields[index].nextFieldsId[key] = res.data;
+                      })
+                      .catch((e) => console.error(e))
+                  );
+                }
+              }
+            });
+            // Wait for all axios calls to finish
+            await Promise.all(promises);
+          })
+          .catch((e) => console.error(e));
+        let form = await replaceKey(data);
+        let processedForm = await processForm(form);
+        //console.log(replaceKey(processedForm));
+        setFormData(processedForm);
+
+      })
+
+      .catch((e) => console.error(e));
+  };
+
+  const replaceKey = (obj) => {
+    let converedObj = _.cloneDeep(obj);
+
+    converedObj.fields.map((field) => {
+      if (field.nextFieldsId) {
+        let data = field.nextFieldsId;
+        field.options = data
+        delete field.nextFieldsId
+        if (Object.keys(field.options).length > 0) {
+          for (const [key, value] of Object.entries(field.options)) {
+            if (value.nextFieldsId) {
+              let nesteddata = value.nextFieldsId;
+              field.options[key].options = nesteddata
+              delete field.options[key].nextFieldsId;
+            }
+          }
+        }
+
+      }
+    })
+    // for (const key in converedObj) {
+    //   if (converedObj.hasOwnProperty(key)) {
+    //     if (typeof converedObj[key] === "object" && converedObj[key] !== null) {
+    //       replaceKey(converedObj[key]);
+    //     }
+    //     if (key === "nextFieldsId") {
+    //       converedObj.options = converedObj.nextFieldsId;
+    //       delete converedObj.nextFieldsId;
+    //     }
+    //   }
+    // }
+    //console.log(converedObj)
+    console.log(converedObj);
+    return converedObj;
+  }
   const applyChanges = (isFinal, workflowsLength) => {
     return isFinal ? workflowsLength > 0 : false;
   };
 
-  const processForm = async () => {
-    let newForm = _.cloneDeep(formData);
+  const processForm = (form) => {
+    let newForm = _.cloneDeep(form);
     newForm.fields.map((field) => {
       // Check if fieldType exists and set it to null
       if (field.fieldType) {
@@ -80,6 +212,7 @@ const FormCreation = () => {
       if (field.options) {
         Object.values(field.options).forEach((nestedField) => {
           if (nestedField.fieldType) {
+            console.log( nestedField.fieldType)
             nestedField.fieldType = fieldTypeMatching[nestedField.fieldType];
           }
         });
@@ -89,18 +222,21 @@ const FormCreation = () => {
   };
 
   const handleSubmitForm = async () => {
-    let processedForm = await processForm();
-    console.log(processedForm);
+    let processedForm = await processForm(formData);
+    delete processedForm.id;
+    let authorisedAccList = processedForm.authorizedAccounts
+    processedForm["authorizedAccountIds"] = authorisedAccList;
+    delete processedForm.authorizedAccounts;
     const shouldApplyChanges = applyChanges(
       formData.isFinal,
       formData.workflows.length
     );
-    console.log(`Bearer ${token}`);
+   // console.log(`Bearer ${token}`);
     await axios
       .put(
         process.env.REACT_APP_ENDPOINT_URL +
           `/api/forms/${id}/${revisionNo}?applyChanges=${shouldApplyChanges}`,
-        { processedForm },
+         processedForm ,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,9 +244,8 @@ const FormCreation = () => {
         }
       )
       .then((res) => {
-        // Login successful
+         setOpen(true);
         navigate("/FormTemplates");
-        console.log("deleted", res.data);
       })
       .catch((e) => {
         console.log(e);
@@ -161,14 +296,14 @@ const FormCreation = () => {
       }
     });
 
-    const newAuthorizedAccountIds = newAuthorizedUserList.map(
+    const newAuthorizedAccounts = newAuthorizedUserList.map(
       (user) => user.id
     );
 
     setAuthorizedUserList(newAuthorizedUserList);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      authorizedAccountIds: newAuthorizedAccountIds,
+      authorizedAccounts: newAuthorizedAccounts,
     }));
   };
 
@@ -192,12 +327,14 @@ const FormCreation = () => {
   // }
 
   const changeData = (data, type) => {
-    console.log(typeof data);
+   // console.log(formData);
+   // console.log(userList)
+   // console.log(authorizedUserList);
     setFormData((prevData) => ({
       ...prevData,
       [type]: data,
     }));
-    console.log(formData);
+  //  console.log(formData);
   };
 
   const fieldDataChange = (value, index, isNextField, type) => {
@@ -208,7 +345,7 @@ const FormCreation = () => {
     } else {
       newFields[index][type] = value;
     }
-    console.log(newFields);
+    //console.log(newFields);
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
@@ -217,61 +354,14 @@ const FormCreation = () => {
   const deleteField = (index) => {
     const newFields = [...formData.fields];
     newFields.splice(index, 1);
-    console.log(newFields);
+    //console.log(newFields);
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
     }));
   };
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: null,
-    isFinal: false,
-    workflows: [],
-    fields: [
-      {
-        name: "",
-        helpText: "",
-        isRequired: true,
-        fieldType: "radio",
-        regexId: null,
-        //  options: {},
-      },
-    ],
-    authorizedAccountIds: [],
 
-    // name: 'test',
-    // description: 'cry ',
-    // isFinal: false,
-    // workflows: [],
-    // fields: [
-    //   {
-    //     name: 'prp',
-    //     helpText: 'help',
-    //     isRequired: true,
-    //     fieldType: 'text',
-    //     regexId: 1,
-    //     options: {
-    //       prp: {
-    //         name: 'BOOOO',
-    //         helpText: 'test',
-    //         isRequired: true,
-    //         fieldType: 'checkbox',
-    //         regexId: 1,
-    //         options: { oest: null, oyyy: null }
-    //       }
-    //     }
-    //   },
-    //   {
-    //     name: '',
-    //     helpText: '',
-    //     isRequired: true,
-    //     fieldType: 'text'
-    //   }
-    // ],
-    // authorizedAccountIds: [ 1 ]
-  });
   const handleCancelForm = async () => {
     await axios
       .delete(
@@ -349,13 +439,13 @@ const FormCreation = () => {
       ...prevData,
       fields: newFields,
     }));
-    console.log(newFields);
+   // console.log(newFields);
   };
   const handleFieldNameChange = (value, index) => {
-    console.log(formData);
+    //console.log(formData);
     const newFields = [...formData.fields];
     const prevName = newFields[index].name;
-    console.log(formData.fields);
+    //console.log(formData.fields);
     newFields[index].name = value;
 
     if (
@@ -400,9 +490,18 @@ const FormCreation = () => {
       fields: newFields,
     }));
   };
+  if (!formData || !authorizedUserList) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
       <NavBar />
+
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
+          Form submitted successfully!
+        </Alert>
+      </Snackbar>
       <h1 style={{ textAlign: "center" }}>Form Creation</h1>
       <Card sx={{ maxWidth: 1100, margin: "auto" }}>
         <CardContent>
@@ -557,8 +656,11 @@ const FormCreation = () => {
                           <TextField
                             size="small"
                             variant="standard"
-                            sx={{ marginTop: 2 }}
-                            value={field.helpText}
+                            sx={{
+                              marginTop: 2,
+                              maxWidth: "50%",
+                            }}
+                            defaultValue={field.helpText}
                             inputProps={{ style: { fontSize: 12 } }}
                             InputLabelProps={{ style: { fontSize: 12 } }}
                             label="Help Text (optional)"
@@ -619,9 +721,7 @@ const FormCreation = () => {
                             <TextField
                               id="outlined-basic"
                               label="Name"
-                              value={
-                                field.options[field.name].name
-                              }
+                              value={field.options[field.name].name}
                               variant="standard"
                               onChange={(e) => {
                                 const newFields = [...formData.fields];
@@ -637,21 +737,19 @@ const FormCreation = () => {
                             <TextField
                               size="small"
                               variant="standard"
+                              defaultValue={field.options[field.name].helpText}
                               sx={{
                                 marginTop: 2,
                                 maxWidth: "50%",
                               }}
                               inputProps={{ style: { fontSize: 12 } }}
                               InputLabelProps={{ style: { fontSize: 12 } }}
-                              value={
-                                field.options[field.name].helpText
-                              }
                               label="Help Text (optional)"
                               onBlur={(e) =>
                                 fieldDataChange(
                                   e.target.value,
                                   index,
-                                  false,
+                                  true,
                                   "helpText"
                                 )
                               }
@@ -672,14 +770,10 @@ const FormCreation = () => {
                               fields={field.options[field.name]}
                               nextField={true}
                               index={index}
-                              value={
-                                field.options[field.name]
-                                  .isRequired
-                              }
+                              value={field.options[field.name].isRequired}
                               fieldDataChange={fieldDataChange}
                             />
-                            {field.options[field.name]
-                              .fieldType === "text" ? (
+                            {field.options[field.name].fieldType === "text" ? (
                               <RegexSelect
                                 field={field}
                                 index={index}

@@ -84,8 +84,10 @@ const columns = [
     disableClickEventBubbling: true,
     renderCell: (params) => {
       const onViewClick = (e) => {
-        const currentRow = params.row;
-        return alert(JSON.stringify(currentRow, null, 4));
+        const formId = params.row.id;
+        const formRevNo = params.row.revisionNo;
+         navigate("/FormCreation/" + formId + "/" + formRevNo);
+       // return alert(JSON.stringify(currentRow, null, 4));
       };
 
       const onDeleteClick = async (e) => {
@@ -190,9 +192,37 @@ const columns = [
       })
       .catch((e) => console.error(e));
   };
+   const [form, setForm] = useState([]);
+  const fetchForms = async () => {
+    axios
+      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms/6/1/fields", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setForm(res.data);
+        // const data = res.data.map((obj) => {
+        //   return Object.entries(obj).reduce((acc, [key, value]) => {
+        //     if (typeof value === "object" && !Array.isArray(value)) {
+        //       // If the value is an object, spread its properties into the accumulator
+        //       acc = { ...acc, ...value };
+        //     } else {
+        //       // Otherwise, add the property to the accumulator as is
+        //       acc[key] = value;
+        //     }
+        //     return acc;
+        //   }, {});
+        // });
+       // setFormList(data);
+        console.log(res);
+      })
+      .catch((e) => console.error(e));
+  };
 
   useEffect(() => {
     fetchFormsList();
+    fetchForms();
   }, []);
 
   const handleCreateForm = async () => {
