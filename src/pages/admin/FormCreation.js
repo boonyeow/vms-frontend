@@ -231,6 +231,16 @@ const handleClose = (event, reason) => {
       formData.isFinal,
       formData.workflows.length
     );
+   processedForm.fields.map((field) => {
+     delete field.id;
+     for (const [key, value] of Object.entries(field.options)) {
+        if (value.options) {
+
+          delete field.options[key].id;
+        }
+    }
+    return field;
+   });
    // console.log(`Bearer ${token}`);
     await axios
       .put(

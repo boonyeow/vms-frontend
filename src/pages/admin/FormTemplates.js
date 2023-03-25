@@ -13,6 +13,7 @@ import Menu from "@mui/material/Menu";
 
 const FormTemplates = () => {
   const { token } = useAuthStore();
+    const [regexList, setRegexList] = useState([]);
   const navigate = useNavigate();
 function AuthorizedAccountsCell({ value }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -223,7 +224,23 @@ const columns = [
   useEffect(() => {
     fetchFormsList();
     fetchForms();
+    fetchRegexList();
   }, []);
+
+   const fetchRegexList = async () => {
+     await axios
+       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/regex", {
+         headers: {
+           Authorization: `Bearer ${token}`,
+         },
+       })
+       .then((res) => {
+         console.log(res.data);
+         setRegexList(res.data);
+       })
+       .catch((e) => console.error(e));
+   };
+
 
   const handleCreateForm = async () => {
     await axios

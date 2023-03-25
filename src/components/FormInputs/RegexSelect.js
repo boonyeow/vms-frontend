@@ -63,6 +63,7 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
         },
       })
       .then((res) => {
+        console.log(res.data)
         setRegexList(res.data);
       })
       .catch((e) => console.error(e));
