@@ -111,6 +111,7 @@ const handleClose = (event, reason) => {
         let user = userList.filter((user) => data.authorizedAccounts.includes(user.id));
         setAuthorizedUserList(user)
 
+        const fieldtoDelete=[]
         await axios
           .get(
             process.env.REACT_APP_ENDPOINT_URL +
@@ -141,6 +142,9 @@ const handleClose = (event, reason) => {
                       )
                       .then((res) => {
                         data.fields[index].nextFieldsId[key] = res.data;
+                        console.log(value)
+                        fieldtoDelete.push(value)
+
                       })
                       .catch((e) => console.error(e))
                   );
@@ -151,6 +155,9 @@ const handleClose = (event, reason) => {
             await Promise.all(promises);
           })
           .catch((e) => console.error(e));
+           data.fields = data.fields.filter(
+             (obj) => !fieldtoDelete.includes(obj.id)
+           );
         let form = await replaceKey(data);
         let processedForm = await processForm(form);
         //console.log(replaceKey(processedForm));
