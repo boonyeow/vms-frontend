@@ -16,7 +16,7 @@ import {
   TableCell
 } from "@mui/material";
 import axios from "axios";
-import { react, useEffect, useState, useReducer } from "react";
+import { react, useEffect, useState } from "react";
 import { useAuthStore } from "../../store";
 import Swal from "sweetalert2";
 // import { TableHead, TableHeadCell, TableHeadRow } from "mui-datatables";
@@ -29,19 +29,16 @@ const AssignWorkflowModal = (props) => {
   const workflow = props.workflow;
 
   useEffect(() => {
+    fetchExistingUserList();
     fetchUserList();
   }, []);
 
+  // should only be executing the one time
   useEffect(() => {
-    fetchExistingUserList();
     setSelected(currList);
-  }, [workflow]);
+  }, [currList]);
 
-  // useEffect(() => {
-  //   setSelected(currList);
-  // }, [currList]);
-
-  const fetchUserList = async () => {
+  const fetchUserList = () => {
     axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/accounts", {
         headers: {
@@ -49,15 +46,15 @@ const AssignWorkflowModal = (props) => {
         },
       })
       .then((res) => {
-        console.log("Fetched overall user list.")
+        // console.log("Fetched overall user list.")
         setUserList(res.data);
-        console.log(res.data);
+        // console.log(res.data);
       })
       .catch((e) => console.error(e));
   };
 
-  const fetchExistingUserList = async () => {
-    console.log("Fetching current selection's user list...")
+  const fetchExistingUserList = () => {
+    // console.log("Fetching current selection's user list...")
     axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflow.id, {
         headers: {
@@ -65,18 +62,20 @@ const AssignWorkflowModal = (props) => {
         },
       })
       .then((res) => {
-        console.log("Fetched current selection's user list.")
+        // console.log("Fetched current selection's user list.")
         setCurrList(res.data.authorizedAccountIds);
-        console.log(res.data.authorizedAccountIds);
+        // console.log(res.data.authorizedAccountIds);
       })
       .catch((e) => console.error(e));
   };
 
   const setNewUserList = async () => {
 
+    let err = 0;
+
     currList.map((select, k) => {
       if (!selected.includes(select)) {
-        console.log("Deauthorizing: " + select);
+        // console.log("Deauthorizing: " + select);
         axios
         .delete(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflow.id + "/authorizedAccount", {
           headers: {
@@ -89,7 +88,7 @@ const AssignWorkflowModal = (props) => {
         })
         .then((res) => {
         })
-        .catch((e) => console.error(e));
+        .catch((e) => err++);
     }
     
   })
@@ -97,7 +96,7 @@ const AssignWorkflowModal = (props) => {
     // console.log(selected);
     selected.map((select, k) => {
       if (!currList.includes(select)) {
-        console.log("Authorizing: " + select);
+        // console.log("Authorizing: " + select);
       axios
       .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflow.id + "/authorizedAccount", null, {
         headers: {
@@ -109,8 +108,27 @@ const AssignWorkflowModal = (props) => {
       })
       .then((res) => {
       })
-      .catch((e) => console.error(e));
+      .catch((e) => err++);
     }})
+
+    if (err==0) {
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        showConfirmButton: false,
+        target: document.getElementById('dialoglog'),
+        timer: 1000,
+      })
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong! The operation may not have been completed.",
+        target: document.getElementById('dialoglog'),
+        timer: 1000,
+      })
+    }
+    
 
     }
     
@@ -135,15 +153,14 @@ const AssignWorkflowModal = (props) => {
 
     const handleSubmit = (e) => {
 
-      console.log(selected);
       setNewUserList();
     
   };
 
   return (
     <Dialog
+      id="dialoglog"
       component="form"
-      onSubmit={props.handleSubmit}
       open={props.open}
       onClose={props.onClose}>
       <DialogTitle>Workflow Assignment</DialogTitle>
@@ -154,13 +171,15 @@ const AssignWorkflowModal = (props) => {
         <TableContainer>
           <Table size="small"> {/*sx={{ minWidth: 650 }}*/}
             <TableHead><TableRow>
-              <TableCell>USERS</TableCell>
               <TableCell>ID</TableCell>
+              <TableCell>USERS</TableCell>
+              <TableCell>ROLE</TableCell>
+              <TableCell>EMAIL</TableCell>
             </TableRow></TableHead>
             
             <TableBody>
-              {userList.map((user) => (
-                props.userTypes.includes(user.accountType)) && (<TableRow
+              {userList.map((user) => 
+                <TableRow
                 hover
                 onClick={(event) => handleClick(event, user.id)}
                 role="checkbox"
@@ -169,10 +188,12 @@ const AssignWorkflowModal = (props) => {
                 selected={selected.includes(user.id)}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell component="th" scope="row">{user.name}</TableCell>
-                <TableCell align="right">{user.id}</TableCell>
+                <TableCell>{user.id}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.accountType}</TableCell>
+                <TableCell>{user.email}</TableCell>
               </TableRow>)
-              )}
+              }
             </TableBody>
           </Table>
         </TableContainer>

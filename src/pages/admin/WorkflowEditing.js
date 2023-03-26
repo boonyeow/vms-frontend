@@ -1,6 +1,6 @@
-// Workflow model has this attribute which is a list of approvalSequence. It stores a list of Form ID.
-// Meaning if approvalSequence = [2,1,3].
-// It means that Form with Id 2 is first, then 1, then 3.
+// Only for the workflow that can be edited
+// Otherwise, this is functionally identical to the workflow creation page
+//  just with the buttons doing slightly different things
 import NavBar from "../../components/SharedComponents/NavBar";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -9,7 +9,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -30,15 +30,22 @@ import "../../form.css";
 import InputAdornment from "@mui/material/InputAdornment";
 import CardHeader from "@mui/material/CardHeader";
 
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const WorkflowCreation = () => {
+const WorkflowEditing = () => {
   
   const { token, role } = useAuthStore();
   const [formList, setFormList] = useState([]);
+
+  const { state } = useLocation();
+  const [workflowData, setWorkflowData] = useState({
+    id: state.id,
+    name: state.name,
+    isFinal: state.isFinal,
+  });
 
   const navigate = useNavigate();
 
@@ -50,22 +57,36 @@ const WorkflowCreation = () => {
         },
       })
       .then((res) => {
-        // console.log("fetching form list", res);
-        console.log("here's where i would put my data", res.data);
         setFormList(res.data.filter(item=>item.isFinal));
+        let tempFormList = res.data.filter(item=>item.isFinal);
+        let tempForms = [];
+        axios
+        .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          // setFormList(res.data.filter(item=>item.isFinal));
+          console.log(res.data.forms);
+          console.log(tempFormList);
+          console.log(tempForms);
+
+          res.data.forms.map((form)=>{
+            console.log(tempFormList.findIndex(item=>item.id.id==form.formId&&item.id.revisionNo==form.revisionNo));
+            tempForms = [...tempForms, { pos: tempFormList.findIndex(item=>item.id.id==form.formId&&item.id.revisionNo==form.revisionNo) }];});
+
+            setForms(tempForms);
+          })
+          .catch((e) => console.error(e));
       })
       .catch((e) => console.error(e));
   };
-  
-  useEffect(() => {
-    fetchFormList();
-  }, []);
 
-  const [workflowData, setWorkflowData] = useState({
-    id: null,
-    name: null,
-    isFinal: false,
-  });
+  useLayoutEffect(() => {
+    fetchFormList();
+    // fetchCurrentFormList(); crammed into fetchFormList
+  }, []);
 
   const [forms, setForms] = useState([]);
 
@@ -85,25 +106,12 @@ const WorkflowCreation = () => {
       const workflowErrors = validateWorkflow(newWorkflowData);
       setErrors(workflowErrors);
       if (Object.keys(workflowErrors).length === 0) {
-        
-        // step 1: create form
-        axios
-          .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", null, {
-               headers: {
-                   Authorization: `Bearer ${token}`,
-                },
-            })
-          .then((response) => {
-
-            // response data is simply the id of our newly-generated workflow
-            console.log("Posting...");
-            console.log(response.data);
 
             // step 2: throwing forms into the workflow
             forms.map((form, k) => {
               console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
               axios
-                .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data + "/addForm", {
+                .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/addForm", {
                 
                   id: formList[form.pos].id.id,
                   revisionNo: formList[form.pos].id.revisionNo,
@@ -123,7 +131,7 @@ const WorkflowCreation = () => {
         
             // step: update our workflow info - left to last because final will lock it.
             axios
-              .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data, {
+              .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
             
                 name: workflowData.name,
                 isFinal: newWorkflowData.isFinal,
@@ -135,7 +143,7 @@ const WorkflowCreation = () => {
               })
               .then((response) => {
                 console.log("Putting...");
-                console.log(response.data);
+                console.log(state.id);
                 if (error==0) {
                   Swal.fire({
                     icon: "success",
@@ -160,14 +168,6 @@ const WorkflowCreation = () => {
                 ++error;
                 //console.error(e);
               });
-              
-
-
-              })
-            .catch((e) => {
-              ++error;
-              //console.error(e);
-            });
 
             
             }
@@ -178,6 +178,7 @@ const WorkflowCreation = () => {
   const validateWorkflow = (data) => {
     const errors = {};
     if (!data.name) errors.name = "Workflow Title is required.";
+    console.log(forms);
     for (let i=0; i<forms.length; i++) {
       if (forms[i].pos=="-1") {
         errors[i] = "Invalid Form selected!";
@@ -215,26 +216,20 @@ const WorkflowCreation = () => {
     setForms(newForms);
   }
 
-  return ( ( role != "ADMIN") ? <Navigate replace to="/home" /> :
+  return ( ( role != "ADMIN" || state.isFinal ) ? <Navigate replace to="/home" /> :
     <>
       <NavBar />
-      <h1 style={{ textAlign: "center" }}>Workflow Creation</h1>
+      <h1 style={{ textAlign: "center" }}>Workflow Editing</h1>
       <Card sx={{ maxWidth: 900, margin: "auto" }}>
         <CardContent>
-          {/*<Stack spacing={2} direction="row">
-            <TextField
-              label="Workflow ID"
-              variant="standard"
-              onChange={(e) => changeData(e.target.value, "id")}
-              required
-              error={errors.id ? true : false}
-              helperText={errors.id ? errors.id : ""}
-            />
-          </Stack>*/}
+          <Stack spacing={2} direction="row">
+            <Button type = "text">ID: {workflowData.id}</Button>
+          </Stack>
           <Stack spacing={2}>
             <TextField
               label="Workflow Title"
               variant="standard"
+              value={workflowData.name}
               onChange={(e) => changeData(e.target.value, "name")}
               required
               error={errors.name ? true : false}
@@ -360,4 +355,4 @@ const WorkflowCreation = () => {
     </>
   );
 };
-export default WorkflowCreation;
+export default WorkflowEditing;
