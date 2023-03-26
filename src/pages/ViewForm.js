@@ -28,17 +28,56 @@ const ViewForm = (props) => {
   const { token } = useAuthStore();
   const { id } = useParams();
   const [form, setForm] = useState({});
-  const [response, setResponse] = useState({});
-    const [selectedValue, setSelectedValue] = useState("");
 
+  const [fieldResponses, setFieldResponses] = useState({});
+    const [selectedValue, setSelectedValue] = useState("");
+  const [regexList, setRegexList] = useState([
+    {
+      id: 1,
+      name: "email",
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    },
+  ]);
   const handleChange = (event) => {
       setSelectedValue(event.target.value);
     };
   useEffect(() => {
-    fetchForm(id);
+     getRegexList()
+       .then(() => fetchForm(id))
+       .catch((error) => console.log(error));
   }, []);
+
+  const getRegexList = async () => {
+   await axios
+      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/regex", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        //console.log(res.data)
+        setRegexList(res.data);
+        console.log(res.data)
+      })
+      .catch((e) => console.error(e));
+}
+  const recordResponse = (value, id) => {
+    // console.log("recording response");
+    console.log(`value: ${value}, id: ${id}`);
+   // const obj = JSON.parse(value);
+    //obj.name = JSON.parse(obj.name.replace(/\\/g, "")); // use if is checkbox
+    //obj.ans = JSON.parse(obj.ans);
+
+    // console.log(obj); // { id: 11, name: "test" }
+    setFieldResponses((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+    console.log(fieldResponses)
+  }
  const handleSubmit = (event) => {
    event.preventDefault();
+    console.log(fieldResponses);
    if (formRef.current.reportValidity()) {
      console.log("Form submitted with values: ", form);
    } else {
@@ -46,10 +85,11 @@ const ViewForm = (props) => {
      return;
    }
  };
-  const fetchForm = (id) => {
+  const fetchForm = async (id) => {
     let data = null
-    let fieldstodelete=[]
-    axios
+    let fieldstodelete = []
+
+     await axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms/" + id, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -59,6 +99,13 @@ const ViewForm = (props) => {
        // setForm(res.data);
         data = res.data
         data.fields.forEach((field, index) => {
+          if (field.regexId) {
+            let regex = regexList.filter((obj) => obj.id == field.regexId);
+            console.log(regex[0])
+            field.regexId=regex[0]
+          }
+
+
           if (field.nextFieldsId) {
             for (const [key, value] of Object.entries(field.nextFieldsId)) {
               if (typeof value === 'number') {
@@ -73,21 +120,21 @@ const ViewForm = (props) => {
         data.fields = data.fields.filter(
           (obj) => !fieldstodelete.includes(obj.id)
         );
-        console.log(data)
+       // console.log(data)
         setForm(data);
         let initResponse = {};
         Object.entries(res.data.fields).forEach(([key]) => {
           initResponse[key] = null;
         });
         //console.log(initResponse);
-        console.log(form)
+       // console.log(form)
       });
   };
 
   return (
     <>
       <NavBar />
-      <Card sx={{ maxWidth: 1000, marginTop: 3, marginX: "auto" }}>
+      <Card sx={{ maxWidth: 900, marginTop: 3, marginX: "auto" }}>
             <form ref={formRef} onSubmit={handleSubmit}>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center">
@@ -120,17 +167,24 @@ const ViewForm = (props) => {
                               fieldData={field}
                               handleChange={handleChange}
                               selectedValue={selectedValue}
+                              recordResponse={recordResponse}
                             />
                           ) : (
                             ""
                           )}
                           {field.fieldType == "TEXTBOX" ? (
-                            <TextboxComponent fieldData={field} />
+                            <TextboxComponent
+                              fieldData={field}
+                              recordResponse={recordResponse}
+                            />
                           ) : (
                             ""
                           )}
                           {field.fieldType == "CHECKBOX" ? (
-                            <CheckboxComponent fieldData={field} />
+                            <CheckboxComponent
+                              fieldData={field}
+                              recordResponse={recordResponse}
+                            />
                           ) : (
                             ""
                           )}
@@ -144,17 +198,26 @@ const ViewForm = (props) => {
                                 <>
                                   {/* <div key={key}>{value.fieldType}</div> */}
                                   {value.fieldType == "RADIOBUTTON" ? (
-                                    <RadioButtonComponent fieldData={value} />
+                                    <RadioButtonComponent
+                                      fieldData={value}
+                                      recordResponse={recordResponse}
+                                    />
                                   ) : (
                                     ""
                                   )}
                                   {value.fieldType == "TEXTBOX" ? (
-                                    <TextboxComponent fieldData={value} />
+                                    <TextboxComponent
+                                      fieldData={value}
+                                      recordResponse={recordResponse}
+                                    />
                                   ) : (
                                     ""
                                   )}
                                   {value.fieldType == "CHECKBOX" ? (
-                                    <CheckboxComponent fieldData={value} />
+                                    <CheckboxComponent
+                                      fieldData={value}
+                                      recordResponse={recordResponse}
+                                    />
                                   ) : (
                                     ""
                                   )}
@@ -182,75 +245,154 @@ const ViewForm = (props) => {
   );
 };
 
-const CheckboxComponent = ({ fieldData: field }) => {
-  return (
-    <FormGroup>
-      <FormLabel id="">{field.name}</FormLabel>
-      {Object.entries(field.nextFieldsId).map(([key, value]) => (
-        <FormControlLabel
-          control={
-            <Checkbox
-              required={field.isRequired}
-              inputProps={{ "aria-label":{key} }}
-            />
-          }
-          label={key}
-        />
-      ))}
-    </FormGroup>
-  );
-};
+const CheckboxComponent = ({ fieldData, recordResponse }) => {
+  const options = Object.entries(fieldData.nextFieldsId);
+  const optionCount = options.length;
+  const optionNames = options.map(([name]) => name);
 
-const TextboxComponent = ({fieldData:field}) => {
-  //console.log(field)
-  return (
-    <FormControl variant="standard">
-      <InputLabel shrink htmlFor="bootstrap-input">
-        {field.name}
-      </InputLabel>
-      <TextField id="bootstrap-input" required={field.isRequired} />
-    </FormControl>
-  );
-};
+  const handleChange = (optionIndex, checked) => {
+    const selectedOptions = Array(optionCount).fill(false);
+    selectedOptions[optionIndex] = checked;
+    const response = {
+      type: "checkbox",
+      name: JSON.stringify(optionNames),
+      ans: JSON.stringify(selectedOptions),
+    };
+    recordResponse(JSON.stringify(response), fieldData.id);
+  };
 
-const RadioButtonComponent = ({ fieldData: field }) => {
-  //console.log(field);
   return (
-    <FormControl>
-      <FormLabel id="">{field.name}</FormLabel>
-      <RadioGroup
-        aria-labelledby="demo-radio-buttons-group-label"
-        name="radio-buttons-group"
-      >
-        {Object.entries(field.nextFieldsId).map(([key, value]) => (
+    <>
+      <FormGroup>
+        <FormLabel id="">{fieldData.name}</FormLabel>
+        {options.map(([name], index) => (
           <FormControlLabel
-            value={key}
-            control={<Radio required={field.isRequired} />}
-            label={key}
+            key={name}
+            control={
+              <Checkbox
+                required={fieldData.isRequired}
+                inputProps={{ "aria-label": name }}
+                onChange={(e) => handleChange(index, e.target.checked)}
+              />
+            }
+            label={name}
           />
         ))}
-      </RadioGroup>
-    </FormControl>
+      </FormGroup>
+      <Stack>
+        <Typography variant="caption" display="block" gutterBottom>
+          {fieldData.helpText}
+        </Typography>
+      </Stack>
+    </>
   );
 };
-const RadioStandaloneComponent = (
- {  fieldData ,
-  handleChange, selectedValue}
-) => {
 
-  console.log(fieldData);
+
+const TextboxComponent = ({ fieldData, recordResponse}) => {
+  const [inputError, setInputError] = useState("");
+  const handleInputChange = (event) => {
+    if (fieldData.regexId) {
+      const value = event.target.value;
+      const regex = new RegExp(fieldData.regexId.pattern);
+      const isValid = regex.test(value);
+      if (!isValid && value !== "") {
+        setInputError(
+          `Please enter a correct ${fieldData.regexId.name} format`
+        );
+      } else {
+        setInputError("");
+      }
+    }
+  };
+  return (
+    <>
+      <InputLabel shrink htmlFor="bootstrap-input">
+        {fieldData.name}
+      </InputLabel>
+      <TextField
+        id="bootstrap-input"
+        variant="standard"
+        required={fieldData.isRequired}
+        helperText={inputError}
+        error={!!inputError}
+        onBlur={(e) => {
+          handleInputChange(e);
+          recordResponse(
+            e.target.value,
+            fieldData.id
+          );
+        }}
+      />
+      <Stack>
+        <Typography variant="caption" display="block" gutterBottom>
+          {fieldData.helpText}
+        </Typography>
+      </Stack>
+    </>
+  );
+};
+
+const RadioButtonComponent = ({ fieldData, recordResponse}) => {
+  //console.log(fieldData);
+  return (
+    <>
+      <FormControl>
+        <FormLabel id="">{fieldData.name}</FormLabel>
+        <RadioGroup
+          aria-labelledby="demo-radio-buttons-group-label"
+          name="radio-buttons-group"
+        >
+          {fieldData.nextFieldsId &&
+            Object.entries(fieldData.nextFieldsId).map(([key, value]) => (
+              <FormControlLabel
+                value={key}
+                control={<Radio required={fieldData.isRequired} />}
+                label={key}
+                onChange={(e) =>
+                  recordResponse(
+                    e.target.checked
+                      ? `{"type":"radio","name":"${key}","ans":"true"}`
+                      : `{ "type":"radio","name":"${key}","ans":"false"}`,
+                    fieldData.id
+                  )
+                }
+              />
+            ))}
+        </RadioGroup>
+      </FormControl>
+      <Stack>
+        <Typography variant="caption" display="block" gutterBottom>
+          {fieldData.helpText}
+        </Typography>
+      </Stack>
+    </>
+  );
+};
+const RadioStandaloneComponent = ({
+  fieldData,
+  handleChange,
+  selectedValue,
+  recordResponse,
+}) => {
+  //console.log(fieldData);
   return (
     <>
       <Stack direction="row" alignItems="center">
         <Radio
           checked={selectedValue === fieldData.name}
-          onChange={ (e)=>handleChange(e)}
+          onChange={(e) => handleChange(e)}
           value={fieldData.name}
           name="radionButtons"
           inputProps={{ "aria-label": fieldData.name }}
           required={fieldData.isRequired}
         />
         {fieldData.name}
+      </Stack>
+      <Stack>
+        <Typography variant="caption" display="block" gutterBottom>
+          {fieldData.helptext}
+        </Typography>
       </Stack>
     </>
   );

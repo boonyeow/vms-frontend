@@ -241,12 +241,14 @@ const handleClose = (event, reason) => {
     );
    processedForm.fields.map((field) => {
      delete field.id;
-     for (const [key, value] of Object.entries(field.options)) {
-        if (value.options) {
+     if (field.options) {
+       for (const [key, value] of Object.entries(field.options)) {
+          if (value.options) {
 
-          delete field.options[key].id;
-        }
-    }
+            delete field.options[key].id;
+          }
+      }
+     }
     return field;
    });
    // console.log(`Bearer ${token}`);
@@ -336,7 +338,7 @@ const handleClose = (event, reason) => {
     });
 
     const newAuthorizedAccounts = newAuthorizedUserList.map(
-      (user) => user.email
+      (user) => user.id
     );
 
     setAuthorizedUserList(newAuthorizedUserList);
@@ -537,7 +539,7 @@ const [formTitle,setFormTitle]=useState('')
     if (formData.isFinal) {
       return (
         <Alert severity="info" sx={{ width: "100%" }}>
-          Form is final. Updating it will create a new revision.
+          Form is final. No edits will be saved upon submission. Please duplicate the form if further upates are necessary.
         </Alert>
       );
     }
