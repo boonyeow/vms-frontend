@@ -42,21 +42,11 @@ export default function NextFields({
   ) {
     return (
       <>
-        {Object.entries(
-          field.options
-        ).map(([key, value], j) => (
+        {Object.entries(field.options).map(([key, value], j) => (
           <Stack direction="row" sx={{ paddingY: 1 }} key={key}>
             <input
-              type={
-                field.fieldType === "radio"
-                  ? "radio"
-                  : field.fieldType
-              }
-              name={
-                field.fieldType === "radio"
-                  ? "nextFieldRadioGroup"
-                  : key
-              }
+              type={field.fieldType === "radio" ? "radio" : field.fieldType}
+              name={field.fieldType === "radio" ? "nextFieldRadioGroup" : key}
             />
             <input
               className="option-text"
@@ -84,19 +74,17 @@ export default function NextFields({
         {field.fieldType !== "text" && (
           <>
             <Button
-              variant="text"
               color="secondary"
               onClick={async () => {
                 addOptionValue();
                 await addNextFieldOptions(index);
               }}
-                sx={{ paddingX: 0 }}
+              sx={{ paddingX: 0, maxWidth: "100px" }}
             >
               Add Option
             </Button>
           </>
         )}
-
       </>
     );
   } else {

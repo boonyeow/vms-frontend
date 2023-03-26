@@ -115,8 +115,8 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
 
   return (
     <div>
-      <FormControl sx={{ minWidth: 120 }} size="small">
-        <InputLabel id="demo-multiple-name-label">Regex</InputLabel>
+      <FormControl sx={{ minWidth: 150 }} size="small">
+        <InputLabel id="demo-multiple-name-label">Regex (optional)</InputLabel>
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"

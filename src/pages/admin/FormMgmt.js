@@ -86,10 +86,37 @@ const rows = [
   const { token } = useAuthStore();
   const navigate = useNavigate();
   const [formList, setFormList] = useState([]);
- 
+    const [formListOriginal, setFormListOriginal] = useState([]);
+    const fetchFormsList = async () => {
+      axios
+        .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          //setFormListOriginal(res.data);
+          // const data = res.data.map((obj) => {
+          //   return Object.entries(obj).reduce((acc, [key, value]) => {
+          //     if (typeof value === "object" && !Array.isArray(value)) {
+          //       // If the value is an object, spread its properties into the accumulator
+          //       acc = { ...acc, ...value };
+          //     } else {
+          //       // Otherwise, add the property to the accumulator as is
+          //       acc[key] = value;
+          //     }
+          //     return acc;
+          //   }, {});
+          // });
+          setFormList(res.data);
+          console.log(res.data);
+        })
+        .catch((e) => console.error(e));
+    };
+
 
  useEffect(() => {
-   //fetchFormsList();
+   fetchFormsList();
  }, []);
 
 
@@ -100,22 +127,6 @@ const rows = [
 
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
-          {/* <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleCreateForm}
-            // component={Link}
-            // to="/FormCreation"
-          >
-            Create New
-          </Button>
-          <Button variant="contained" color="secondary" size="small">
-            Load Draft
-          </Button>
-          <Button variant="contained" color="warning" size="small">
-            Send Form
-          </Button> */}
         </Stack>
         <div
           style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}

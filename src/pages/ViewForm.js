@@ -27,8 +27,12 @@ const ViewForm = (props) => {
   const formRef = useRef();
   const { token } = useAuthStore();
   const { id } = useParams();
+  const { revisionNo } = useParams();
   const [form, setForm] = useState({});
-
+  const { role } = useAuthStore();
+  const { accountId } = useAuthStore();
+  console.log(role)
+  console.log(accountId)
   const [fieldResponses, setFieldResponses] = useState({});
     const [selectedValue, setSelectedValue] = useState("");
   const [regexList, setRegexList] = useState([
@@ -75,11 +79,37 @@ const ViewForm = (props) => {
     }));
     console.log(fieldResponses)
   }
- const handleSubmit = (event) => {
-   event.preventDefault();
-    console.log(fieldResponses);
+  const handleSubmit = async (event) => {
+    const formData = {
+      workflow_id: 6,
+      fck: {
+        id: id,
+        revisionNo:revisionNo
+      },
+      submittedBy: accountId,
+      fieldResponses: fieldResponses
+   }
+    event.preventDefault();
+    console.log(formData);
    if (formRef.current.reportValidity()) {
      console.log("Form submitted with values: ", form);
+     await axios
+      .put(
+        process.env.REACT_APP_ENDPOINT_URL +
+          '/api/formsubmission',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(async (res) => {
+
+      })
+      .catch((e) => {
+        console.log(e);
+      });
    } else {
      console.log("Form not valid");
      return;
@@ -97,6 +127,7 @@ const ViewForm = (props) => {
       })
       .then((res) => {
        // setForm(res.data);
+        console.log(res.data)
         data = res.data
         data.fields.forEach((field, index) => {
           if (field.regexId) {

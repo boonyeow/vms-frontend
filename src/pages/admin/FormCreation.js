@@ -264,24 +264,6 @@ const handleClose = (event, reason) => {
         }
       )
       .then(async (res) => {
-        //   await axios
-        // .put(
-        //   process.env.REACT_APP_ENDPOINT_URL +
-        //     `/api/forms/${id}/${revisionNo}/authorizedAccount`,
-        //    {processedForm.authorizedAccountIds} ,
-        //   {
-        //     headers: {
-        //       Authorization: `Bearer ${token}`,
-        //     },
-        //   }
-        // )
-        // .then((res) => {
-        //    //setOpen(true);
-        //  // navigate("/FormTemplates");
-        // })
-        // .catch((e) => {
-        //   console.log(e);
-        // });
         setOpen(true);
          navigate("/FormTemplates");
       })
@@ -535,8 +517,8 @@ const [formTitle,setFormTitle]=useState('')
   const isFinalAlertComponent = () => {
     if (isDisabled) {
       return (
-        <Alert severity="info" sx={{ width: "100%" }}>
-          Form is final. No edits will be saved upon submission. Please duplicate the form if further upates are necessary.
+        <Alert severity="warning" sx={{ width: "100%" }}>
+          Form is final and submission is disabled. Please duplicate this form if further upates are necessary.
         </Alert>
       );
     }
@@ -633,7 +615,7 @@ const [formTitle,setFormTitle]=useState('')
                   <Grid
                     container
                     justifyContent="flex-start"
-                    alignItems="center"
+                    alignItems="flex-start"
                     key={index}
                   >
                     <Grid item xs={5}>
@@ -688,6 +670,7 @@ const [formTitle,setFormTitle]=useState('')
                               sx={{
                                 marginTop: 2,
                                 paddingX: 3,
+                                marginLeft:5,
                                 maxWidth: "70%",
                               }}
                               placeholder="User Input"
@@ -768,9 +751,10 @@ const [formTitle,setFormTitle]=useState('')
                           <Stack spacing={2}>
                             <TextField
                               id="outlined-basic"
-                              label="Name"
+                              label="Label"
                               value={field.options[field.name].name}
-                              variant="standard"
+                                variant="standard"
+                                sx={{maxWidth:"250px"}}
                               onChange={(e) => {
                                 const newFields = [...formData.fields];
                                 newFields[index].options[
@@ -812,7 +796,7 @@ const [formTitle,setFormTitle]=useState('')
                           </Stack>
                           <Grid
                             item
-                            style={{ display: "flex", alignItems: "center" }}
+                            style={{ display: "flex", alignItems: "center", marginTop:10 }}
                           >
                             <RequiredCheckBox
                               fields={field.options[field.name]}

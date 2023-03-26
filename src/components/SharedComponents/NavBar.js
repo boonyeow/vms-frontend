@@ -14,30 +14,43 @@ import AdbIcon from "@mui/icons-material/Adb";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Link } from "react-router-dom";
-
-const pages = ["Products", "Pricing", "Blog"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
-const isAdmin = true;//get user permission from database
-const vendor = ["Forms", "Workflows"];
-const admin = [
-  {
-    name: "User",
-    list: null,
-    path: "/UserMgmt",
-  },
-  {
-    name: "Forms",
-    list: [ "Manage Forms", "Form Templates"],
-    path: [ "/FormMgmt","/FormTemplates"],
-  },
-  {
-    name: "Workflows",
-    list: ["Create Workflow", "Manage Workflow"],
-    path: ["/WorkflowCreation", "/WorkflowMgmt"],
-  },
-];
+import { useAuthStore } from "../../store";
 
 function NavBar() {
+  const pages = ["Products", "Pricing", "Blog"];
+  const settings = ["Profile", "Account", "Dashboard", "Logout"];
+  const vendor = [
+    {
+      name: "Forms",
+      list: null,
+      path: "/FormList",
+    },
+    {
+      name: "Workflows",
+      list: null,
+      path: "/Workflows",
+    },
+  ];
+  const { role } = useAuthStore();
+  const { accountId } = useAuthStore();
+  const isAdmin = role === "ADMIN" ? true : false;//get user permission from database
+  const admin = [
+    {
+      name: "User",
+      list: null,
+      path: "/UserMgmt",
+    },
+    {
+      name: "Forms",
+      list: [ "Manage Forms", "Form Templates"],
+      path: [ "/FormMgmt","/FormTemplates"],
+    },
+    {
+      name: "Workflows",
+      list: ["Create Workflow", "Manage Workflow"],
+      path: ["/WorkflowCreation", "/WorkflowMgmt"],
+    },
+  ];
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -105,7 +118,7 @@ function NavBar() {
             >
               <MenuIcon />
             </IconButton>
-            <Menu
+            {/* <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{
@@ -128,7 +141,7 @@ function NavBar() {
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
-            </Menu>
+            </Menu> */}
           </Box>
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
           <Typography
@@ -149,10 +162,10 @@ function NavBar() {
             Quantum VMS
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-           {/* if is admin then use admin list else use vendor list */}
+            {/* if is admin then use admin list else use vendor list */}
             {isAdmin
               ? admin.map((page) =>
-                // if there is a list then will make dropdown tab
+                  // if there is a list then will make dropdown tab
                   page.list ? (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <PopupState variant="popover" popupId="demo-popup-menu">
@@ -186,25 +199,26 @@ function NavBar() {
                   ) : (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <Button>
-                          <Link to={page.path}>
-                            <Typography
-                              textAlign="center"
-                              sx={{ color: "white" }}
-                            >
-                              {page.name}
-                            </Typography>
-                          </Link>
-
+                        <Link to={page.path}>
+                          <Typography
+                            textAlign="center"
+                            sx={{ color: "white" }}
+                          >
+                            {page.name}
+                          </Typography>
+                        </Link>
                       </Button>
                     </Box>
                   )
                 )
-              : vendor.map((name) => (
-                  <Box sx={{ flexGrow: 0 }} key={name}>
+              : vendor.map((page) => (
+                  <Box sx={{ flexGrow: 0 }} key={page.name}>
                     <Button>
-                      <Typography textAlign="center" sx={{ color: "white" }}>
-                        {name}
-                      </Typography>
+                      <Link to={page.path}>
+                        <Typography textAlign="center" sx={{ color: "white" }}>
+                          {page.name}
+                        </Typography>
+                      </Link>
                     </Button>
                   </Box>
                 ))}

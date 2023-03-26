@@ -21,7 +21,7 @@ function AppRoutes() {
       <Route path="UserMgmt" element={<UserMgmt />} />
       <Route path="FormTemplates" element={<FormTemplates />} />
       {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
-      <Route path="form/:id" element={<ViewForm />} />
+      <Route path="form/:id/:revisionNo" element={<ViewForm />} />
     </Routes>
   );
 }
