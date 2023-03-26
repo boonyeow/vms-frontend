@@ -5,7 +5,6 @@ export const useAuthStore = create(
   persist(
     (set) => ({
       accountId: null,
-
       token: null,
       email: null,
       role: null,

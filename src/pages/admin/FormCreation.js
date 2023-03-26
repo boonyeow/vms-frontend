@@ -243,10 +243,7 @@ const handleClose = (event, reason) => {
      delete field.id;
      if (field.options) {
        for (const [key, value] of Object.entries(field.options)) {
-          if (value.options) {
-
             delete field.options[key].id;
-          }
       }
      }
     return field;
@@ -536,7 +533,7 @@ const [formTitle,setFormTitle]=useState('')
   }
 
   const isFinalAlertComponent = () => {
-    if (formData.isFinal) {
+    if (isDisabled) {
       return (
         <Alert severity="info" sx={{ width: "100%" }}>
           Form is final. No edits will be saved upon submission. Please duplicate the form if further upates are necessary.
@@ -907,6 +904,7 @@ const [formTitle,setFormTitle]=useState('')
               size="small"
               variant="contained"
               color="primary"
+              disabled={isDisabled}
               onClick={(e) => handleSubmitForm()}
             >
               Submit
