@@ -63,7 +63,7 @@ const FormCreation = () => {
   const revisionNo = url.pathname.split("/")[3];
   const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
-
+ const [isDisabled, setIsDisabled] = useState(false);
  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(null);
   useEffect(() => {
@@ -105,9 +105,10 @@ const handleClose = (event, reason) => {
         }
       )
       .then(async (res) => {
-        //console.log(res.data)
+        console.log(res.data)
         data = { ...data, ...res.data };
-
+       // setFormTitle("Create Form");
+        setIsDisabled(data.isFinal);
         let user = userList.filter((user) => data.authorizedAccounts.includes(user.id));
         setAuthorizedUserList(user)
 
@@ -123,8 +124,8 @@ const handleClose = (event, reason) => {
             }
           )
           .then(async (res) => {
-           //  console.log(res.data)
             data.fields = res.data;
+           // setFormTitle("Edit Form")
             const promises = [];
             res.data.forEach((field, index) => {
               if (field.nextFieldsId) {
@@ -142,7 +143,7 @@ const handleClose = (event, reason) => {
                       )
                       .then((res) => {
                         data.fields[index].nextFieldsId[key] = res.data;
-                        console.log(value)
+                        //console.log(value)
                         fieldtoDelete.push(value)
 
                       })
@@ -200,7 +201,7 @@ const handleClose = (event, reason) => {
     //   }
     // }
     //console.log(converedObj)
-    console.log(converedObj);
+   // console.log(converedObj);
     return converedObj;
   }
   const applyChanges = (isFinal, workflowsLength) => {
@@ -219,7 +220,7 @@ const handleClose = (event, reason) => {
       if (field.options) {
         Object.values(field.options).forEach((nestedField) => {
           if (nestedField.fieldType) {
-            console.log( nestedField.fieldType)
+            //console.log( nestedField.fieldType)
             nestedField.fieldType = fieldTypeMatching[nestedField.fieldType];
           }
         });
@@ -249,20 +250,41 @@ const handleClose = (event, reason) => {
     return field;
    });
    // console.log(`Bearer ${token}`);
+
+           console.log(processedForm.authorizedAccountIds)
     await axios
       .put(
         process.env.REACT_APP_ENDPOINT_URL +
           `/api/forms/${id}/${revisionNo}?applyChanges=${shouldApplyChanges}`,
-         processedForm ,
+        processedForm,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       )
-      .then((res) => {
-         setOpen(true);
-        navigate("/FormTemplates");
+      .then(async (res) => {
+        //   await axios
+        // .put(
+        //   process.env.REACT_APP_ENDPOINT_URL +
+        //     `/api/forms/${id}/${revisionNo}/authorizedAccount`,
+        //    {processedForm.authorizedAccountIds} ,
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${token}`,
+        //     },
+        //   }
+        // )
+        // .then((res) => {
+        //    //setOpen(true);
+        //  // navigate("/FormTemplates");
+        // })
+        // .catch((e) => {
+        //   console.log(e);
+        // });
+        setOpen(true);
+         navigate("/FormTemplates");
       })
       .catch((e) => {
         console.log(e);
@@ -314,7 +336,7 @@ const handleClose = (event, reason) => {
     });
 
     const newAuthorizedAccounts = newAuthorizedUserList.map(
-      (user) => user.id
+      (user) => user.email
     );
 
     setAuthorizedUserList(newAuthorizedUserList);
@@ -344,9 +366,9 @@ const handleClose = (event, reason) => {
   // }
 
   const changeData = (data, type) => {
-   // console.log(formData);
-   // console.log(userList)
-   // console.log(authorizedUserList);
+    // if (type == 'isFinal') {
+    //  setIsDisabled(data);
+    // }
     setFormData((prevData) => ({
       ...prevData,
       [type]: data,
@@ -486,7 +508,7 @@ const handleClose = (event, reason) => {
     return errors;
   };
   const [errors, setErrors] = useState({});
-
+const [formTitle,setFormTitle]=useState('')
   const deleteNextFieldOptions = (index, key, isText) => {
     const newFields = [...formData.fields];
     if (!isText) {
@@ -510,17 +532,27 @@ const handleClose = (event, reason) => {
   if (!formData || !authorizedUserList) {
     return <div>Loading...</div>;
   }
+
+  const isFinalAlertComponent = () => {
+    if (formData.isFinal) {
+      return (
+        <Alert severity="info" sx={{ width: "100%" }}>
+          Form is final. Updating it will create a new revision.
+        </Alert>
+      );
+    }
+  }
   return (
     <>
       <NavBar />
-
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
           Form submitted successfully!
         </Alert>
       </Snackbar>
-      <h1 style={{ textAlign: "center" }}>Form Creation</h1>
-      <Card sx={{ maxWidth: 1100, margin: "auto" }}>
+      <h1 style={{ textAlign: "center" }}>{formTitle}</h1>
+      <Card sx={{ maxWidth: 1000, margin: "auto" }}>
+        {isFinalAlertComponent()}
         <CardContent>
           <Stack spacing={2} direction="row">
             <TextField
@@ -841,16 +873,25 @@ const handleClose = (event, reason) => {
               gap: 10,
             }}
           >
-            <ToggleButtonGroup
-              color="primary"
-              exclusive
-              value={formData.isFinal}
-              onChange={(e) => changeData(e.target.value === "true", "isFinal")}
-              aria-label="Platform"
+            <Tooltip
+              title="Once form is final, updating will create new revision."
+              placement="top-start"
             >
-              <ToggleButton value={true}>Final</ToggleButton>
-              <ToggleButton value={false}>Not Final</ToggleButton>
-            </ToggleButtonGroup>
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={formData.isFinal}
+                onChange={(e) =>
+                  changeData(e.target.value === "true", "isFinal")
+                }
+                aria-label="Platform"
+              >
+                <ToggleButton value={true}>Final</ToggleButton>
+                <ToggleButton value={false} disabled={isDisabled}>
+                  Not Final
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Tooltip>
             <Button
               size="small"
               variant="contained"

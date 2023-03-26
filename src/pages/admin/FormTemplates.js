@@ -13,9 +13,9 @@ import Menu from "@mui/material/Menu";
 
 const FormTemplates = () => {
   const { token } = useAuthStore();
-    const [regexList, setRegexList] = useState([]);
+  const [regexList, setRegexList] = useState([]);
   const navigate = useNavigate();
-function AuthorizedAccountsCell({ value }) {
+  function AuthorizedAccountsCell({ value }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -193,37 +193,37 @@ const columns = [
       })
       .catch((e) => console.error(e));
   };
-   const [form, setForm] = useState([]);
-  const fetchForms = async () => {
-    axios
-      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms/6/1/fields", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setForm(res.data);
-        // const data = res.data.map((obj) => {
-        //   return Object.entries(obj).reduce((acc, [key, value]) => {
-        //     if (typeof value === "object" && !Array.isArray(value)) {
-        //       // If the value is an object, spread its properties into the accumulator
-        //       acc = { ...acc, ...value };
-        //     } else {
-        //       // Otherwise, add the property to the accumulator as is
-        //       acc[key] = value;
-        //     }
-        //     return acc;
-        //   }, {});
-        // });
-       // setFormList(data);
-        console.log(res);
-      })
-      .catch((e) => console.error(e));
-  };
+  //  const [form, setForm] = useState([]);
+  // const fetchForms = async () => {
+  //   axios
+  //     .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms/6/1/fields", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((res) => {
+  //       setForm(res.data);
+  //       // const data = res.data.map((obj) => {
+  //       //   return Object.entries(obj).reduce((acc, [key, value]) => {
+  //       //     if (typeof value === "object" && !Array.isArray(value)) {
+  //       //       // If the value is an object, spread its properties into the accumulator
+  //       //       acc = { ...acc, ...value };
+  //       //     } else {
+  //       //       // Otherwise, add the property to the accumulator as is
+  //       //       acc[key] = value;
+  //       //     }
+  //       //     return acc;
+  //       //   }, {});
+  //       // });
+  //      // setFormList(data);
+  //       console.log(res);
+  //     })
+  //     .catch((e) => console.error(e));
+  // };
 
   useEffect(() => {
     fetchFormsList();
-    fetchForms();
+    //fetchForms();
     fetchRegexList();
   }, []);
 
@@ -235,7 +235,7 @@ const columns = [
          },
        })
        .then((res) => {
-         console.log(res.data);
+       //  console.log(res.data);
          setRegexList(res.data);
        })
        .catch((e) => console.error(e));

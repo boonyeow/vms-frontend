@@ -1,5 +1,5 @@
 import NavBar from "../../components/SharedComponents/NavBar";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -86,40 +86,13 @@ const rows = [
   const { token } = useAuthStore();
   const navigate = useNavigate();
   const [formList, setFormList] = useState([]);
-  const fetchFormsList = async () => {
-   axios
-     .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms", {
-       headers: {
-         Authorization: `Bearer ${token}`,
-       },
-     })
-     .then((res) => {
-       setFormList(res.data);
-       console.log(res.data)
-     })
-     .catch((e) => console.error(e));
- };
+ 
 
  useEffect(() => {
-   fetchFormsList();
+   //fetchFormsList();
  }, []);
 
-  const handleCreateForm = async () => {
-    await axios
-      .post(process.env.REACT_APP_ENDPOINT_URL + "/api/forms", {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        // Create form  successful
-        console.log("success", res.data);
-        navigate("/FormCreation/" + res.data.id + "/" + res.data.revisionNo);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
+
   return (
     <>
       <NavBar />
@@ -127,7 +100,7 @@ const rows = [
 
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             size="small"
@@ -142,7 +115,7 @@ const rows = [
           </Button>
           <Button variant="contained" color="warning" size="small">
             Send Form
-          </Button>
+          </Button> */}
         </Stack>
         <div
           style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
@@ -153,6 +126,9 @@ const rows = [
             pageSize={5}
             rowsPerPageOptions={[5]}
             checkboxSelection
+            slots={{
+              toolbar: GridToolbar,
+            }}
           />
         </div>
       </Stack>
