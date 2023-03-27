@@ -91,25 +91,156 @@ const WorkflowEditing = () => {
   const [forms, setForms] = useState([]);
 
   const handleSaveDraft = () => {
-    handleSubmitWorkflow(true);
+    // ditto - basically the same as submit but without the publishing step.
+    // in addition, does not redirect away.
+    
+    let error = 0;
+
+    const workflowErrors = validateWorkflow(workflowData);
+    setErrors(workflowErrors);
+    if (Object.keys(workflowErrors).length === 0) {
+          // step 1: removing forms from the workflow
+          axios
+          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((res) => {
+              res.data.forms.map((form)=>{
+                
+                axios
+                  .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/removeForm", {
+                  
+                    id: form.id.id,
+                    revisionNo: form.id.revisionNo,
+                  
+                  }, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  })
+                  .then((response) => {
+                  })
+                  .catch((e) => {
+                    ++error;
+                    // console.error(e)
+                  });
+                
+              })
+            })
+            .catch((e) => console.error(e));
+          // step 2: throwing forms into the workflow
+          forms.map((form, k) => {
+            // console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
+            axios
+              .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/addForm", {
+              
+                id: formList[form.pos].id.id,
+                revisionNo: formList[form.pos].id.revisionNo,
+              
+              }, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              })
+              .then((response) => {
+              })
+              .catch((e) => {
+                ++error;
+                // console.error(e)
+              });
+          })
+      
+          // step: update our workflow info
+          axios
+            .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
+          
+              name: workflowData.name,
+              isFinal: false, // line does not work- publishing workflow is a new thing.
+          
+            }, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
+              console.log("Putting...");
+              console.log(state.id);
+              if (error==0) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Redirecting...",
+                  showConfirmButton: false,
+                  confirmButtonColor: "#262626",
+                  timer: 1500,
+                }) //.then(() => navigate("/WorkflowMgmt"));
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Oops...",
+                  text: "Something went wrong! The operation may not have been completed.",
+                  showCloseButton: false,
+                  showConfirmButton: false,
+                  timer: 1500,
+                }).then(() => navigate("/WorkflowMgmt"));
+              }
+            })
+            .catch((e) => {
+              ++error;
+              //console.error(e);
+            });
+          
+          }
+
   }
 
-  const handleSubmitWorkflow = (draft = false) => {
+  const handleSubmitWorkflow = () => {
 
     let error = 0;
 
-    const newWorkflowData = {
-      ...workflowData,
-      // fields: forms
-      isFinal: !draft, // set isFinal to false if necessary
-    };
-      const workflowErrors = validateWorkflow(newWorkflowData);
+      const workflowErrors = validateWorkflow(workflowData);
       setErrors(workflowErrors);
       if (Object.keys(workflowErrors).length === 0) {
 
+            // step 1: removing forms from the workflow
+
+            axios
+            .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              })
+              .then((res) => {
+                res.data.forms.map((form)=>{
+
+                  
+                  axios
+                    .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/removeForm", {
+                    
+                      id: form.id.id,
+                      revisionNo: form.id.revisionNo,
+                    
+                    }, {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    })
+                    .then((response) => {
+                    })
+                    .catch((e) => {
+                      ++error;
+                      // console.error(e)
+                    });
+                  
+                })
+              })
+              .catch((e) => console.error(e));
+
             // step 2: throwing forms into the workflow
             forms.map((form, k) => {
-              console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
+              // console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
               axios
                 .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/addForm", {
                 
@@ -134,7 +265,7 @@ const WorkflowEditing = () => {
               .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id, {
             
                 name: workflowData.name,
-                isFinal: newWorkflowData.isFinal,
+                isFinal: true, // line does not work- publishing workflow is a new thing.
             
               }, {
                 headers: {
@@ -142,27 +273,34 @@ const WorkflowEditing = () => {
                 },
               })
               .then((response) => {
-                console.log("Putting...");
-                console.log(state.id);
-                if (error==0) {
-                  Swal.fire({
-                    icon: "success",
-                    title: "Success!",
-                    text: "Redirecting...",
-                    showConfirmButton: false,
-                    confirmButtonColor: "#262626",
-                    timer: 1500,
-                  }).then(() => navigate("/WorkflowMgmt"));
-                } else {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Something went wrong! The operation may not have been completed.",
-                    showCloseButton: false,
-                    showConfirmButton: false,
-                    timer: 1500,
-                  }).then(() => navigate("/WorkflowMgmt"));
-                }
+                axios
+                  .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + state.id + "/publishWorkflow", null, {
+                      headers: {
+                          Authorization: `Bearer ${token}`,
+                      },
+                  })
+                  .then((response) => {
+                    if (error==0) {
+                      Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: "Redirecting...",
+                        showConfirmButton: false,
+                        confirmButtonColor: "#262626",
+                        timer: 1500,
+                      }).then(() => navigate("/WorkflowMgmt"));
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Something went wrong! The operation may not have been completed.",
+                        showCloseButton: false,
+                        showConfirmButton: false,
+                        timer: 1500,
+                      }).then(() => navigate("/WorkflowMgmt"));
+                    }
+                  })
+                  .catch((e) => {error++;});
               })
               .catch((e) => {
                 ++error;
