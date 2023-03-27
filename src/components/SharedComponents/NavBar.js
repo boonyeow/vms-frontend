@@ -94,7 +94,7 @@ function NavBar() {
 
 
   return (
-    <div style={{ marginBottom: 30 }}>
+    <div style={{ marginBottom: "6em" }}>
       <AppBar
         position="static"
         style={{ top: 0, left: 0, position: "absolute" }}
