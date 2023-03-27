@@ -9,23 +9,52 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
 const columns = [
-  { field: "id", headerName: "ID", width: 160 },
-  { field: "title", headerName: "Title", width: 180 },
-  { field: "vendor", headerName: "Vendor", width: 180 },
+  { field: "id", headerName: "ID", width: 1 },
+  {
+    field: "name",
+    headerName: "Form Name",
+    width: 160,
+    valueGetter: (params) => params.row.form.name,
+  },
+  {
+    field: "formid",
+    headerName: "Form ID",
+    width: 120,
+    valueGetter: (params) => params.row.form.id.id,
+  },
+  {
+    field: "revisionNumber",
+    headerName: "Form Revision#",
+    width: 160,
+    valueGetter: (params) => params.row.form.id.revisionNo,
+  },
+  {
+    field: "email",
+    headerName: "Submitted By",
+    width: 160,
+    valueGetter: (params) => params.row.submittedBy.email,
+  },
+  {
+    field: "company",
+    headerName: "Company",
+    width: 160,
+    valueGetter: (params) => params.row.submittedBy.company,
+  },
   {
     field: "status",
     headerName: "Status",
-    width: 180,
+    width: 160,
     renderCell: (params) => {
       let color = "";
       switch (params.value) {
-        case "waiting":
+        case "AWAITING_APPROVER":
+        case "AWAITING_ADMIN":
           color = "orange";
           break;
-        case "approved":
+        case "APPROVED":
           color = "green";
           break;
-        case "rejected":
+        case "REJECTED":
           color = "red";
           break;
         default:
@@ -37,7 +66,7 @@ const columns = [
   {
     field: "action",
     headerName: "Action",
-    width: 180,
+    width: 150,
     sortable: false,
     disableClickEventBubbling: true,
     renderCell: (params) => {
@@ -56,14 +85,6 @@ const columns = [
           >
             View
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={onClick}
-          >
-            Delete
-          </Button>
         </Stack>
       );
     },
@@ -71,15 +92,53 @@ const columns = [
 ];
 
 const rows = [
-  { id: 1, title: "Snow", vendor: "Jon", status: "waiting" },
-  { id: 2, title: "Lannister", vendor: "Cersei", status: "approved" },
-  { id: 3, title: "Lannister", vendor: "Jaime", status: "waiting" },
-  { id: 4, title: "Stark", vendor: "Arya", status: "waiting" },
-  { id: 5, title: "Targaryen", vendor: "Daenerys", status: "approved" },
-  { id: 6, title: "Melisandre", vendor: "Daenerys", status: "approved" },
-  { id: 7, title: "Clifford", vendor: "Ferrara", status: "approved" },
-  { id: 8, title: "Frances", vendor: "Rossini", status: "rejected" },
-  { id: 9, title: "Roxie", vendor: "Harvey", status: "rejected" },
+  {
+    id: 2,
+    workflow: {
+      id: 5,
+      name: "Untitled Workflow",
+      progress: 0,
+      approvalSequence: [2],
+      final: true,
+    },
+    form: {
+      id: {
+        id: 2,
+        revisionNo: 1,
+      },
+      name: "Form Test 1",
+      description: "Form Description 1",
+      isFinal: true,
+      field: [
+        {
+          field_id: 5,
+          field_name: "Question",
+          help_text: "",
+          next_field_id: {},
+        },
+        {
+          field_id: 6,
+          field_name: "How are you doing",
+          help_text: "",
+          next_field_id: {
+            "How are you doing": 5,
+          },
+        },
+      ],
+    },
+    status: "AWAITING_ADMIN",
+    submittedBy: {
+      id: 1,
+      name: "admin",
+      email: "admin@kmail.com",
+      company: null,
+      accountType: "ADMIN",
+    },
+    fieldResponses: {
+      5: "My Name",
+      6: "Another Answer",
+    },
+  }
 ];
 
   const FormMgmt = () => {
