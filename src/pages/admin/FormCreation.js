@@ -3,6 +3,7 @@ import NextFields from "../../components/FormInputs/NextFields";
 import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
 import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
+import { Link } from "react-router-dom";
 import {
   Button,
   Card,
@@ -878,11 +879,23 @@ const [formTitle,setFormTitle]=useState('')
             <Button
               size="small"
               variant="contained"
-              style={{ backgroundColor: "grey" }}
+              style={{ backgroundColor: "red" }}
               onClick={handleCancelForm}
+            >
+              Delete
+            </Button>
+
+            <Button
+              size="small"
+              variant="contained"
+              style={{ backgroundColor: "grey" }}
+                onClick={()=>{navigate(
+                  "../../../FormTemplates"
+                );}}
             >
               Cancel
             </Button>
+
 
             <Button
               size="small"

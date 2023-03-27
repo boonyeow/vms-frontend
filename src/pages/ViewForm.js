@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../store";
 import { Box } from "@mui/system";
+import { useNavigate } from "react-router-dom";
 import {
   Checkbox,
   FormControl,
@@ -24,10 +25,6 @@ import {
 } from "@mui/material";
 
 
-
-
-
-
 const ViewForm = (props) => {
   const formRef = useRef();
   const { token } = useAuthStore();
@@ -35,9 +32,8 @@ const ViewForm = (props) => {
   const { revisionNo } = useParams();
   const [form, setForm] = useState({});
   const { role } = useAuthStore();
+    const navigate = useNavigate();
   const { accountId } = useAuthStore();
-  console.log(role)
-  console.log(accountId)
   const [fieldResponses, setFieldResponses] = useState({});
     const [selectedValue, setSelectedValue] = useState("");
   const [regexList, setRegexList] = useState([
@@ -79,26 +75,26 @@ const ViewForm = (props) => {
     // console.log(obj); // { id: 11, name: "test" }
     setFieldResponses((prevData) => ({
       ...prevData,
-      [id]: value,
+      [parseInt(id)]: value,
     }));
     console.log(fieldResponses)
   }
   const handleSubmit = async (event) => {
     const formData = {
-      workflow_id: 6,
+      workflow_id: 1,
       fck: {
-        id: id,
-        revisionNo:revisionNo
+        id: parseInt(id),
+        revisionNo: parseInt(revisionNo),
       },
       submittedBy: accountId,
-      fieldResponses: fieldResponses
-   }
+      fieldResponses: fieldResponses,
+    };
     event.preventDefault();
     console.log(formData);
    if (formRef.current.reportValidity()) {
      console.log("Form submitted with values: ", form);
      await axios
-      .put(
+      .post(
         process.env.REACT_APP_ENDPOINT_URL +
           '/api/formsubmission',
         formData,
@@ -109,7 +105,7 @@ const ViewForm = (props) => {
         }
       )
       .then(async (res) => {
-
+ navigate("../../home");
       })
       .catch((e) => {
         console.log(e);
