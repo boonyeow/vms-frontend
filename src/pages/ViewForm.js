@@ -36,11 +36,11 @@ const ViewForm = (props) => {
   const [fieldResponses, setFieldResponses] = useState({});
     const [selectedValue, setSelectedValue] = useState("");
   const [regexList, setRegexList] = useState([
-    {
-      id: 1,
-      name: "email",
-      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    },
+    // {
+    //   id: 1,
+    //   name: "email",
+    //   pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    // },
   ]);
   const handleChange = (event) => {
       setSelectedValue(event.target.value);
@@ -61,7 +61,6 @@ const ViewForm = (props) => {
       .then((res) => {
         //console.log(res.data)
         setRegexList(res.data);
-        console.log(res.data)
       })
       .catch((e) => console.error(e));
 }
@@ -132,10 +131,8 @@ const ViewForm = (props) => {
         data.fields.forEach((field, index) => {
           if (field.regexId) {
             let regex = regexList.filter((obj) => obj.id == field.regexId);
-            console.log(regex[0])
             field.regexId=regex[0]
           }
-
 
           if (field.nextFieldsId) {
             for (const [key, value] of Object.entries(field.nextFieldsId)) {
