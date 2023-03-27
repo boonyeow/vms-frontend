@@ -9,6 +9,7 @@ import WorkflowEditing from "./pages/admin/WorkflowEditing";
 import WorkflowMgmt from "./pages/admin/WorkflowMgmt";
 import FormTemplates from "./pages/admin/FormTemplates";
 import ViewForm from "./pages/ViewForm";
+import ViewWorkflow from "./pages/ViewWorkflow";
 
 function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ function AppRoutes() {
       <Route path="FormTemplates" element={<FormTemplates />} />
       {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
       <Route path="form/:id/:revisionNo" element={<ViewForm />} />
+      <Route path="workflow/:id" element={<ViewWorkflow />} />
     </Routes>
   );
 }
