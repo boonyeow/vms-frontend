@@ -109,10 +109,8 @@ const handleClose = (event, reason) => {
         console.log(res.data)
         data = { ...data, ...res.data };
        // setFormTitle("Create Form");
+        setAuthorizedUserList(data.authorizedAccounts)
         setIsDisabled(data.isFinal);
-        let user = userList.filter((user) => data.authorizedAccounts.includes(user.id));
-        setAuthorizedUserList(user)
-
         const fieldtoDelete=[]
         await axios
           .get(
@@ -190,19 +188,6 @@ const handleClose = (event, reason) => {
 
       }
     })
-    // for (const key in converedObj) {
-    //   if (converedObj.hasOwnProperty(key)) {
-    //     if (typeof converedObj[key] === "object" && converedObj[key] !== null) {
-    //       replaceKey(converedObj[key]);
-    //     }
-    //     if (key === "nextFieldsId") {
-    //       converedObj.options = converedObj.nextFieldsId;
-    //       delete converedObj.nextFieldsId;
-    //     }
-    //   }
-    // }
-    //console.log(converedObj)
-   // console.log(converedObj);
     return converedObj;
   }
   const applyChanges = (isFinal, workflowsLength) => {
@@ -233,8 +218,9 @@ const handleClose = (event, reason) => {
   const handleSubmitForm = async () => {
     let processedForm = await processForm(formData);
     delete processedForm.id;
-    let authorisedAccList = processedForm.authorizedAccounts
-    processedForm["authorizedAccountIds"] = authorisedAccList;
+
+     let authorisedAccList = authorizedUserList.map((obj)=>obj.email)
+    // processedForm["authorizedAccountIds"] = authorisedAccList;
     delete processedForm.authorizedAccounts;
     const shouldApplyChanges = applyChanges(
       formData.isFinal,
@@ -245,9 +231,7 @@ const handleClose = (event, reason) => {
      if (field.regexId === null) {
        delete field.regexId;
      }
-     if (!field.options) {
-       field['options']={}
-     }
+
      if (field.options) {
        for (const [key, value] of Object.entries(field.options)) {
          delete field.options[key].id;
@@ -259,7 +243,6 @@ const handleClose = (event, reason) => {
     return field;
    });
 
-    console.log(processedForm.authorizedAccountIds)
     await axios
       .put(
         process.env.REACT_APP_ENDPOINT_URL +
@@ -273,8 +256,22 @@ const handleClose = (event, reason) => {
         }
       )
       .then(async (res) => {
-        setOpen(true);
-         navigate("/FormTemplates");
+        await axios
+          .put(
+            process.env.REACT_APP_ENDPOINT_URL +
+              `/api/forms/${id}/${revisionNo}/authorizedAccount`,
+            authorisedAccList,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then((res) => {
+            setOpen(true);
+            navigate("/FormTemplates");
+          })
+          .catch((e) => console.error(e));
       })
       .catch((e) => {
         console.log(e);
@@ -326,7 +323,7 @@ const handleClose = (event, reason) => {
     });
 
     const newAuthorizedAccounts = newAuthorizedUserList.map(
-      (user) => user.id
+      (user) => user.email
     );
 
     setAuthorizedUserList(newAuthorizedUserList);
