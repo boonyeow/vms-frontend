@@ -1,167 +1,55 @@
 import NavBar from "../components/SharedComponents/NavBar";
-import { Box, Button, Chip, Grid, Typography } from "@mui/material";
-import { Container, Stack } from "@mui/system";
-import { useAuthStore } from "../store";
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Box, Button, Grid } from "@mui/material";
 
 const HomePage = () => {
-  const { accountId, token, email, role } = useAuthStore();
-  const [workflowData, setWorkflowData] = useState([]);
-  const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
-  useEffect(() => {
-    fetchWorkflows();
-  }, []);
+  const isAdmin = true;//get user permission from database
 
-  const fetchWorkflows = () => {
-    axios
-      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        console.log(res);
-        setWorkflowData(res.data);
-        setDataLoaded(true);
-      });
-  };
-
-  return (
-    <Box>
-      <NavBar />
-      <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}>
-          <Typography
-            component="h1"
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: "action.main", alignSelf: "center" }}>
-            Home
-          </Typography>
-        </Box>
-        <Box sx={{ py: 1 }}>
-          <Box sx={{ p: 1 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#1f1f1f" }}>
-              Action Items
-            </Typography>
-            {/* <WorkflowTable data={workflowData} dataLoaded={dataLoaded} /> */}
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#1f1f1f", mb: 1 }}>
-              Workflow
-            </Typography>
-            <WorkflowTable data={workflowData} dataLoaded={dataLoaded} />
-          </Box>
-        </Box>
-      </Container>
-    </Box>
-  );
-};
-
-const WorkflowTable = ({ data, dataLoaded }) => {
-  console.log("data", data);
-  let rows = data;
-
-  rows.forEach((temp) => {
-    temp["final"] = temp["final"] === true ? "Published" : "Draft";
-  });
-
-  let columns = [
-    { field: "id", headerName: "ID" },
-    { field: "name", headerName: "Name", flex: 1 },
-    {
-      field: "progress",
-      headerName: "Progress",
-    },
-    {
-      field: "final",
-      headerName: "Status",
-      minWidth: 150,
-      renderCell: (params) => {
-        let isFinal = params.row["final"];
-
-        if (isFinal === "Draft") {
-          return (
-            <Chip
-              label={isFinal}
-              sx={{
-                fontWeight: "bold",
-              }}></Chip>
-          );
-        } else {
-          return (
-            <Chip
-              label={isFinal}
-              sx={{
-                bgcolor: "#e8f4ff",
-                color: "primary.main",
-                fontWeight: "bold",
-              }}></Chip>
-          );
-        }
-      },
-    },
-    {
-      field: "actions",
-      minWidth: 200,
-      headerName: "Action",
-      sortable: false,
-      disableClickEventBubbling: true,
-      renderCell: (params) => {
-        const onClick = (e) => {
-          const currentRow = params.row;
-        };
-
-        return (
-          <Stack direction="row" spacing={2}>
-            <Button
-              href={"/workflow/" + params.row["id"]}
-              variant="contained"
-              color="action"
-              size="small">
-              View
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              size="small"
-              onClick={onClick}>
-              Delete
-            </Button>
-          </Stack>
-        );
-      },
-    },
-  ];
-
-  console.log("rows", rows);
-  console.log("columns", columns);
   return (
     <>
-      {dataLoaded ? ( // only render DataGrid if data has finished loading
-        <DataGrid
-          sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
-          rows={rows}
-          columns={columns}
-          autoHeight
-          pageSize={5}
-          rowsPerPageOptions={[5]}
-          disableRowSelectionOnClick
-        />
-      ) : (
-        <Typography variant="body1">Loading...</Typography> // show loading message if data is not loaded yet
-      )}
+      <NavBar />
+      <h1>Home</h1>
+      {isAdmin 
+        ? 
+        <>
+          <Box sx={{ display: "flex", flexDirection: "row",justifyContent: "center" }}>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1}}>
+              <a href="/UserMgmt">User Management</a>
+            </Button>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="/WorkflowMgmt">Manage Workflow</a>
+            </Button>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="/FormMgmt">Manage Forms</a>
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "row",justifyContent: "center" }}>
+            {/* <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="/UserCreation">View User List</a>
+            </Button> */}
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="/WorkflowCreation">Create Workflow</a>
+            </Button>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="/FormCreation">Create Forms</a>
+            </Button>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="#">Approve Forms</a>
+            </Button>
+          </Box>
+        </>
+        : 
+        <>
+          <Box sx={{ display: "flex", flexDirection: "row",justifyContent: "center" }}>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="#">Forms to complete</a>
+              {/* add in link for route.js and here */}
+            </Button>
+            <Button variant="outlined" sx={{ margin: 3, backgroundColor:"white", border:1 }}>
+              <a href="#">See all Workflow</a>
+              {/* add in link for route.js and here */}
+            </Button>
+          </Box>
+        </>};
     </>
   );
 };
