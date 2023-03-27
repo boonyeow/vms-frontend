@@ -16,6 +16,14 @@ export const useAuthStore = create(
           role: data["accountType"],
         }));
       },
+      clearStore: () => {
+        set(() => ({
+          accountId: null,
+          token: null,
+          email: null,
+          role: null,
+        }));
+      },
     }),
     {
       name: "authStore",

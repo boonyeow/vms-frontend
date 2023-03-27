@@ -7,17 +7,20 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
 import AdbIcon from "@mui/icons-material/Adb";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { useAuthStore } from "../../store";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useNavigate } from "react-router-dom";
 
 function NavBar() {
-  const pages = ["Products", "Pricing", "Blog"];
+  const { token } = useAuthStore();
   const settings = ["Profile", "Account", "Dashboard", "Logout"];
   const vendor = [
     {
@@ -32,6 +35,7 @@ function NavBar() {
     },
   ];
   const { role } = useAuthStore();
+    const navigate = useNavigate();
   const { accountId } = useAuthStore();
   const admin = [
     {
@@ -82,123 +86,129 @@ function NavBar() {
       [pageName]: null,
     }));
   };
+  const logout = () => {
+    useAuthStore.getState().clearStore();
+    navigate("/");
+
+  }
 
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/home"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".1rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            Quantum VMS
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            {/* <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+    <div style={{ marginBottom: 30 }}>
+      <AppBar
+        position="static"
+        style={{ top: 0, left: 0, position: "absolute" }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/home"
               sx={{
-                display: { xs: "block", md: "none" },
+                mr: 2,
+                display: { xs: "none", md: "flex" },
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".1rem",
+                color: "inherit",
+                textDecoration: "none",
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu> */}
-          </Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".1rem",
-              textDecoration: "none",
-            }}
-          >
-            Quantum VMS
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {/* if is admin then use admin list else use vendor list */}
-            {role == "ADMIN"
-              ? admin.map((page) =>
-                  // if there is a list then will make dropdown tab
-                  page.list ? (
-                    <Box sx={{ flexGrow: 0 }} key={page.name}>
-                      <PopupState variant="popover" popupId="demo-popup-menu">
-                        {(popupState) => (
-                          <React.Fragment>
-                            <Button
-                              variant="contained"
-                              {...bindTrigger(popupState)}
-                              style={{ boxShadow: "none" }}
+              Quantum VMS
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+            </Box>
+            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <Typography
+              variant="h5"
+              noWrap
+              component="a"
+              href=""
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "none" },
+                flexGrow: 1,
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".1rem",
+                textDecoration: "none",
+              }}
+            >
+              Quantum VMS
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+              {/* if is admin then use admin list else use vendor list */}
+              {role == "ADMIN"
+                ? admin.map((page) =>
+                    // if there is a list then will make dropdown tab
+                    page.list ? (
+                      <Box sx={{ flexGrow: 0 }} key={page.name}>
+                        <PopupState variant="popover" popupId="demo-popup-menu">
+                          {(popupState) => (
+                            <React.Fragment>
+                              <Button
+                                variant="contained"
+                                {...bindTrigger(popupState)}
+                                style={{ boxShadow: "none" }}
+                              >
+                                <Typography>{page.name}</Typography>
+                                <KeyboardArrowDownIcon
+                                  style={{ color: "white", width: "0.7em" }}
+                                />
+                              </Button>
+                              <Menu {...bindMenu(popupState)}>
+                                {page.list.map((item, index) => (
+                                  <MenuItem onClick={popupState.close}>
+                                    <Link
+                                      to={page.path[index]}
+                                      style={{ textDecoration: "none" }}
+                                    >
+                                      <Typography textAlign="center">
+                                        {item}
+                                      </Typography>
+                                    </Link>
+                                  </MenuItem>
+                                ))}
+                              </Menu>
+                            </React.Fragment>
+                          )}
+                        </PopupState>
+                      </Box>
+                    ) : (
+                      <Box sx={{ flexGrow: 0 }} key={page.name}>
+                        <Button>
+                          <Link
+                            to={page.path}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Typography
+                              textAlign="center"
+                              sx={{ color: "white" }}
                             >
-                              <Typography>{page.name}</Typography>
-                              <KeyboardArrowDownIcon
-                                style={{ color: "white", width: "0.7em" }}
-                              />
-                            </Button>
-                            <Menu {...bindMenu(popupState)}>
-                              {page.list.map((item, index) => (
-                                <MenuItem onClick={popupState.close}>
-                                  <Link to={page.path[index]}>
-                                    <Typography textAlign="center">
-                                      {item}
-                                    </Typography>
-                                  </Link>
-                                </MenuItem>
-                              ))}
-                            </Menu>
-                          </React.Fragment>
-                        )}
-                      </PopupState>
-                    </Box>
-                  ) : (
+                              {page.name}
+                            </Typography>
+                          </Link>
+                        </Button>
+                      </Box>
+                    )
+                  )
+                : vendor.map((page) => (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <Button>
-                        <Link to={page.path}>
+                        <Link to={page.path} style={{ textDecoration: "none" }}>
                           <Typography
                             textAlign="center"
                             sx={{ color: "white" }}
@@ -208,27 +218,34 @@ function NavBar() {
                         </Link>
                       </Button>
                     </Box>
-                  )
-                )
-              : vendor.map((page) => (
-                  <Box sx={{ flexGrow: 0 }} key={page.name}>
-                    <Button>
-                      <Link to={page.path}>
-                        <Typography textAlign="center" sx={{ color: "white" }}>
-                          {page.name}
-                        </Typography>
-                      </Link>
-                    </Button>
-                  </Box>
-                ))}
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+                  ))}
+            </Box>
+            <Box sx={{ flexGrow: 0 }}>
+              <Stack justifyContent="center" alignItems="center">
+                <PopupState variant="popover" popupId="demo-popup-menu">
+                  {(popupState) => (
+                    <React.Fragment>
+                      <IconButton
+                        {...bindTrigger(popupState)}
+                        sx={{ padding: 0 }}
+                      >
+                        <AccountCircleIcon fontSize="large" color="light" />
+                      </IconButton>
+                      <Menu {...bindMenu(popupState)}>
+                        <MenuItem onClick={logout}>
+                          <Typography textAlign="center">Logout</Typography>
+                        </MenuItem>
+                      </Menu>
+                    </React.Fragment>
+                  )}
+                </PopupState>
+                <Typography textAlign="center">{role}</Typography>
+              </Stack>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </div>
   );
 }
 export default NavBar;
