@@ -33,7 +33,6 @@ function NavBar() {
   ];
   const { role } = useAuthStore();
   const { accountId } = useAuthStore();
-  const isAdmin = role === "ADMIN" ? true : false;//get user permission from database
   const admin = [
     {
       name: "User",
@@ -163,7 +162,7 @@ function NavBar() {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {/* if is admin then use admin list else use vendor list */}
-            {isAdmin
+            {role == "ADMIN"
               ? admin.map((page) =>
                   // if there is a list then will make dropdown tab
                   page.list ? (

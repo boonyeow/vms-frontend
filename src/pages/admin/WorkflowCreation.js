@@ -51,7 +51,7 @@ const WorkflowCreation = () => {
       })
       .then((res) => {
         // console.log("fetching form list", res);
-        console.log("here's where i would put my data", res.data);
+        // console.log("here's where i would put my data", res.data);
         setFormList(res.data.filter(item=>item.isFinal));
       })
       .catch((e) => console.error(e));
@@ -64,25 +64,17 @@ const WorkflowCreation = () => {
   const [workflowData, setWorkflowData] = useState({
     id: null,
     name: null,
-    isFinal: false,
   });
 
   const [forms, setForms] = useState([]);
 
   const handleSaveDraft = () => {
-    handleSubmitWorkflow(true);
-  }
-
-  const handleSubmitWorkflow = (draft = false) => {
-
+    // this is essentially the same thing as submitting but with a couple of differences
+    // 1. it's not final
+    // 2. instead of redirecting to the main workflow management, it redirects to the editing page
     let error = 0;
 
-    const newWorkflowData = {
-      ...workflowData,
-      // fields: forms
-      isFinal: !draft, // set isFinal to false if necessary
-    };
-      const workflowErrors = validateWorkflow(newWorkflowData);
+      const workflowErrors = validateWorkflow(workflowData);
       setErrors(workflowErrors);
       if (Object.keys(workflowErrors).length === 0) {
         
@@ -96,12 +88,12 @@ const WorkflowCreation = () => {
           .then((response) => {
 
             // response data is simply the id of our newly-generated workflow
-            console.log("Posting...");
-            console.log(response.data);
+            // console.log("Posting...");
+            // console.log(response.data);
 
             // step 2: throwing forms into the workflow
             forms.map((form, k) => {
-              console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
+              // console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
               axios
                 .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data + "/addForm", {
                 
@@ -126,16 +118,14 @@ const WorkflowCreation = () => {
               .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data, {
             
                 name: workflowData.name,
-                isFinal: newWorkflowData.isFinal,
+                isFinal: false,
             
               }, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
               })
-              .then((response) => {
-                console.log("Putting...");
-                console.log(response.data);
+              .then(() => {
                 if (error==0) {
                   Swal.fire({
                     icon: "success",
@@ -144,7 +134,7 @@ const WorkflowCreation = () => {
                     showConfirmButton: false,
                     confirmButtonColor: "#262626",
                     timer: 1500,
-                  }).then(() => navigate("/WorkflowMgmt"));
+                  }).then(() => navigate("/WorkflowEditing", { state: { id: response.data, name: workflowData.name, isFinal: false } } ));
                 } else {
                   Swal.fire({
                     icon: "error",
@@ -170,7 +160,111 @@ const WorkflowCreation = () => {
             });
 
             
-            }
+          }
+  }
+
+  const handleSubmitWorkflow = () => {
+
+    let error = 0;
+
+      const workflowErrors = validateWorkflow(workflowData);
+      setErrors(workflowErrors);
+      if (Object.keys(workflowErrors).length === 0) {
+        
+        // step 1: create form
+        axios
+          .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", null, {
+               headers: {
+                   Authorization: `Bearer ${token}`,
+                },
+            })
+          .then((response) => {
+
+            // response data is simply the id of our newly-generated workflow
+            // console.log("Posting...");
+            // console.log(response.data);
+
+            // step 2: throwing forms into the workflow
+            forms.map((form, k) => {
+              // console.log("Form-- Pos: " + form.pos + " ID: " + formList[form.pos].id.id + " Rev: " + formList[form.pos].id.revisionNo);
+              axios
+                .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data + "/addForm", {
+                
+                  id: formList[form.pos].id.id,
+                  revisionNo: formList[form.pos].id.revisionNo,
+                
+                }, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                })
+                .then((r) => {
+                })
+                .catch((e) => {
+                  ++error;
+                  // console.error(e)
+                });
+            })
+        
+            // step: update our workflow info - left to last because final will lock it.
+            axios
+              .put(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data, {
+            
+                name: workflowData.name,
+                isFinal: false,
+            
+              }, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              })
+              .then((r) => {
+                axios
+                  .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + response.data + "/publishWorkflow", null, {
+                      headers: {
+                          Authorization: `Bearer ${token}`,
+                      },
+                  })
+                  .then((response) => {
+                    if (error==0) {
+                      Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: "Redirecting...",
+                        showConfirmButton: false,
+                        confirmButtonColor: "#262626",
+                        timer: 1500,
+                      }).then(() => navigate("/WorkflowMgmt"));
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Something went wrong! The operation may not have been completed.",
+                        showCloseButton: false,
+                        showConfirmButton: false,
+                        timer: 1500,
+                      }).then(() => navigate("/WorkflowMgmt"));
+                    }
+                  })
+                  .catch((e) => {error++;});
+                
+                
+              })
+              .catch((e) => {
+                ++error;
+                //console.error(e);
+              });
+              
+
+
+              })
+            .catch((e) => {
+              ++error;
+              //console.error(e);
+            });
+
+            
+          }
 
             
   }
@@ -184,7 +278,7 @@ const WorkflowCreation = () => {
       }
     }
 
-    console.log(errors);
+    // console.log(errors);
     
     return errors;
   };

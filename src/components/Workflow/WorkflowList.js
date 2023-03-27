@@ -61,12 +61,6 @@ const WorkflowList = () => {
         
     };
 
-    // edit/clone workflow
-    const publishForms = async () => {
-        //
-    }
-
-
     useEffect(() => { fetchWorkflowList(); }, []);
 
     const columns = [
@@ -137,7 +131,6 @@ const WorkflowList = () => {
 
     }
 
-    // to do
     function EditWorkflowButton() {
 
         const navigate = useNavigate();
@@ -177,7 +170,7 @@ const WorkflowList = () => {
         )
     }
 
-    // to do
+    // to do: not currently implemented in backend
     function DeleteWorkflowButton() {
    
         function handleClick() {
@@ -185,9 +178,9 @@ const WorkflowList = () => {
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>Delete Workflow</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Delete Workflow</Button>
         )
-        }
+    }
    
     function DefaultToolbar() {
       return (
@@ -204,10 +197,7 @@ const WorkflowList = () => {
           <React.Fragment>
               <Box sx={{py: 1.75, pl: 3}}>
                   <CreateNewButton />
-                  <EditWorkflowButton />
-                  {/* <SeeResponsesButton /> */}
-                  { workflowList[selectedRow].final ? <AssignWorkflowButton /> : <PublishWorkflowButton />}
-                  <DeleteWorkflowButton /> 
+                  { workflowList[selectedRow].final ? <AssignWorkflowButton /> : <><EditWorkflowButton /><PublishWorkflowButton /></>}
               </Box>
           </React.Fragment>
       );
