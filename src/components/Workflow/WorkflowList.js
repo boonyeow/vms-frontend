@@ -6,19 +6,18 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "../../store";
 import axios from "axios";
 import { TroubleshootSharp, Construction, LibraryAddCheck } from "@mui/icons-material";
 
-// to settle
 const WorkflowList = () => {
 
     const [selectedRow, setSelectedRow] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
 
-    const { token } = useAuthStore();
+    const { token, role } = useAuthStore();
     const [workflowList, setWorkflowList] = useState([]);
 
     const [sUMOpen, setSUMOpen] = useState(false);
@@ -32,12 +31,6 @@ const WorkflowList = () => {
         setSUMOpen(false);
     };
 
-    const selectUserHandleSubmit = (id, value) => {
-        console.log(id);
-        console.log(value);
-        setSUMOpen(false);
-    };
-
     const fetchWorkflowList = async () => {
         axios
             .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
@@ -48,19 +41,6 @@ const WorkflowList = () => {
             .then((res) => {
                 setWorkflowList(res.data);
                 console.log(res.data);
-            })
-            .catch((e) => console.error(e));
-    };
-
-    const deleteWorkflow = async () => {
-        axios
-            .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then(() => {
-                // setWorkflowList(res.data);
             })
             .catch((e) => console.error(e));
     };
@@ -80,6 +60,11 @@ const WorkflowList = () => {
             .catch((e) => console.error(e));
         
     };
+
+    // edit/clone workflow
+    const publishForms = async () => {
+        //
+    }
 
 
     useEffect(() => { fetchWorkflowList(); }, []);
@@ -154,13 +139,16 @@ const WorkflowList = () => {
 
     // to do
     function EditWorkflowButton() {
+
+        const navigate = useNavigate();
    
         function handleClick() {
-            // doSomething();
+            console.log(workflowList[selectedRow]);
+            navigate("/WorkflowEditing", { state: { id: workflowList[selectedRow].id, name: workflowList[selectedRow].name, isFinal: workflowList[selectedRow].isFinal } } );
         }
     
         return (
-            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}><a href='/home'>Edit Workflow</a></Button>
+            <Button variant='outlined' sx={{mr:3}} onClick={handleClick}>Edit Workflow</Button>
         )
     }
 
@@ -219,13 +207,13 @@ const WorkflowList = () => {
                   <EditWorkflowButton />
                   {/* <SeeResponsesButton /> */}
                   { workflowList[selectedRow].final ? <AssignWorkflowButton /> : <PublishWorkflowButton />}
-                  <DeleteWorkflowButton />
+                  <DeleteWorkflowButton /> 
               </Box>
           </React.Fragment>
       );
     }
 
-    return (
+    return ( ( role != "ADMIN") ? <Navigate replace to="/home" /> :
       <>
         <DataTable
           title={'Employees'}
@@ -237,12 +225,12 @@ const WorkflowList = () => {
           whenRowSelected={SelectDealer}
           rowsSelected={selectedRows}/>
         
-        <AssignWorkflowModal
+        {sUMOpen && <AssignWorkflowModal
             open={sUMOpen}
             onClose={selectUserHandleClose}
-            handleSubmit={selectUserHandleSubmit}
+            // handleSubmit={selectUserHandleSubmit}
             workflow={workflowList[selectedRow]} /* see comment in AssignWorkflowModal */
-          />
+          />}
       </>
     );
     }
