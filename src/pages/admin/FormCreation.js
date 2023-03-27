@@ -242,16 +242,24 @@ const handleClose = (event, reason) => {
     );
    processedForm.fields.map((field) => {
      delete field.id;
+     if (field.regexId === null) {
+       delete field.regexId;
+     }
+     if (!field.options) {
+       field['options']={}
+     }
      if (field.options) {
        for (const [key, value] of Object.entries(field.options)) {
-            delete field.options[key].id;
-      }
+         delete field.options[key].id;
+         if (field.options[key].regexId === null) {
+           delete field.options[key].regexId;
+         }
+       }
      }
     return field;
    });
-   // console.log(`Bearer ${token}`);
 
-           console.log(processedForm.authorizedAccountIds)
+    console.log(processedForm.authorizedAccountIds)
     await axios
       .put(
         process.env.REACT_APP_ENDPOINT_URL +

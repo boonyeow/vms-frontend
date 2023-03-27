@@ -22,6 +22,9 @@ import {
   Divider,
   Stack,
   Button,
+  Alert,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 
 
@@ -29,13 +32,18 @@ const ViewForm = (props) => {
   const formRef = useRef();
   const { token } = useAuthStore();
   const { id } = useParams();
+  const { submissionid } = useParams();
   const { revisionNo } = useParams();
   const [form, setForm] = useState({});
   const { role } = useAuthStore();
-    const navigate = useNavigate();
+  const [readOnly, setReadOnly]=useState(false)
+  const navigate = useNavigate();
   const { accountId } = useAuthStore();
+  const [submittedResponse, setSubmittedResponse] = useState("");
+  const [currentStatus, setCurrentStatus] = useState("");
   const [fieldResponses, setFieldResponses] = useState({});
-    const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValue, setSelectedValue] = useState("");
+  const [submittedForm, setSubmittedForm] = useState();
   const [regexList, setRegexList] = useState([
     // {
     //   id: 1,
@@ -43,6 +51,35 @@ const ViewForm = (props) => {
     //   pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     // },
   ]);
+
+  const handleNewStatusChange = async (value) => {
+    let newStatus;
+
+    if (role === "ADMIN" && value === "approve") {
+        newStatus="AWAITING_APPROVER";
+    } else if (role === "APPROVER" && value === "approve") {
+        newStatus ="APPROVED";
+    } else {
+        newStatus ="REJECTED";
+    }
+     await axios
+       .put(
+         process.env.REACT_APP_ENDPOINT_URL +
+           `/api/formsubmission/${submissionid}`,
+      {status: newStatus} ,
+         {
+           headers: {
+             Authorization: `Bearer ${token}`,
+           },
+         }
+       )
+       .then(() => {
+         fetchForm(id);
+       })
+       .catch((e) => {
+         console.log(e);
+       });
+  };
   const handleChange = (event) => {
       setSelectedValue(event.target.value);
     };
@@ -66,13 +103,6 @@ const ViewForm = (props) => {
       .catch((e) => console.error(e));
 }
   const recordResponse = (value, id) => {
-    // console.log("recording response");
-    console.log(`value: ${value}, id: ${id}`);
-   // const obj = JSON.parse(value);
-    //obj.name = JSON.parse(obj.name.replace(/\\/g, "")); // use if is checkbox
-    //obj.ans = JSON.parse(obj.ans);
-
-    // console.log(obj); // { id: 11, name: "test" }
     setFieldResponses((prevData) => ({
       ...prevData,
       [parseInt(id)]: value,
@@ -90,7 +120,6 @@ const ViewForm = (props) => {
       fieldResponses: fieldResponses,
     };
     event.preventDefault();
-    console.log(formData);
    if (formRef.current.reportValidity()) {
      console.log("Form submitted with values: ", form);
      await axios
@@ -105,7 +134,7 @@ const ViewForm = (props) => {
         }
       )
       .then(async (res) => {
- navigate("../../home");
+        navigate("../../home");
       })
       .catch((e) => {
         console.log(e);
@@ -118,16 +147,13 @@ const ViewForm = (props) => {
   const fetchForm = async (id) => {
     let data = null
     let fieldstodelete = []
-
      await axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/forms/" + id, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-       // setForm(res.data);
-        console.log(res.data)
+      .then(async (res) => {
         data = res.data
         data.fields.forEach((field, index) => {
           if (field.regexId) {
@@ -151,31 +177,94 @@ const ViewForm = (props) => {
         );
        // console.log(data)
         setForm(data);
+        console.log(data.fields)
         let initResponse = {};
         Object.entries(res.data.fields).forEach(([key]) => {
           initResponse[key] = null;
         });
-        //console.log(initResponse);
-       // console.log(form)
+        console.log(role)
+
+        if (role === 'ADMIN' || role === 'APPROVER') {
+           setReadOnly(true);
+            await axios
+              .get(
+                process.env.REACT_APP_ENDPOINT_URL +
+                  `/api/formsubmission/getById?formSubmissionId=${submissionid}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              )
+              .then(async (res) => {
+                console.log(res.data)
+                let responses = res.data[0].fieldResponses;
+                setCurrentStatus(res.data[0].status)
+                for (const [key, value] of Object.entries(responses)) {
+                  try {
+                    let obj = JSON.parse(value);
+                    obj.ans = JSON.parse(obj.ans);
+                    if (obj.type === "checkbox") {
+                      obj.name = JSON.parse(obj.name.replace(/\\/g, ""));
+                    }
+                    responses[key] = obj;
+                  } finally {
+                    continue;
+                  }
+                }
+                console.log(responses);
+                setSubmittedResponse(responses)
+              })
+              .catch((e) => {
+                console.log(e);
+              });
+          }
+
       });
   };
-
+if (!submittedResponse && role!=='VENDOR') {
+  return <div>Loading...</div>;
+}
   return (
     <>
       <NavBar />
-      <Card sx={{ maxWidth: 900, marginTop: 3, marginX: "auto" }}>
-            <form ref={formRef} onSubmit={handleSubmit}>
-        <CardContent>
-          <Typography variant="h4" gutterBottom align="center">
-            {form.name}
-          </Typography>
-          <Divider sx={{ marginY: 3 }} />
-          <Typography variant="h6" gutterBottom>
-            {form.description}
-          </Typography>
-          <Divider sx={{ marginY: 3 }} />
 
-          <Box>
+      {role === "VENDOR" ? (
+        ""
+      ) : (
+        <Stack
+          direction="row"
+          justifyContent="space-around"
+          alignItems="flex-end"
+          spacing={2}
+          sx={{ marginTop: 2 }}
+        >
+          <StatusToggleComponent
+            status={currentStatus}
+            role={role}
+            handleNewStatusChange={handleNewStatusChange}
+          />
+        </Stack>
+      )}
+      <Card sx={{ maxWidth: 900, marginTop: 1, marginX: "auto" }}>
+        {role === "VENDOR" ? (
+          ""
+        ) : (
+          <StatusAlertComponent status={currentStatus} />
+        )}
+
+        <form ref={formRef} onSubmit={handleSubmit}>
+          <CardContent>
+            <Typography variant="h4" gutterBottom align="center">
+              {form.name}
+            </Typography>
+            <Divider sx={{ marginY: 3 }} />
+            <Typography variant="h6" gutterBottom>
+              {form.description}
+            </Typography>
+            <Divider sx={{ marginY: 3 }} />
+
+            <Box>
               {form.fields?.map((field, idx) => {
                 return (
                   <Card>
@@ -197,6 +286,8 @@ const ViewForm = (props) => {
                               handleChange={handleChange}
                               selectedValue={selectedValue}
                               recordResponse={recordResponse}
+                              readOnly={readOnly}
+                              submittedResponse={submittedResponse}
                             />
                           ) : (
                             ""
@@ -205,6 +296,8 @@ const ViewForm = (props) => {
                             <TextboxComponent
                               fieldData={field}
                               recordResponse={recordResponse}
+                              readOnly={readOnly}
+                              submittedResponse={submittedResponse}
                             />
                           ) : (
                             ""
@@ -213,6 +306,8 @@ const ViewForm = (props) => {
                             <CheckboxComponent
                               fieldData={field}
                               recordResponse={recordResponse}
+                              readOnly={readOnly}
+                              submittedResponse={submittedResponse}
                             />
                           ) : (
                             ""
@@ -230,6 +325,8 @@ const ViewForm = (props) => {
                                     <RadioButtonComponent
                                       fieldData={value}
                                       recordResponse={recordResponse}
+                                      readOnly={readOnly}
+                                      submittedResponse={submittedResponse}
                                     />
                                   ) : (
                                     ""
@@ -238,6 +335,8 @@ const ViewForm = (props) => {
                                     <TextboxComponent
                                       fieldData={value}
                                       recordResponse={recordResponse}
+                                      readOnly={readOnly}
+                                      submittedResponse={submittedResponse}
                                     />
                                   ) : (
                                     ""
@@ -246,6 +345,8 @@ const ViewForm = (props) => {
                                     <CheckboxComponent
                                       fieldData={value}
                                       recordResponse={recordResponse}
+                                      readOnly={readOnly}
+                                      submittedResponse={submittedResponse}
                                     />
                                   ) : (
                                     ""
@@ -259,53 +360,90 @@ const ViewForm = (props) => {
                   </Card>
                 );
               })}
-
-          </Box>
+            </Box>
           </CardContent>
           <CardActions>
-
-              <Button variant="contained" type='submit'>
+            {role === "VENDOR" ? (
+              <Button variant="contained" type="submit">
                 Submit
               </Button>
+            ) : (
+              ""
+            )}
           </CardActions>
-            </form>
+        </form>
       </Card>
     </>
   );
 };
 
-const CheckboxComponent = ({ fieldData, recordResponse }) => {
-  const options = Object.entries(fieldData.nextFieldsId);
-  const optionCount = options.length;
-  const optionNames = options.map(([name]) => name);
+const StatusAlertComponent = ({ status }) => {
+   const severity = status.includes('AWAITING')
+    ? 'warning'
+    : status === 'APPROVED'
+    ? 'success'
+    : 'error';
+  return (
+    <Alert severity={severity} sx={{ width: "100%" }}>
+      Status: {status}
+    </Alert>
+  );
+};
 
-  const handleChange = (optionIndex, checked) => {
-    const selectedOptions = Array(optionCount).fill(false);
-    selectedOptions[optionIndex] = checked;
-    const response = {
-      type: "checkbox",
-      name: JSON.stringify(optionNames),
-      ans: JSON.stringify(selectedOptions),
-    };
-    recordResponse(JSON.stringify(response), fieldData.id);
-  };
+const CheckboxComponent = ({
+  fieldData,
+  recordResponse,
+  readOnly,
+  submittedResponse,
+}) => {
+ const options = Object.entries(fieldData.nextFieldsId);
+ const optionCount = options.length;
+ const optionNames = options.map(([name]) => name);
+ const [selectedOptions, setSelectedOptions] = useState(
+   Array(optionCount).fill(false)
+ );
+
+ const handleChange = (optionIndex, checked) => {
+   const updatedSelectedOptions = [...selectedOptions];
+   updatedSelectedOptions[optionIndex] = checked;
+   setSelectedOptions(updatedSelectedOptions);
+   const response = {
+     type: "checkbox",
+     name: JSON.stringify(optionNames),
+     ans: JSON.stringify(updatedSelectedOptions),
+   };
+   recordResponse(JSON.stringify(response), fieldData.id);
+ };
 
   return (
     <>
       <FormGroup>
         <FormLabel id="">{fieldData.name}</FormLabel>
         {options.map(([name], index) => (
-          <FormControlLabel
-            key={name}
-            control={
-              <Checkbox
-                required={fieldData.isRequired}
-                inputProps={{ "aria-label": name }}
-                onChange={(e) => handleChange(index, e.target.checked)}
-              />
-            }
-            label={name}
-          />
+          <>
+            <FormControlLabel
+              key={name}
+              control={
+                <Checkbox
+                  required={fieldData.isRequired}
+                  checked={
+                    submittedResponse &&
+                    submittedResponse[fieldData.id] &&
+                    submittedResponse[fieldData.id].name[index] == name &&
+                    submittedResponse[fieldData.id].ans[index]
+                      ? true
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": name }}
+                  onChange={(e) => handleChange(index, e.target.checked)}
+                  InputProps={{
+                    readOnly: readOnly,
+                  }}
+                />
+              }
+              label={name}
+            />
+          </>
         ))}
       </FormGroup>
       <Stack>
@@ -317,8 +455,37 @@ const CheckboxComponent = ({ fieldData, recordResponse }) => {
   );
 };
 
+const StatusToggleComponent = ({
+  status,
+  role,
+  handleNewStatusChange,
+  submittedResponse,
+}) => {
+  const [toggleValue, setToggleValue] = useState("");
+  return (
+    <ToggleButtonGroup
+      color="primary"
+      exclusive
+      aria-label="Platform"
+      value={toggleValue}
+      disabled={role === "APPROVER" && status === "AWAITING_ADMIN"}
+      onChange={(e) => {
+        handleNewStatusChange(e.target.value);
+        setToggleValue(e.target.value);
+      }}
+    >
+      <ToggleButton value="approve">Approve</ToggleButton>
+      <ToggleButton value="reject">Reject</ToggleButton>
+    </ToggleButtonGroup>
+  );
+};
 
-const TextboxComponent = ({ fieldData, recordResponse}) => {
+const TextboxComponent = ({
+  fieldData,
+  recordResponse,
+  readOnly,
+  submittedResponse,
+}) => {
   const [inputError, setInputError] = useState("");
   const handleInputChange = (event) => {
     if (fieldData.regexId) {
@@ -345,12 +512,13 @@ const TextboxComponent = ({ fieldData, recordResponse}) => {
         required={fieldData.isRequired}
         helperText={inputError}
         error={!!inputError}
+        value={submittedResponse? submittedResponse[fieldData.id] : undefined}
         onBlur={(e) => {
           handleInputChange(e);
-          recordResponse(
-            e.target.value,
-            fieldData.id
-          );
+          recordResponse(e.target.value, fieldData.id);
+        }}
+        InputProps={{
+          readOnly: readOnly,
         }}
       />
       <Stack>
@@ -362,8 +530,13 @@ const TextboxComponent = ({ fieldData, recordResponse}) => {
   );
 };
 
-const RadioButtonComponent = ({ fieldData, recordResponse}) => {
-  //console.log(fieldData);
+const RadioButtonComponent = ({
+  fieldData,
+  recordResponse,
+  readOnly,
+  submittedResponse,
+}) => {
+  //console.log(readOnly);
   return (
     <>
       <FormControl>
@@ -376,7 +549,18 @@ const RadioButtonComponent = ({ fieldData, recordResponse}) => {
             Object.entries(fieldData.nextFieldsId).map(([key, value]) => (
               <FormControlLabel
                 value={key}
-                control={<Radio required={fieldData.isRequired} />}
+                control={
+                  <Radio
+                    required={fieldData.isRequired}
+                    disabled={readOnly}
+                    checked={
+                      submittedResponse &&
+                      submittedResponse[fieldData.id] &&
+                      submittedResponse[fieldData.id].name == key &&
+                      submittedResponse[fieldData.id].ans
+                    }
+                  />
+                }
                 label={key}
                 onChange={(e) =>
                   recordResponse(
@@ -403,18 +587,39 @@ const RadioStandaloneComponent = ({
   handleChange,
   selectedValue,
   recordResponse,
+  readOnly,
+  submittedResponse,
 }) => {
-  //console.log(fieldData);
   return (
     <>
       <Stack direction="row" alignItems="center">
         <Radio
-          checked={selectedValue === fieldData.name}
-          onChange={(e) => handleChange(e)}
+          // checked={selectedValue === fieldData.name}
+          disabled={readOnly}
+          checked={
+            submittedResponse &&
+            submittedResponse[fieldData.id] &&
+            submittedResponse[fieldData.id].name == fieldData.name &&
+            submittedResponse[fieldData.id].ans
+              ? true
+              : selectedValue === fieldData.name
+          }
+          onChange={(e) => {
+            handleChange(e);
+            recordResponse(
+              e.target.checked
+                ? `{"type":"radio","name":"${fieldData.name}","ans":"true"}`
+                : `{ "type":"radio","name":"${fieldData.name}","ans":"false"}`,
+              fieldData.id
+            );
+          }}
           value={fieldData.name}
           name="radionButtons"
           inputProps={{ "aria-label": fieldData.name }}
           required={fieldData.isRequired}
+          InputProps={{
+            readOnly: readOnly,
+          }}
         />
         {fieldData.name}
       </Stack>

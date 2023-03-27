@@ -9,9 +9,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
 
-
-
-
 const FormMgmt = () => {
 
   const { token } = useAuthStore();
@@ -80,7 +77,10 @@ const FormMgmt = () => {
       renderCell: (params) => {
         const onClick = (e) => {
           const submissionId = params.row.id;
+          const id = params.row.form.id.id;
+          const revisionNo = params.row.form.id.revisionNo;
           navigate("/formsubmission/" + submissionId);
+          navigate(`/formsubmission/${id}/${revisionNo}/${submissionId}`);
         };
 
         return (
