@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
+import SendEmailButton from "../../components/Email/SendEmailButton"
 
 const FormMgmt = () => {
 
@@ -108,21 +109,7 @@ const FormMgmt = () => {
           },
         })
         .then((res) => {
-          //setFormListOriginal(res.data);
-          // const data = res.data.map((obj) => {
-          //   return Object.entries(obj).reduce((acc, [key, value]) => {
-          //     if (typeof value === "object" && !Array.isArray(value)) {
-          //       // If the value is an object, spread its properties into the accumulator
-          //       acc = { ...acc, ...value };
-          //     } else {
-          //       // Otherwise, add the property to the accumulator as is
-          //       acc[key] = value;
-          //     }
-          //     return acc;
-          //   }, {});
-          // });
           setFormList(res.data);
-          console.log(res.data);
         })
         .catch((e) => console.error(e));
     };
@@ -139,7 +126,9 @@ const FormMgmt = () => {
       <h1 style={{ textAlign: "center" }}>Form Management</h1>
 
       <Stack spacing={2} alignItems="center">
-        <Stack direction="row" spacing={2} alignItems="flex-end"></Stack>
+        <Stack direction="row" spacing={2} alignItems="flex-end">
+         <SendEmailButton/>
+        </Stack>
         <div
           style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
         >
