@@ -26,7 +26,7 @@ function NavBar() {
     {
       name: "Forms",
       list: null,
-      path: "/FormList",
+      path: "/FormMgmt",
     },
     {
       name: "Workflows",

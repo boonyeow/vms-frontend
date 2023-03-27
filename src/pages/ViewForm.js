@@ -5,6 +5,8 @@ import axios from "axios";
 import { useAuthStore } from "../store";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import { Paper } from "@mui/material";
 import {
   Checkbox,
   FormControl,
@@ -29,6 +31,10 @@ import {
 
 
 const ViewForm = (props) => {
+  const componentRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
   const formRef = useRef();
   const { token } = useAuthStore();
   const { id } = useParams();
@@ -254,7 +260,7 @@ if (!submittedResponse && role!=='VENDOR') {
         )}
 
         <form ref={formRef} onSubmit={handleSubmit}>
-          <CardContent>
+          <CardContent ref={componentRef}>
             <Typography variant="h4" gutterBottom align="center">
               {form.name}
             </Typography>
@@ -368,7 +374,9 @@ if (!submittedResponse && role!=='VENDOR') {
                 Submit
               </Button>
             ) : (
-              ""
+              <Button variant="contained" onClick={handlePrint}>
+                Print
+              </Button>
             )}
           </CardActions>
         </form>
