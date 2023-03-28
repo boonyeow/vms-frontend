@@ -13,7 +13,6 @@ import SendEmailButton from "../../components/Email/SendEmailButton"
 const FormMgmt = () => {
   const { token, accountId, role } = useAuthStore();
   const accId = accountId.toString();
-  var isAdmin = role == "ADMIN"?true:false;
   const navigate = useNavigate();
   const columns = [
     { field: "id", headerName: "ID", width: 1 },
@@ -103,20 +102,31 @@ const FormMgmt = () => {
   const [formList, setFormList] = useState([]);
     const [formListOriginal, setFormListOriginal] = useState([]);
     const fetchFormsList = async () => {
-      if(isAdmin == true){
-        // axios
-        //   .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission", {
-        //     headers: {
-        //       Authorization: `Bearer ${token}`,
-        //     },
-        //   })
-        //   .then((res) => {
-        //     setFormList(res.data);
-        //   })
-        //   .catch((e) => console.error(e));
+      if(role == "ADMIN"){
+        axios
+          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            setFormList(res.data);
+          })
+          .catch((e) => console.error(e));
+      } else if (role == "APPROVER") {
+        axios
+          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission/getByStatus?StatusType=AWAITING_APPROVER", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            setFormList(res.data);
+          })
+          .catch((e) => console.error(e));
       } else {
         axios
-          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission/getByAccountId?AccountId="+accountId.toString(), {
+          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission/getByAccountId?accountId="+accId, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
