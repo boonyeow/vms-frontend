@@ -15,7 +15,12 @@ const FormMgmt = () => {
   const accId = accountId.toString();
   const navigate = useNavigate();
 const columns = [
-  { field: "id", headerName: "ID", width: 1 },
+  {
+    field: "submissionid",
+    headerName: "ID",
+    width: 1,
+    valueGetter: (params) => params.row.id,
+  },
   {
     field: "name",
     headerName: "Form Name",
@@ -69,6 +74,7 @@ const columns = [
     width: 160,
     renderCell: (params) => {
       let color = "";
+      let backgroundColor = "";
       switch (params.value) {
         case "AWAITING_APPROVER":
         case "AWAITING_ADMIN":
@@ -80,10 +86,18 @@ const columns = [
         case "REJECTED":
           color = "red";
           break;
+        case "NOT SUBMITTED":
+          color= 'white';
+          backgroundColor = "rgba(0, 0, 255, 0.5)";
+          break;
         default:
           break;
       }
-      return <div style={{ color: color }}>{params.value}</div>;
+      return (
+        <div style={{ color: color, backgroundColor: backgroundColor }}>
+          {params.value}
+        </div>
+      );
     },
   },
   {
@@ -97,9 +111,14 @@ const columns = [
         const submissionId = params.row.id ? params.row.id : "";
         const id = params.row.form.id.id;
         const revisionNo = params.row.form.id.revisionNo;
-        navigate(`/formsubmission/${id}/${revisionNo}/${submissionId}`);
+        if (submissionId) {
+          console.log('hiii')
+          navigate(`/formsubmission/${id}/${revisionNo}/${submissionId}`);
+        } else {
+        let workflowId=params.row.workflow.id
+          navigate(`/form/${id}/${revisionNo}/${workflowId}`);
+        }
       };
-
       return (
         <Stack direction="row" spacing={2}>
           <Button
@@ -116,8 +135,9 @@ const columns = [
   },
 ];
   const [formList, setFormList] = useState([]);
-    const [formListOriginal, setFormListOriginal] = useState([]);
-  const fetchFormsList =  () => {
+  const [formListOriginal, setFormListOriginal] = useState([]);
+  let formListTemp=[]
+  const fetchFormsList =  async () => {
     let url = '';
     if (role == "ADMIN") {
         url = process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission";
@@ -131,70 +151,58 @@ const columns = [
         "/api/formsubmission/getByAccountId?accountId=" +
         accId;
       }
-      axios
+      await axios
         .get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
-       .then((res) => {
-         // console.log(res.data)
+       .then(async (res) => {
+          formListTemp=res.data
           setFormList(res.data);
-        })
-      .catch((e) => console.error(e));
-        if (role === 'VENDOR') {
-              axios
-               .get(
-                 process.env.REACT_APP_ENDPOINT_URL +
-                   "/api/workflows/getWorkflowsByAccountId/" +
-                   accountId,
-                 {
-                   headers: {
-                     Authorization: `Bearer ${token}`,
-                   },
-                 }
-               )
-               .then( (res) => {
-                 //console.log(res.data);
-                 const submission = [...formList]
-                 let len = submission.length;
-
-                 const workflow = res.data;
-                 const missingForms = [];
-                 // Loop through the workflow array
-                 for (const workflowObj of workflow) {
-                   for (const form of workflowObj.forms) {
-                     // Check if the form exists in the submission array
-
-                     const foundForm = submission.find((submissionObj) => {
-                       console.log(submissionObj)
-                       console.log(form);
-                       console.log(workflowObj);
-                       return (
-                         submissionObj.form.id.id === form.formId &&
-                         submissionObj.form.id.revisionNo === form.revisionNo &&
-                         submissionObj.workflow.id === workflowObj.id
-                       );
-                     });
-
-                     // If the form is not found, add it to the missingForms array
-                     if (!foundForm) {
-                       len++
-                       missingForms.push({
-                         id: 10,
-                         form:{id:{id:form.formId,revisionNo:form.revisionNo,},name:form.name},
-                         status: "AWAITING_VENDOR",
-                         workflow: { id: workflowObj.id, name: workflowObj.name},
+          if (role === 'VENDOR') {
+                await axios
+                 .get(
+                   process.env.REACT_APP_ENDPOINT_URL +
+                     "/api/workflows/getWorkflowsByAccountId/" +
+                     accountId,
+                   {
+                     headers: {
+                       Authorization: `Bearer ${token}`,
+                     },
+                   }
+                 )
+                 .then( (res) => {
+                   const submission = [...formListTemp];
+                   let len = submission.length;
+                   const workflow = res.data;
+                   const missingForms = [];
+                   for (const workflowObj of workflow) {
+                     for (const form of workflowObj.forms) {
+                       const foundForm = submission.find((submissionObj) => {
+                         return (
+                           submissionObj.form.id.id === form.formId &&
+                           submissionObj.form.id.revisionNo === form.revisionNo &&
+                           submissionObj.workflow.id === workflowObj.id
+                         );
                        });
+
+                       if (!foundForm) {
+                         missingForms.push({
+                           id: '',
+                           form:{id:{id:form.formId,revisionNo:form.revisionNo,},name:form.name},
+                           status: "NOT SUBMITTED",
+                           workflow: { id: workflowObj.id, name: workflowObj.name},
+                         });
+                       }
                      }
                    }
-                 }
-                 console.log(missingForms);
-                // setFormList([...formList,...missingForms])
-                  //  setFormList((prevData) => ([...prevData,missingForms]));
-                  //  console.log(formList)
-               });
-    }
+                   console.log(missingForms);
+                   setFormList([...formListTemp, ...missingForms]);
+                 });
+      }
+        })
+      .catch((e) => console.error(e));
 
 
     };
@@ -210,7 +218,6 @@ const columns = [
     <>
       <NavBar />
       <h1 style={{ textAlign: "center" }}>Form Management</h1>
-
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
           {role === "ADMIN" ? <SendEmailButton /> : ""}
@@ -223,7 +230,7 @@ const columns = [
             columns={columns}
             pageSize={5}
             rowsPerPageOptions={[5]}
-            //getRowId={(row) => row.id +row.status +row.workflow.id +row.form.id.id+row.form.id.revisionNo }
+            getRowId={(row) => row.id +row.status +row.workflow.id +row.form.id.id+row.form.id.revisionNo }
             checkboxSelection
             slots={{
               toolbar: GridToolbar,
