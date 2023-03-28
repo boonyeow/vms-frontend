@@ -28,11 +28,11 @@ function NavBar() {
       list: null,
       path: "/FormMgmt",
     },
-    {
-      name: "Workflows",
-      list: null,
-      path: "/Workflows",
-    },
+    // {
+    //   name: "Workflows",
+    //   list: null,
+    //   path: "/Workflows",
+    // },
   ];
   const { role } = useAuthStore();
     const navigate = useNavigate();

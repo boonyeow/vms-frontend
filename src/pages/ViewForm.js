@@ -186,41 +186,45 @@ const ViewForm = (props) => {
         });
         console.log(role)
 
-        if (role === 'ADMIN' || role === 'APPROVER') {
-           setReadOnly(true);
-            await axios
-              .get(
-                process.env.REACT_APP_ENDPOINT_URL +
-                  `/api/formsubmission/getById?formSubmissionId=${submissionid}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              )
-              .then(async (res) => {
-                console.log(res.data)
-                let responses = res.data[0].fieldResponses;
-                setCurrentStatus(res.data[0].status)
-                for (const [key, value] of Object.entries(responses)) {
-                  try {
-                    let obj = JSON.parse(value);
-                    obj.ans = JSON.parse(obj.ans);
-                    if (obj.type === "checkbox") {
-                      obj.name = JSON.parse(obj.name.replace(/\\/g, ""));
-                    }
-                    responses[key] = obj;
-                  } finally {
-                    continue;
+        if (
+          role === "ADMIN" ||
+          role === "APPROVER" ||
+          (role === "VENDOR" && submissionid!==undefined)
+        ) {
+          setReadOnly(true);
+          await axios
+            .get(
+              process.env.REACT_APP_ENDPOINT_URL +
+                `/api/formsubmission/getById?formSubmissionId=${submissionid}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then(async (res) => {
+              console.log(res.data);
+              let responses = res.data[0].fieldResponses;
+              setCurrentStatus(res.data[0].status);
+              for (const [key, value] of Object.entries(responses)) {
+                try {
+                  let obj = JSON.parse(value);
+                  obj.ans = JSON.parse(obj.ans);
+                  if (obj.type === "checkbox") {
+                    obj.name = JSON.parse(obj.name.replace(/\\/g, ""));
                   }
+                  responses[key] = obj;
+                } finally {
+                  continue;
                 }
-                console.log(responses);
-                setSubmittedResponse(responses)
-              })
-              .catch((e) => {
-                console.log(e);
-              });
-          }
+              }
+              console.log(responses);
+              setSubmittedResponse(responses);
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        }
 
       });
   };
@@ -365,7 +369,7 @@ if (!submittedResponse && role!=='VENDOR') {
             </Box>
           </CardContent>
           <CardActions>
-            {role === "VENDOR" ? (
+            {role === "VENDOR" && submissionid===undefined ? (
               <Button variant="contained" type="submit">
                 Submit
               </Button>
