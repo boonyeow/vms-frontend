@@ -25,23 +25,22 @@ import { ContentPasteOffOutlined } from "@mui/icons-material";
 const ViewWorkflow = (props) => {
 
   const [workflowData,setWorkflowData]=useState({})
+  const [openDialog, setOpenDialog] = useState(false);
   useEffect(() => {
     fetchWorkflowData();
   }, []);
+    useEffect(() => {
+      fetchWorkflowData();
+    }, [openDialog]);
+
   const navigate = useNavigate();
   const { workflowId } = useParams();
   const { token } = useAuthStore();
   const { role } = useAuthStore();
-  const [workflowInfo, setWorkflowInfo] = useState({
-    title: "hihi",
-    isFinal: false,
-  });
-  const [openDialog, setOpenDialog] = useState(false);
+
   const [targetWorkflow, setTargetWorkflow] = useState('')
-  const [targetForm, setTargetForm] = useState(null);
-const [authorizedUserList, setAuthorizedUserList] = useState([])
+  const [authorizedUserList, setAuthorizedUserList] = useState([])
   const editAuthorizedUsers = () => {
-   // console.log(authorizedUserList);
       setTargetWorkflow(workflowId);
       setOpenDialog(true);
   }

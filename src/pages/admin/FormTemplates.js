@@ -170,7 +170,7 @@ const FormTemplates = () => {
           size="small"
           onClick={handleEditAuthAcc}
         >
-          Edit Authorized Acc
+          Edit Auths
         </Button>
       </Stack>
     );
@@ -187,9 +187,38 @@ const columns = [
     renderCell: (params) => <AuthorizedAccountsCell value={params.value} />,
   },
   {
+    field: "final",
+    headerName: "Status",
+    minWidth: 100,
+    renderCell: (params) => {
+      let isFinal = params.row["isFinal"];
+      if (!isFinal) {
+        return (
+          <Chip
+            label='draft'
+            sx={{
+              fontWeight: "bold",
+            }}
+          ></Chip>
+        );
+      } else {
+        return (
+          <Chip
+            label='final'
+            sx={{
+              bgcolor: "#e8f4ff",
+              color: "primary.main",
+              fontWeight: "bold",
+            }}
+          ></Chip>
+        );
+      }
+    },
+  },
+  {
     field: "action",
     headerName: "Action",
-    width: 450,
+    width: 410,
     sortable: false,
     headerAlign: "center",
     disableClickEventBubbling: true,
@@ -199,9 +228,8 @@ const columns = [
         fetchFormsList={fetchFormsList}
         token={token}
         navigate={navigate}
-        openDialog
-        ={openDialog}
-      setTargetForm={setTargetForm}
+        openDialog={openDialog}
+        setTargetForm={setTargetForm}
       />
     ),
   },

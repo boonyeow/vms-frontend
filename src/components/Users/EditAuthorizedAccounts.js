@@ -73,44 +73,40 @@ export default function EditAuthorizedAccounts({
 
             const deleted = oldList.filter((x) => !newList.includes(x));
             const added = newList.filter((x) => !oldList.includes(x));
-           console.log(deleted)
-            console.log(added)
-            added?.map(async (user) => {
-                await axios
-                  .post(
-                    process.env.REACT_APP_ENDPOINT_URL +
-                      `/api/workflows/${target}/authorizedAccount?accountId=${user}`,
-                    authorizedUserList,
-                    {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
-                    }
-                  )
-                    .then( async(res) => {
-                        deleted?.map( async(user) => {
-
-                            await axios
-                       .delete(
-                         process.env.REACT_APP_ENDPOINT_URL +
-                           `/api/workflows/${target}/authorizedAccount?accountId=${user}`,
-                         authorizedUserList,
-                         {
-                           headers: {
-                             Authorization: `Bearer ${token}`,
-                           },
-                         }
-                       )
-                                .then((res) => {
-
-
-                       })
-                       .catch((e) => console.error(e));
+            if (added !== []){
+                added?.map(async (user) => {
+                    await axios
+                      .post(
+                        process.env.REACT_APP_ENDPOINT_URL +
+                          `/api/workflows/${target}/authorizedAccount?accountId=${user}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      )
+                    .then( (res) => {
                         })
-
-                  })
-                  .catch((e) => console.error(e));
-            })
+                        .catch((e) => console.error(e));
+                        })
+            }
+            if (deleted !== []) {
+                deleted?.map(async (user) => {
+                    await axios
+                    .delete(
+                        process.env.REACT_APP_ENDPOINT_URL +
+                        `/api/workflows/${target}/authorizedAccount?accountId=${user}`,
+                        {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        }
+                    )
+                    .then((res) => {})
+                    .catch((e) => console.error(e));
+                });
+            }
+                setOpenDialog(false);
     }
 };
   const fetchUserList = async () => {
