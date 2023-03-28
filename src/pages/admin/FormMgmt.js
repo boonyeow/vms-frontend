@@ -115,7 +115,7 @@ const FormMgmt = () => {
           .catch((e) => console.error(e));
       } else if (role == "APPROVER") {
         axios
-          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission/getByStatus?StatusType=AWAITING_APPROVER", {
+          .get(process.env.REACT_APP_ENDPOINT_URL + "/api/formsubmission/getByStatus?status=AWAITING_APPROVER", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
