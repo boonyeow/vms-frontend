@@ -11,7 +11,7 @@ import { useAuthStore } from "../../store";
 import SendEmailButton from "../../components/Email/SendEmailButton"
 
 const FormMgmt = () => {
-
+  const { role } = useAuthStore();
   const { token } = useAuthStore();
   const navigate = useNavigate();
   const columns = [
@@ -120,6 +120,7 @@ const FormMgmt = () => {
  }, []);
 
 
+
   return (
     <>
       <NavBar />
@@ -127,7 +128,7 @@ const FormMgmt = () => {
 
       <Stack spacing={2} alignItems="center">
         <Stack direction="row" spacing={2} alignItems="flex-end">
-         <SendEmailButton/>
+        {role==='ADMIN' ? <SendEmailButton/> : ''}
         </Stack>
         <div
           style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}

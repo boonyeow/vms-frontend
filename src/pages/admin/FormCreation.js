@@ -3,7 +3,7 @@ import NextFields from "../../components/FormInputs/NextFields";
 import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
 import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
-import { Link } from "react-router-dom";
+import { useBeforeUnload } from "react-router-dom";
 import {
   Button,
   Card,
@@ -27,7 +27,7 @@ import {
   ToggleButtonGroup,
   Snackbar,
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -70,8 +70,16 @@ const FormCreation = () => {
   useEffect(() => {
     fetchUserList();
     getFormData();
+
   }, []);
+
   const [authorizedUserList, setAuthorizedUserList] = useState(null);
+  useBeforeUnload(
+    useCallback(() => {
+      localStorage.setItem(`formCreation${id}${revisionNo}`, formData);
+    }, [])
+  );
+
 const handleClose = (event, reason) => {
   if (reason === "clickaway") {
     return;
@@ -79,6 +87,10 @@ const handleClose = (event, reason) => {
   setOpen(false);
 };
   const getFormData = async () => {
+    const savedFormData = localStorage.getItem(
+      `formCreation${id}${revisionNo}`
+    );
+    console.log(savedFormData)
     let data = {
       name: "",
       description: null,
@@ -106,7 +118,7 @@ const handleClose = (event, reason) => {
         }
       )
       .then(async (res) => {
-        console.log(res.data)
+       // console.log(res.data)
         data = { ...data, ...res.data };
        // setFormTitle("Create Form");
         setAuthorizedUserList(data.authorizedAccounts)

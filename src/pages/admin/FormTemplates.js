@@ -25,7 +25,6 @@ const FormTemplates = () => {
 
   function AuthorizedAccountsCell({ value }) {
     const [anchorEl, setAnchorEl] = useState(null);
-    console.log(value)
     const open = Boolean(anchorEl);
 
     const handleChipClick = (event) => {
@@ -97,7 +96,6 @@ const FormTemplates = () => {
           }
         )
         .then((res) => {
-          console.log(res);
            setOpenDialog(false);
         })
         .catch((e) => console.error(e));
@@ -254,7 +252,6 @@ const columns = [
           }, {});
         });
         setFormList(data);
-        console.log(data)
       })
       .catch((e) => console.error(e));
   };
@@ -299,7 +296,6 @@ const columns = [
       })
       .then((res) => {
         setUserList(res.data);
-        console.log(res.data)
       })
       .catch((e) => console.error(e));
   };

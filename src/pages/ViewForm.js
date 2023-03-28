@@ -374,9 +374,14 @@ if (!submittedResponse && role!=='VENDOR') {
                 Submit
               </Button>
             ) : (
+              ""
+            )}
+            {role === "ADMIN" ? (
               <Button variant="contained" onClick={handlePrint}>
                 Print
               </Button>
+            ) : (
+              ""
             )}
           </CardActions>
         </form>
