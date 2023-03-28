@@ -143,7 +143,7 @@ const columns = [
       } else if (role == "APPROVER") {
         url =
           process.env.REACT_APP_ENDPOINT_URL +
-          "/api/formsubmission/getByStatus?StatusType=AWAITING_APPROVER";
+          "/api/formsubmission/getByStatus?status=AWAITING_APPROVER";
     } else {
       url =
         process.env.REACT_APP_ENDPOINT_URL +
