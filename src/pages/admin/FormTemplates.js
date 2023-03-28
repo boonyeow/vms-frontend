@@ -9,13 +9,8 @@ import { useAuthStore } from "../../store";
 import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Select,
-  DialogActions,
-} from "@mui/material";
+import EditAuthorizedAccounts from "../../components/Users/EditAuthorizedAccounts";
+
 
 const FormTemplates = () => {
   const { token } = useAuthStore();
@@ -83,24 +78,7 @@ const FormTemplates = () => {
     setOpenDialog(false);
     setAuthorizedUserList([]);
   };
-  const handleNewAuthorizedUsers =async () => {
-      await axios
-        .put(
-          process.env.REACT_APP_ENDPOINT_URL +
-            `/api/forms/${targetForm.id}/${targetForm.revisionNo}/authorizedAccount`,
-          authorizedUserList,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-           setOpenDialog(false);
-        })
-        .catch((e) => console.error(e));
 
-  };
   function ActionCell({ row, fetchFormsList, token, navigate, setTargetForm }) {
     const handleEditAuthAcc = async (e) => {
       const target = row;
@@ -242,10 +220,8 @@ const columns = [
         const data = res.data.map((obj) => {
           return Object.entries(obj).reduce((acc, [key, value]) => {
             if (typeof value === "object" && !Array.isArray(value)) {
-              // If the value is an object, spread its properties into the accumulator
               acc = { ...acc, ...value };
             } else {
-              // Otherwise, add the property to the accumulator as is
               acc[key] = value;
             }
             return acc;
@@ -274,31 +250,21 @@ const columns = [
        }
      });
 
-     const newAuthorizedAccounts = newAuthorizedUserList.map((user) => user.id);
+    // const newAuthorizedAccounts = newAuthorizedUserList.map((user) => user.id);
 
      setAuthorizedUserList(newAuthorizedUserList);
 
    };
 
- const [userList, setUserList] = useState([]);
   useEffect(() => {
     fetchFormsList();
-    //fetchForms();
-    fetchUserList();
     fetchRegexList();
   }, []);
-  const fetchUserList = async () => {
-    axios
-      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/accounts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setUserList(res.data);
-      })
-      .catch((e) => console.error(e));
-  };
+
+    useEffect(() => {
+      fetchFormsList();
+    }, [openDialog]);
+
 
    const fetchRegexList = async () => {
      await axios
@@ -308,7 +274,6 @@ const columns = [
          },
        })
        .then((res) => {
-       //  console.log(res.data);
          setRegexList(res.data);
        })
        .catch((e) => console.error(e));
@@ -367,34 +332,16 @@ const columns = [
           />
         </div>
       </Stack>
-      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth>
-        <DialogTitle>Edit Authorized Accounts</DialogTitle>
-        <DialogContent>
-          <Select
-            fullWidth
-            value={authorizedUserList}
-            onChange={handleChange}
-            multiple
-            // renderValue={(selected) => (
-            //   <div>
-            //     {selected.map((value) => (
-            //       <Chip key={value.name} label={value.name} />
-            //     ))}
-            //   </div>
-            // )}
-          >
-            {userList.map((user) => (
-              <MenuItem key={user.id} value={user.email}>
-                {user.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleNewAuthorizedUsers}>Submit</Button>
-        </DialogActions>
-      </Dialog>
+      <EditAuthorizedAccounts
+        handleCloseDialog={handleCloseDialog}
+        authorizedUserList={authorizedUserList}
+        handleChange={handleChange}
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+        target={targetForm}
+        type='form'
+      />
+
     </>
   );
 };
