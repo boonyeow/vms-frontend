@@ -8,13 +8,16 @@ import { Container } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { useAuthStore } from "../../store";
 import axios from "axios";
-import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
 const UserMgmt = () => {
   const [open, setOpen] = useState(false);
   const { token } = useAuthStore();
   const [userList, setUserList] = useState([]);
+
+  useEffect(() => {
+    fetchUserList();
+  }, []);
 
   const fetchUserList = async () => {
     axios
@@ -29,16 +32,12 @@ const UserMgmt = () => {
       .catch((e) => console.error(e));
   };
 
-  useEffect(() => {
-    fetchUserList();
-  }, []);
-
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = (event, reason) => {
-    if (reason && reason == "backdropClick") return;
+    if (reason && reason === "backdropClick") return;
     setOpen(false);
   };
 

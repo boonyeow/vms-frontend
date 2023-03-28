@@ -16,31 +16,26 @@ const HomePage = () => {
   }, []);
 
   const fetchWorkflows = () => {
-    let url = null
-    if (role !== 'VENDOR') {
+    let url = null;
+    if (role !== "VENDOR") {
       url = process.env.REACT_APP_ENDPOINT_URL + "/api/workflows";
-
     } else {
       url =
         process.env.REACT_APP_ENDPOINT_URL +
         "/api/workflows/getWorkflowsByAccountId/" +
         accountId;
-
-      }
-      axios
-        .get(
-         url,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          setWorkflowData(res.data);
-          console.log(res.data)
-          setDataLoaded(true);
-        });
+    }
+    axios
+      .get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setWorkflowData(res.data);
+        console.log(res.data);
+        setDataLoaded(true);
+      });
   };
 
   return (
@@ -86,11 +81,6 @@ const HomePage = () => {
 const WorkflowTable = ({ data, dataLoaded }) => {
   //console.log("data", data);
   let rows = data;
-
-  rows.forEach((temp) => {
-    temp["final"] = temp["final"] === true ? "Published" : "Draft";
-  });
-
   let columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
@@ -104,22 +94,22 @@ const WorkflowTable = ({ data, dataLoaded }) => {
       minWidth: 150,
       renderCell: (params) => {
         let isFinal = params.row["final"];
-
-        if (isFinal === "Draft") {
+        console.log(isFinal);
+        if (isFinal === true) {
           return (
             <Chip
-              label={isFinal}
+              label={"Published"}
               sx={{
+                bgcolor: "#e8f4ff",
+                color: "primary.main",
                 fontWeight: "bold",
               }}></Chip>
           );
         } else {
           return (
             <Chip
-              label={isFinal}
+              label={"Draft"}
               sx={{
-                bgcolor: "#e8f4ff",
-                color: "primary.main",
                 fontWeight: "bold",
               }}></Chip>
           );
