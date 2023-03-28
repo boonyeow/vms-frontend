@@ -112,7 +112,6 @@ const columns = [
         const id = params.row.form.id.id;
         const revisionNo = params.row.form.id.revisionNo;
         if (submissionId) {
-          console.log('hiii')
           navigate(`/formsubmission/${id}/${revisionNo}/${submissionId}`);
         } else {
         let workflowId=params.row.workflow.id
