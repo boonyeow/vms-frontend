@@ -16,17 +16,31 @@ const HomePage = () => {
   }, []);
 
   const fetchWorkflows = () => {
-    axios
-      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        console.log(res);
-        setWorkflowData(res.data);
-        setDataLoaded(true);
-      });
+    let url = null
+    if (role !== 'VENDOR') {
+      url = process.env.REACT_APP_ENDPOINT_URL + "/api/workflows";
+
+    } else {
+      url =
+        process.env.REACT_APP_ENDPOINT_URL +
+        "/api/workflows/getWorkflowsByAccountId/" +
+        accountId;
+
+      }
+      axios
+        .get(
+         url,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          setWorkflowData(res.data);
+          console.log(res.data)
+          setDataLoaded(true);
+        });
   };
 
   return (
@@ -47,14 +61,14 @@ const HomePage = () => {
           </Typography>
         </Box>
         <Box sx={{ py: 1 }}>
-          <Box sx={{ p: 1 }}>
+          {/* <Box sx={{ p: 1 }}>
             <Typography
               variant="h6"
               sx={{ fontWeight: "bold", color: "#1f1f1f" }}>
               Action Items
             </Typography>
-            {/* <WorkflowTable data={workflowData} dataLoaded={dataLoaded} /> */}
-          </Box>
+          <WorkflowTable data={workflowData} dataLoaded={dataLoaded} />
+          </Box> */}
           <Box sx={{ p: 1 }}>
             <Typography
               variant="h6"
@@ -70,7 +84,7 @@ const HomePage = () => {
 };
 
 const WorkflowTable = ({ data, dataLoaded }) => {
-  console.log("data", data);
+  //console.log("data", data);
   let rows = data;
 
   rows.forEach((temp) => {
@@ -145,8 +159,8 @@ const WorkflowTable = ({ data, dataLoaded }) => {
     },
   ];
 
-  console.log("rows", rows);
-  console.log("columns", columns);
+  //console.log("rows", rows);
+  //console.log("columns", columns);
   return (
     <>
       {dataLoaded ? ( // only render DataGrid if data has finished loading

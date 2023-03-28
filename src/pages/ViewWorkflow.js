@@ -23,82 +23,147 @@ import { ContentPasteOffOutlined } from "@mui/icons-material";
 
 
 const ViewWorkflow = (props) => {
-
-  const [workflowData,setWorkflowData]=useState({})
+  const [workflowData, setWorkflowData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
   useEffect(() => {
     fetchWorkflowData();
   }, []);
-    useEffect(() => {
-      fetchWorkflowData();
-    }, [openDialog]);
+
+  useEffect(() => {
+    fetchWorkflowData();
+  }, [openDialog]);
+
+  useEffect(() => {
+    if (role === "VENDOR") {
+      getFormsSubmitted();
+    }
+  }, [dataLoaded]);
 
   const navigate = useNavigate();
   const { workflowId } = useParams();
-  const { token } = useAuthStore();
-  const { role } = useAuthStore();
+  const { role, accountId, token } = useAuthStore();
+  const [formsSubmitted, setFormsSubmitted] = useState([]);
+  const [targetWorkflow, setTargetWorkflow] = useState("");
+  const [authorizedUserList, setAuthorizedUserList] = useState([]);
 
-  const [targetWorkflow, setTargetWorkflow] = useState('')
-  const [authorizedUserList, setAuthorizedUserList] = useState([])
   const editAuthorizedUsers = () => {
-      setTargetWorkflow(workflowId);
-      setOpenDialog(true);
-  }
-     const handleChange = (event) => {
-       const {
-         target: { value },
-       } = event;
-       const newAuthorizedUserList = [...authorizedUserList];
+    setTargetWorkflow(workflowId);
+    setOpenDialog(true);
+  };
+  const getFormsSubmitted = () => {
+    axios
+      .get(
+        process.env.REACT_APP_ENDPOINT_URL +
+          "/api/formsubmission/getByAccountId?accountId=" +
+          accountId,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
 
-       value.forEach((selectedOption) => {
-         if (!newAuthorizedUserList.includes(selectedOption)) {
-           newAuthorizedUserList.push(selectedOption);
-         }
-       });
+        let newWorkFlowdataForms = [...workflowData.forms];
+        console.log(res);
+        let submissions = res.data
+          .filter((object) => object.workflow.id == workflowId)
+          .map((object) => {
+            return {
+              formId: object.form.id.id,
+              revisionNo: object.form.id.revisionNo,
+              status: object.status,
+            };
+          });
+        submissions.forEach((submission) => {
+          const formIndex = newWorkFlowdataForms.findIndex((form) => {
+            return (
+              form.formId === submission.formId &&
+              form.revisionNo === submission.revisionNo
+            );
+          });
+          if (formIndex !== -1) {
+            if (!newWorkFlowdataForms[formIndex]["submission"]) {
+              newWorkFlowdataForms[formIndex]["submission"]=[]
+            }
+              newWorkFlowdataForms[formIndex]["submission"].push(submission);
+          } else {
+            const newForm = {
+              formId: submission.formId,
+              revisionNo: submission.revisionNo,
+              name:
+                newWorkFlowdataForms.find(
+                  (form) => form.formId === submission.formId
+                )?.name ?? "",
+              submissions: [],
+            };
+            newForm.submissions.push(submission);
 
-       newAuthorizedUserList.forEach((existingOption, index) => {
-         if (!value.includes(existingOption)) {
-           newAuthorizedUserList.splice(index, 1);
-         }
-       });
-
-       // const newAuthorizedAccounts = newAuthorizedUserList.map((user) => user.id);
-
-       setAuthorizedUserList(newAuthorizedUserList);
-     };
-
-    const handleCloseDialog = () => {
-      setOpenDialog(false);
-      //setAuthorizedUserList([]);
-    };
-    const fetchWorkflowData = async () => {
-      await  axios
-        .get(
-          process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowId,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            newWorkFlowdataForms.push(newForm);
           }
-        )
-        .then((res) => {
-          setWorkflowData(res.data);
-          setAuthorizedUserList(res.data.authorizedAccountIds);
-          console.log(res.data)
-          setDataLoaded(true);
+        });
+        console.log(newWorkFlowdataForms);
+           setWorkflowData((prevData) => ({
+             ...prevData,
+             forms: newWorkFlowdataForms,
+           }));
+      })
+      .catch((e) => console.error(e));
+  };
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    const newAuthorizedUserList = [...authorizedUserList];
 
-        })
-        .catch((e) => console.error(e));
-    };
-  const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
+    value.forEach((selectedOption) => {
+      if (!newAuthorizedUserList.includes(selectedOption)) {
+        newAuthorizedUserList.push(selectedOption);
+      }
+    });
+
+    newAuthorizedUserList.forEach((existingOption, index) => {
+      if (!value.includes(existingOption)) {
+        newAuthorizedUserList.splice(index, 1);
+      }
+    });
+
+    // const newAuthorizedAccounts = newAuthorizedUserList.map((user) => user.id);
+
+    setAuthorizedUserList(newAuthorizedUserList);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    //setAuthorizedUserList([]);
+  };
+  const fetchWorkflowData = async () => {
+    await axios
+      .get(
+        process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + workflowId,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        setWorkflowData(res.data);
+        setAuthorizedUserList(res.data.authorizedAccountIds);
+        console.log(res.data);
+        setDataLoaded(true);
+      })
+      .catch((e) => console.error(e));
+  };
 
   const viewForm = (formId, formRevisionNo) => {
-    if (role === 'ADMIN') {
-      navigate(`../../FormCreation/${formId}/${formRevisionNo}`)
+    if (role === "ADMIN") {
+      navigate(`../../FormCreation/${formId}/${formRevisionNo}`);
     } else {
-      navigate(`../../form/${formId}/${formRevisionNo}`);
+      navigate(`../../form/${formId}/${formRevisionNo}/${workflowId}`);
     }
-  }
+  };
   return (
     <Box>
       <NavBar />
@@ -164,17 +229,37 @@ const ViewWorkflow = (props) => {
             </Box>
 
             <Box sx={{ bgcolor: "white", p: 3, borderRadius: 2 }}>
-              {workflowData.forms?.map((form) => (
+              {workflowData?.forms?.map((form) => (
                 <Box>
                   <Stack
                     direction="row"
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    {form.name}
+                    <Typography
+                      variant="h6"
+                      sx={{ color: "action.main", alignSelf: "center" }}
+                    >
+                      {form.name}
+                    </Typography>
                     {role === "VENDOR"
                       ? ""
                       : ` (ID: ${form.formId} Revision No: ${form.revisionNo})`}
+                    {form.submission ? (
+                      <>
+                       { ` Submission(s): ${form.submission?.length}`}
+                        <Stack>
+                          {form.submission.map((sub, index) => {
+                           return ( <Stack direction="row">
+                              {`${index+1}: ${sub.status}`}
+                            </Stack>)
+                          })}
+                        </Stack>
+                      </>
+                    ) : (
+                      ""
+                    )}
+
                     <Button
                       size="large"
                       sx={{ my: 2 }}
@@ -191,44 +276,44 @@ const ViewWorkflow = (props) => {
             </Box>
           </Box>
 
-          {/* {role === "ADMIN" ? (
+          {role === "ADMIN" ? (
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  sx={{ color: "action.main", alignSelf: "center" }}
+                >
+                  Authorized Accounts List
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<AddIcon />}
+                  sx={{ my: 2 }}
+                  color="action"
+                  onClick={() => {
+                    editAuthorizedUsers();
+                    // setTargetWorkflow(workflowId)
+                  }}
+                >
+                  Edit User
+                </Button>
+              </Box>
+
+              <Box sx={{ my: 2 }}>
+                <UserTable
+                  data={workflowData ? workflowData : []}
+                  dataLoaded={dataLoaded}
+                  workflowId={workflowId}
+                  token={token}
+                  fetchWorkflowData={fetchWorkflowData}
+                />
+              </Box>
+            </Box>
           ) : (
             ""
-          )} */}
-          <Box sx={{ p: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                sx={{ color: "action.main", alignSelf: "center" }}
-              >
-                Authorized Accounts List
-              </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddIcon />}
-                sx={{ my: 2 }}
-                color="action"
-                onClick={() => {
-                  editAuthorizedUsers();
-                  // setTargetWorkflow(workflowId)
-                }}
-              >
-                Edit User
-              </Button>
-            </Box>
-
-            <Box sx={{ my: 2 }}>
-              <UserTable
-                data={workflowData ? workflowData : []}
-                dataLoaded={dataLoaded}
-                workflowId={workflowId}
-                token={token}
-                fetchWorkflowData={fetchWorkflowData}
-              />
-            </Box>
-          </Box>
+          )}
         </Box>
       </Container>
       <EditAuthorizedAccounts

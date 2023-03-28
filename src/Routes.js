@@ -24,7 +24,7 @@ function AppRoutes() {
       <Route path="UserMgmt" element={<UserMgmt />} />
       <Route path="FormTemplates" element={<FormTemplates />} />
       {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
-      <Route path="form/:id/:revisionNo" element={<ViewForm />} />
+      <Route path="form/:id/:revisionNo/:workflowId" element={<ViewForm />} />
       <Route path="formsubmission/:id/:revisionNo/:submissionid" element={<ViewForm />} />
       <Route path="workflow/:workflowId" element={<ViewWorkflow />} />
     </Routes>

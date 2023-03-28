@@ -36,15 +36,11 @@ const ViewForm = (props) => {
     content: () => componentRef.current,
   });
   const formRef = useRef();
-  const { token } = useAuthStore();
-  const { id } = useParams();
-  const { submissionid } = useParams();
-  const { revisionNo } = useParams();
+  const { id,submissionid, workflowId, revisionNo } = useParams();
   const [form, setForm] = useState({});
-  const { role } = useAuthStore();
+  const { role, token, accountId } = useAuthStore();
   const [readOnly, setReadOnly]=useState(false)
   const navigate = useNavigate();
-  const { accountId } = useAuthStore();
   const [submittedResponse, setSubmittedResponse] = useState("");
   const [currentStatus, setCurrentStatus] = useState("");
   const [fieldResponses, setFieldResponses] = useState({});
@@ -117,7 +113,7 @@ const ViewForm = (props) => {
   }
   const handleSubmit = async (event) => {
     const formData = {
-      workflow_id: 1,
+      workflow_id: workflowId,
       fck: {
         id: parseInt(id),
         revisionNo: parseInt(revisionNo),
