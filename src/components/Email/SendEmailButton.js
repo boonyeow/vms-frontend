@@ -10,7 +10,7 @@ import {
 import emailer from "../../utils/emailer";
 import { useAuthStore } from "../../store";
 
-function SendEmailButton() {
+function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
   const [open, setOpen] = useState(false);
   const [recipient, setRecipient] = useState("");
   const [msgBody, setMsgBody] = useState("");
@@ -43,7 +43,7 @@ function SendEmailButton() {
 
   return (
     <>
-      <Button variant="contained" onClick={handleOpen}>
+      <Button variant="outlined" size="small" onClick={handleOpen}>
         Send Email
       </Button>
       <Dialog open={open} onClose={handleClose}>
@@ -56,8 +56,8 @@ function SendEmailButton() {
               label="Recipient"
               type="email"
               fullWidth
+              defaultValue={defaultRecipient}
               required
-              value={recipient}
               onChange={(event) => setRecipient(event.target.value)}
             />
             <TextField
@@ -66,7 +66,7 @@ function SendEmailButton() {
               type="text"
               fullWidth
               required
-              value={subject}
+              defaultValue={defaultSubject}
               onChange={(event) => setSubject(event.target.value)}
             />
             <TextField
@@ -77,14 +77,12 @@ function SendEmailButton() {
               required
               multiline
               rows={4}
-              value={msgBody}
               onChange={(event) => setMsgBody(event.target.value)}
             />
             <TextField
               margin="dense"
               type="file"
               fullWidth
-              value={attachment}
               onChange={(event) => setAttachment(event.target.value)}
             />
           </DialogContent>

@@ -38,7 +38,6 @@ const HomePage = () => {
         )
         .then((res) => {
           setWorkflowData(res.data);
-          console.log(res.data)
           setDataLoaded(true);
         });
   };
@@ -86,11 +85,6 @@ const HomePage = () => {
 const WorkflowTable = ({ data, dataLoaded }) => {
   //console.log("data", data);
   let rows = data;
-
-  rows.forEach((temp) => {
-    temp["final"] = temp["final"] === true ? "Published" : "Draft";
-  });
-
   let columns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1 },
@@ -104,24 +98,26 @@ const WorkflowTable = ({ data, dataLoaded }) => {
       minWidth: 150,
       renderCell: (params) => {
         let isFinal = params.row["final"];
-
-        if (isFinal === "Draft") {
+        //console.log(isFinal);
+        if (isFinal === true) {
           return (
             <Chip
-              label={isFinal}
-              sx={{
-                fontWeight: "bold",
-              }}></Chip>
-          );
-        } else {
-          return (
-            <Chip
-              label={isFinal}
+              label={"Published"}
               sx={{
                 bgcolor: "#e8f4ff",
                 color: "primary.main",
                 fontWeight: "bold",
-              }}></Chip>
+              }}
+            ></Chip>
+          );
+        } else {
+          return (
+            <Chip
+              label={"Draft"}
+              sx={{
+                fontWeight: "bold",
+              }}
+            ></Chip>
           );
         }
       },
@@ -143,14 +139,16 @@ const WorkflowTable = ({ data, dataLoaded }) => {
               href={"/workflow/" + params.row["id"]}
               variant="contained"
               color="action"
-              size="small">
+              size="small"
+            >
               View
             </Button>
             <Button
               variant="outlined"
               color="error"
               size="small"
-              onClick={onClick}>
+              onClick={onClick}
+            >
               Delete
             </Button>
           </Stack>
