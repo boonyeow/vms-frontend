@@ -74,11 +74,7 @@ const FormCreation = () => {
   }, []);
 
   const [authorizedUserList, setAuthorizedUserList] = useState(null);
-  useBeforeUnload(
-    useCallback(() => {
-      localStorage.setItem(`formCreation${id}${revisionNo}`, formData);
-    }, [])
-  );
+
 
 const handleClose = (event, reason) => {
   if (reason === "clickaway") {
@@ -87,10 +83,6 @@ const handleClose = (event, reason) => {
   setOpen(false);
 };
   const getFormData = async () => {
-    const savedFormData = localStorage.getItem(
-      `formCreation${id}${revisionNo}`
-    );
-    console.log(savedFormData)
     let data = {
       name: "",
       description: null,
@@ -135,6 +127,7 @@ const handleClose = (event, reason) => {
             }
           )
           .then(async (res) => {
+            console.log(res.data)
             data.fields = res.data;
            // setFormTitle("Edit Form")
             const promises = [];
@@ -142,7 +135,7 @@ const handleClose = (event, reason) => {
               if (field.nextFieldsId) {
                 for (const [key, value] of Object.entries(field.nextFieldsId)) {
                   promises.push(
-                    axios
+                     axios
                       .get(
                         process.env.REACT_APP_ENDPOINT_URL +
                           `/api/fields/dto/${value}`,
@@ -170,9 +163,12 @@ const handleClose = (event, reason) => {
            data.fields = data.fields.filter(
              (obj) => !fieldtoDelete.includes(obj.id)
            );
-        let form = await replaceKey(data);
+           //console.log(data)
+           let form = await replaceKey(data);
+          // console.log(form)
         let processedForm = await processForm(form);
         //console.log(replaceKey(processedForm));
+        console.log(processedForm)
         setFormData(processedForm);
 
       })
@@ -181,8 +177,8 @@ const handleClose = (event, reason) => {
   };
 
   const replaceKey = (obj) => {
+   // console.log(obj)
     let converedObj = _.cloneDeep(obj);
-
     converedObj.fields.map((field) => {
       if (field.nextFieldsId) {
         let data = field.nextFieldsId;
@@ -190,7 +186,7 @@ const handleClose = (event, reason) => {
         delete field.nextFieldsId
         if (Object.keys(field.options).length > 0) {
           for (const [key, value] of Object.entries(field.options)) {
-            if (value.nextFieldsId) {
+            if (value?.nextFieldsId) {
               let nesteddata = value.nextFieldsId;
               field.options[key].options = nesteddata
               delete field.options[key].nextFieldsId;
@@ -213,11 +209,10 @@ const handleClose = (event, reason) => {
       if (field.fieldType) {
         field.fieldType = fieldTypeMatching[field.fieldType];
       }
-
       // Check if options exists and recursively set its fieldType to null
       if (field.options) {
         Object.values(field.options).forEach((nestedField) => {
-          if (nestedField.fieldType) {
+          if (nestedField?.fieldType) {
             //console.log( nestedField.fieldType)
             nestedField.fieldType = fieldTypeMatching[nestedField.fieldType];
           }
@@ -752,7 +747,7 @@ const [formTitle,setFormTitle]=useState('')
                       </Stack>
                     </Grid>
                     <Grid item xs={1}>
-                      <Tooltip title="Add Field Beside" placement="top-start">
+                      {field.fieldType !== "text" ?<Tooltip title="Add Field Beside" placement="top-start">
                         <div>
                           <FieldTypeMenu
                             handleChangeFieldType={handleChangeFieldType}
@@ -760,7 +755,7 @@ const [formTitle,setFormTitle]=useState('')
                             isNextField={true}
                           />
                         </div>
-                      </Tooltip>
+                      </Tooltip> : ''}
                     </Grid>
                     <Grid item xs={6}>
                       {field.options &&
