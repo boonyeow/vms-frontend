@@ -103,7 +103,10 @@ const WorkflowTable = ({ data, dataLoaded }) => {
           return (
             <Chip
               label={"Published"}
+              label={"Published"}
               sx={{
+                bgcolor: "#e8f4ff",
+                color: "primary.main",
                 bgcolor: "#e8f4ff",
                 color: "primary.main",
                 fontWeight: "bold",
@@ -113,6 +116,7 @@ const WorkflowTable = ({ data, dataLoaded }) => {
         } else {
           return (
             <Chip
+              label={"Draft"}
               label={"Draft"}
               sx={{
                 fontWeight: "bold",

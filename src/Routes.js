@@ -25,8 +25,11 @@ function AppRoutes() {
       <Route path="FormTemplates" element={<FormTemplates />} />
       {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
       <Route path="form/:id/:revisionNo/:workflowId" element={<ViewForm />} />
-      <Route path="formsubmission/:id/:revisionNo/:submissionid" element={<ViewForm />} />
-      <Route path="workflow/:workflowId" element={<ViewWorkflow />} />
+      <Route
+        path="formsubmission/:id/:revisionNo/:submissionid"
+        element={<ViewForm />}
+      />
+      <Route path="workflow/:id" element={<ViewWorkflow />} />
     </Routes>
   );
 }
