@@ -3,7 +3,7 @@ import NextFields from "../../components/FormInputs/NextFields";
 import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
 import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
-import { useBeforeUnload } from "react-router-dom";
+import { useBeforeUnload, useParams } from "react-router-dom";
 import {
   Button,
   Card,
@@ -16,7 +16,7 @@ import {
   Grid,
   Checkbox,
   Tooltip,
-  Alert ,
+  Alert,
   OutlinedInput,
   InputLabel,
   FormControl,
@@ -52,41 +52,45 @@ const fieldTypeMatching = {
   text: "TEXTBOX",
   radio: "RADIOBUTTON",
   checkbox: "CHECKBOX",
-  TEXTBOX: 'text',
-  RADIOBUTTON: 'radio',
-  CHECKBOX:'checkbox'
+  TEXTBOX: "text",
+  RADIOBUTTON: "radio",
+  CHECKBOX: "checkbox",
 };
 
 const FormCreation = () => {
   const { token } = useAuthStore();
-  const url = new URL(window.location.href);
-  const id = url.pathname.split("/")[2];
-  const revisionNo = url.pathname.split("/")[3];
+  const { id, revisionNo } = useParams();
   const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
- const [isDisabled, setIsDisabled] = useState(false);
- const [open, setOpen] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(null);
   useEffect(() => {
     fetchUserList();
     getFormData();
-
   }, []);
 
-  const [authorizedUserList, setAuthorizedUserList] = useState(null);
+  useBeforeUnload(
+    useCallback(() => {
+      localStorage.setItem(`formCreation${id}${revisionNo}`, formData);
+    }, [])
+  );
 
-
-const handleClose = (event, reason) => {
-  if (reason === "clickaway") {
-    return;
-  }
-  setOpen(false);
-};
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false);
+  };
   const getFormData = async () => {
+    const savedFormData = localStorage.getItem(
+      `formCreation${id}${revisionNo}`
+    );
+    console.log(savedFormData);
     let data = {
       name: "",
       description: null,
-      isFinal: false,
+      is_final: false,
       workflows: [],
       fields: [
         {
@@ -95,10 +99,9 @@ const handleClose = (event, reason) => {
           isRequired: true,
           fieldType: "radio",
           regexId: null,
-          nextFieldsId:{}
+          nextFieldsId: {},
         },
       ],
-      authorizedAccounts: [],
     };
     await axios
       .get(
@@ -110,12 +113,11 @@ const handleClose = (event, reason) => {
         }
       )
       .then(async (res) => {
-       // console.log(res.data)
+        // console.log(res.data)
         data = { ...data, ...res.data };
-       // setFormTitle("Create Form");
-        setAuthorizedUserList(data.authorizedAccounts)
-        setIsDisabled(data.isFinal);
-        const fieldtoDelete=[]
+        // setFormTitle("Create Form");
+        setIsDisabled(data.is_final);
+        const fieldtoDelete = [];
         await axios
           .get(
             process.env.REACT_APP_ENDPOINT_URL +
@@ -127,15 +129,15 @@ const handleClose = (event, reason) => {
             }
           )
           .then(async (res) => {
-            console.log(res.data)
+            console.log(res.data);
             data.fields = res.data;
-           // setFormTitle("Edit Form")
+            // setFormTitle("Edit Form")
             const promises = [];
             res.data.forEach((field, index) => {
               if (field.nextFieldsId) {
                 for (const [key, value] of Object.entries(field.nextFieldsId)) {
                   promises.push(
-                     axios
+                    axios
                       .get(
                         process.env.REACT_APP_ENDPOINT_URL +
                           `/api/fields/dto/${value}`,
@@ -148,8 +150,7 @@ const handleClose = (event, reason) => {
                       .then((res) => {
                         data.fields[index].nextFieldsId[key] = res.data;
                         //console.log(value)
-                        fieldtoDelete.push(value)
-
+                        fieldtoDelete.push(value);
                       })
                       .catch((e) => console.error(e))
                   );
@@ -160,46 +161,39 @@ const handleClose = (event, reason) => {
             await Promise.all(promises);
           })
           .catch((e) => console.error(e));
-           data.fields = data.fields.filter(
-             (obj) => !fieldtoDelete.includes(obj.id)
-           );
-           //console.log(data)
-           let form = await replaceKey(data);
-          // console.log(form)
+        data.fields = data.fields.filter(
+          (obj) => !fieldtoDelete.includes(obj.id)
+        );
+        let form = await replaceKey(data);
         let processedForm = await processForm(form);
         //console.log(replaceKey(processedForm));
-        console.log(processedForm)
+        console.log(processedForm);
         setFormData(processedForm);
-
       })
 
       .catch((e) => console.error(e));
   };
 
   const replaceKey = (obj) => {
-   // console.log(obj)
+    // console.log(obj)
     let converedObj = _.cloneDeep(obj);
     converedObj.fields.map((field) => {
       if (field.nextFieldsId) {
         let data = field.nextFieldsId;
-        field.options = data
-        delete field.nextFieldsId
+        field.options = data;
+        delete field.nextFieldsId;
         if (Object.keys(field.options).length > 0) {
           for (const [key, value] of Object.entries(field.options)) {
             if (value?.nextFieldsId) {
               let nesteddata = value.nextFieldsId;
-              field.options[key].options = nesteddata
+              field.options[key].options = nesteddata;
               delete field.options[key].nextFieldsId;
             }
           }
         }
-
       }
-    })
+    });
     return converedObj;
-  }
-  const applyChanges = (isFinal, workflowsLength) => {
-    return isFinal ? workflowsLength > 0 : false;
   };
 
   const processForm = (form) => {
@@ -226,34 +220,26 @@ const handleClose = (event, reason) => {
     let processedForm = await processForm(formData);
     delete processedForm.id;
 
-     let authorisedAccList = authorizedUserList.map((obj)=>obj.email)
-    // processedForm["authorizedAccountIds"] = authorisedAccList;
-    delete processedForm.authorizedAccounts;
-    const shouldApplyChanges = applyChanges(
-      formData.isFinal,
-      formData.workflows.length
-    );
-   processedForm.fields.map((field) => {
-     delete field.id;
-     if (field.regexId === null) {
-       delete field.regexId;
-     }
+    processedForm.fields.map((field) => {
+      delete field.id;
+      if (field.regexId === null) {
+        delete field.regexId;
+      }
 
-     if (field.options) {
-       for (const [key, value] of Object.entries(field.options)) {
-         delete field.options[key].id;
-         if (field.options[key].regexId === null) {
-           delete field.options[key].regexId;
-         }
-       }
-     }
-    return field;
-   });
+      if (field.options) {
+        for (const [key, value] of Object.entries(field.options)) {
+          delete field.options[key].id;
+          if (field.options[key].regexId === null) {
+            delete field.options[key].regexId;
+          }
+        }
+      }
+      return field;
+    });
 
     await axios
       .put(
-        process.env.REACT_APP_ENDPOINT_URL +
-          `/api/forms/${id}/${revisionNo}?applyChanges=${shouldApplyChanges}`,
+        process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
         processedForm,
         {
           headers: {
@@ -262,24 +248,6 @@ const handleClose = (event, reason) => {
           },
         }
       )
-      .then(async (res) => {
-        await axios
-          .put(
-            process.env.REACT_APP_ENDPOINT_URL +
-              `/api/forms/${id}/${revisionNo}/authorizedAccount`,
-            authorisedAccList,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-          .then((res) => {
-            setOpen(true);
-            navigate("/FormTemplates");
-          })
-          .catch((e) => console.error(e));
-      })
       .catch((e) => {
         console.log(e);
       });
@@ -300,8 +268,7 @@ const handleClose = (event, reason) => {
 
   const nextFieldOptionChange = (value, key, index) => {
     const newFields = [...formData.fields];
-    const object =
-      newFields[index].options[newFields[index].name];
+    const object = newFields[index].options[newFields[index].name];
     object.options[value] = object.options[key];
     delete object.options[key];
 
@@ -311,54 +278,6 @@ const handleClose = (event, reason) => {
     }));
   };
 
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    const newAuthorizedUserList = [...authorizedUserList];
-
-    value.forEach((selectedOption) => {
-      if (!newAuthorizedUserList.includes(selectedOption)) {
-        newAuthorizedUserList.push(selectedOption);
-      }
-    });
-
-    newAuthorizedUserList.forEach((existingOption, index) => {
-      if (!value.includes(existingOption)) {
-        newAuthorizedUserList.splice(index, 1);
-      }
-    });
-
-    const newAuthorizedAccounts = newAuthorizedUserList.map(
-      (user) => user.email
-    );
-
-    setAuthorizedUserList(newAuthorizedUserList);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      authorizedAccounts: newAuthorizedAccounts,
-    }));
-  };
-
-  //   {
-  //   "name": "Site Evaluation Results",
-  //   "helpText": "laurent",
-  //   "isRequired": true,
-  //   "fieldType": "CHECKBOX",
-  //   "options": {
-  //     "Site Evaluation Results": {
-  //       "name": "",
-  //       "helpText": "",
-  //       "isRequired": false,
-  //       "fieldType": "RADIOBUTTON",
-  //       "options": {
-  //         "Satisfactory": null,
-  //         "Unsatisfactory": null
-  //       }
-  //     }
-  //   }
-  // }
-
   const changeData = (data, type) => {
     // if (type == 'isFinal') {
     //  setIsDisabled(data);
@@ -367,18 +286,16 @@ const handleClose = (event, reason) => {
       ...prevData,
       [type]: data,
     }));
-  //  console.log(formData);
+    //  console.log(formData);
   };
 
   const fieldDataChange = (value, index, isNextField, type) => {
     const newFields = [...formData.fields];
     if (isNextField) {
-      newFields[index].options[newFields[index].name][type] =
-        value;
+      newFields[index].options[newFields[index].name][type] = value;
     } else {
       newFields[index][type] = value;
     }
-    //console.log(newFields);
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
@@ -387,13 +304,11 @@ const handleClose = (event, reason) => {
   const deleteField = (index) => {
     const newFields = [...formData.fields];
     newFields.splice(index, 1);
-    //console.log(newFields);
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
     }));
   };
-
 
   const handleCancelForm = async () => {
     await axios
@@ -432,8 +347,7 @@ const handleClose = (event, reason) => {
       if (input.value !== "text") {
         nextField.options = { option1: null };
       }
-      newFields[index].options[formData.fields[index].name] =
-        nextField;
+      newFields[index].options[formData.fields[index].name] = nextField;
     } else {
       newFields[index] = {
         ...newFields[index],
@@ -462,17 +376,16 @@ const handleClose = (event, reason) => {
   const addNextFieldOptions = (index) => {
     const newFields = [...formData.fields];
     const length = Object.keys(
-      newFields[index].options[newFields[index].name]
-        .options
+      newFields[index].options[newFields[index].name].options
     ).length;
-    newFields[index].options[
-      newFields[index].name
-    ].options[`option${length + 1}`] = null;
+    newFields[index].options[newFields[index].name].options[
+      `option${length + 1}`
+    ] = null;
     setFormData((prevData) => ({
       ...prevData,
       fields: newFields,
     }));
-   // console.log(newFields);
+    // console.log(newFields);
   };
   const handleFieldNameChange = (value, index) => {
     //console.log(formData);
@@ -481,12 +394,8 @@ const handleClose = (event, reason) => {
     //console.log(formData.fields);
     newFields[index].name = value;
 
-    if (
-      newFields[index].options &&
-      newFields[index].options[prevName]
-    ) {
-      newFields[index].options[value] =
-        newFields[index].options[prevName];
+    if (newFields[index].options && newFields[index].options[prevName]) {
+      newFields[index].options[value] = newFields[index].options[prevName];
       delete newFields[index].options[prevName];
     }
 
@@ -502,19 +411,16 @@ const handleClose = (event, reason) => {
     return errors;
   };
   const [errors, setErrors] = useState({});
-const [formTitle,setFormTitle]=useState('')
+  const [formTitle, setFormTitle] = useState("");
   const deleteNextFieldOptions = (index, key, isText) => {
     const newFields = [...formData.fields];
     if (!isText) {
-      delete newFields[index].options[newFields[index].name]
-        .options[key];
+      delete newFields[index].options[newFields[index].name].options[key];
     }
     if (
       isText ||
-      Object.keys(
-        newFields[index].options[newFields[index].name]
-          .options
-      ).length === 0
+      Object.keys(newFields[index].options[newFields[index].name].options)
+        .length === 0
     ) {
       newFields[index].options = {};
     }
@@ -523,7 +429,7 @@ const [formTitle,setFormTitle]=useState('')
       fields: newFields,
     }));
   };
-  if (!formData || !authorizedUserList) {
+  if (!formData) {
     return <div>Loading...</div>;
   }
 
@@ -531,11 +437,12 @@ const [formTitle,setFormTitle]=useState('')
     if (isDisabled) {
       return (
         <Alert severity="warning" sx={{ width: "100%" }}>
-          Form is final and submission is disabled. Please duplicate this form if further upates are necessary.
+          Form is final and submission is disabled. Please duplicate this form
+          if further upates are necessary.
         </Alert>
       );
     }
-  }
+  };
   return (
     <>
       <NavBar />
@@ -588,38 +495,6 @@ const [formTitle,setFormTitle]=useState('')
               variant="outlined"
               onChange={(e) => changeData(e.target.value, "description")}
             />
-            <div>
-              <FormControl sx={{ m: 1, width: 300 }}>
-                <InputLabel id="demo-multiple-checkbox-label">
-                  Authorized Accounts
-                </InputLabel>
-                <Select
-                  labelId="demo-multiple-checkbox-label"
-                  id="demo-multiple-checkbox"
-                  multiple
-                  value={authorizedUserList}
-                  onChange={handleChange}
-                  input={<OutlinedInput label="AuthorizedAccounts" />}
-                  renderValue={(selected) => (
-                    <div>
-                      {selected.map((value) => (
-                        <Chip key={value.name} label={value.name} />
-                      ))}
-                    </div>
-                  )}
-                  MenuProps={MenuProps}
-                >
-                  {userList.map((user) => (
-                    <MenuItem key={user.id} value={user}>
-                      <Checkbox
-                        checked={authorizedUserList.indexOf(user) > -1}
-                      />
-                      <ListItemText primary={user.name} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
           </Stack>
           <Card sx={{ maxWidth: 1100, margin: "auto", marginTop: 2 }}>
             <CardContent>
@@ -629,16 +504,14 @@ const [formTitle,setFormTitle]=useState('')
                     container
                     justifyContent="flex-start"
                     alignItems="flex-start"
-                    key={index}
-                  >
+                    key={index}>
                     <Grid item xs={5}>
                       <Stack>
                         <Stack
                           direction="row"
                           spacing={3}
                           justifyContent="flex-start"
-                          alignItems="center"
-                        >
+                          alignItems="center">
                           <FieldTypeMenu
                             handleChangeFieldType={handleChangeFieldType}
                             index={index}
@@ -683,7 +556,7 @@ const [formTitle,setFormTitle]=useState('')
                               sx={{
                                 marginTop: 2,
                                 paddingX: 3,
-                                marginLeft:5,
+                                marginLeft: 5,
                                 maxWidth: "70%",
                               }}
                               placeholder="User Input"
@@ -695,8 +568,7 @@ const [formTitle,setFormTitle]=useState('')
                           alignItems="flex-end"
                           direction="row"
                           spacing={2}
-                          sx={{ marginLeft: 8 }}
-                        >
+                          sx={{ marginLeft: 8 }}>
                           <TextField
                             size="small"
                             variant="standard"
@@ -724,8 +596,7 @@ const [formTitle,setFormTitle]=useState('')
                           spacing={3}
                           justifyContent="flex-start"
                           alignItems="center"
-                          sx={{ marginTop: 3, marginLeft: 8 }}
-                        >
+                          sx={{ marginTop: 3, marginLeft: 8 }}>
                           <RequiredCheckBox
                             fields={field}
                             nextField={false}
@@ -747,15 +618,19 @@ const [formTitle,setFormTitle]=useState('')
                       </Stack>
                     </Grid>
                     <Grid item xs={1}>
-                      {field.fieldType !== "text" ?<Tooltip title="Add Field Beside" placement="top-start">
-                        <div>
-                          <FieldTypeMenu
-                            handleChangeFieldType={handleChangeFieldType}
-                            index={index}
-                            isNextField={true}
-                          />
-                        </div>
-                      </Tooltip> : ''}
+                      {field.fieldType !== "text" ? (
+                        <Tooltip title="Add Field Beside" placement="top-start">
+                          <div>
+                            <FieldTypeMenu
+                              handleChangeFieldType={handleChangeFieldType}
+                              index={index}
+                              isNextField={true}
+                            />
+                          </div>
+                        </Tooltip>
+                      ) : (
+                        ""
+                      )}
                     </Grid>
                     <Grid item xs={6}>
                       {field.options &&
@@ -766,8 +641,8 @@ const [formTitle,setFormTitle]=useState('')
                               id="outlined-basic"
                               label="Label"
                               value={field.options[field.name].name}
-                                variant="standard"
-                                sx={{maxWidth:"250px"}}
+                              variant="standard"
+                              sx={{ maxWidth: "250px" }}
                               onChange={(e) => {
                                 const newFields = [...formData.fields];
                                 newFields[index].options[
@@ -809,8 +684,11 @@ const [formTitle,setFormTitle]=useState('')
                           </Stack>
                           <Grid
                             item
-                            style={{ display: "flex", alignItems: "center", marginTop:10 }}
-                          >
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              marginTop: 10,
+                            }}>
                             <RequiredCheckBox
                               fields={field.options[field.name]}
                               nextField={true}
@@ -839,8 +717,7 @@ const [formTitle,setFormTitle]=useState('')
                     container
                     direction="row"
                     justifyContent="flex-end"
-                    alignItems="flex-end"
-                  >
+                    alignItems="flex-end">
                     {index !== 0 ? (
                       <IconButton onClick={() => deleteField(index)}>
                         <DeleteIcon />
@@ -867,21 +744,18 @@ const [formTitle,setFormTitle]=useState('')
               justifyContent: "flex-end",
               width: "85%",
               gap: 10,
-            }}
-          >
+            }}>
             <Tooltip
               title="Once form is final, updating will create new revision."
-              placement="top-start"
-            >
+              placement="top-start">
               <ToggleButtonGroup
                 color="primary"
                 exclusive
-                value={formData.isFinal}
+                value={formData.is_final}
                 onChange={(e) =>
-                  changeData(e.target.value === "true", "isFinal")
+                  changeData(e.target.value === "true", "is_final")
                 }
-                aria-label="Platform"
-              >
+                aria-label="Platform">
                 <ToggleButton value={true}>Final</ToggleButton>
                 <ToggleButton value={false} disabled={isDisabled}>
                   Not Final
@@ -892,8 +766,7 @@ const [formTitle,setFormTitle]=useState('')
               size="small"
               variant="contained"
               style={{ backgroundColor: "red" }}
-              onClick={handleCancelForm}
-            >
+              onClick={handleCancelForm}>
               Delete
             </Button>
 
@@ -901,21 +774,18 @@ const [formTitle,setFormTitle]=useState('')
               size="small"
               variant="contained"
               style={{ backgroundColor: "grey" }}
-                onClick={()=>{navigate(
-                  "../../../FormTemplates"
-                );}}
-            >
+              onClick={() => {
+                navigate("../../../FormTemplates");
+              }}>
               Cancel
             </Button>
-
 
             <Button
               size="small"
               variant="contained"
               color="primary"
               disabled={isDisabled}
-              onClick={(e) => handleSubmitForm()}
-            >
+              onClick={(e) => handleSubmitForm()}>
               Submit
             </Button>
           </div>

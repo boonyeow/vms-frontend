@@ -1,17 +1,4 @@
-import {
-  Autocomplete,
-  Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormHelperText,
-  Input,
-  InputLabel,
-  TextField,
-  Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Button, TextField, Typography } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -20,7 +7,6 @@ import axios from "axios";
 import { useAuthStore } from "../store";
 
 import AttachedFormsSection from "../components/Workflow/AttachedFormsSection.js";
-import AuthorizedUsersSection from "../components/Workflow/AuthorizedUsersSection";
 import Swal from "sweetalert2";
 
 const ViewWorkflow = (props) => {
@@ -31,18 +17,17 @@ const ViewWorkflow = (props) => {
 
   const [attachedForms, setAttachedForms] = useState([]);
   const [userList, setUserList] = useState([]);
-  const [authorizedUsers, setAuthorizedUsers] = useState([]);
+  const [userMap, setUserMap] = useState({});
 
   useEffect(() => {
-    console.log(id);
+    fetchUserList();
     fetchWorkflowInfo();
     fetchFormTemplateInfo();
-    fetchUserList();
   }, []);
 
   useEffect(() => {
-    console.log("hehe changed", formTemplateInfo);
-  }, [formTemplateInfo]);
+    fetchWorkflowInfo();
+  }, [userMap]);
 
   useEffect(() => {
     console.log("attach", attachedForms);
@@ -56,15 +41,14 @@ const ViewWorkflow = (props) => {
         },
       })
       .then((res) => {
-        setAuthorizedUsers(res.data["authorizedAccountIds"]);
         setWorkflowInfo(res.data);
-        // console.log("LINE 57 VIEW WORKFLOW", res.data);
         setAttachedForms(
           res.data["forms"].map((temp) => {
             return {
               id: { id: temp["formId"], revisionNo: temp["revisionNo"] },
               name: temp["name"],
               description: temp["description"],
+              account: userMap[temp["accountId"]],
             };
           })
         );
@@ -96,22 +80,56 @@ const ViewWorkflow = (props) => {
       })
       .then((res) => {
         setUserList(res.data);
+        const newUserMap = res.data.reduce((acc, cur) => {
+          acc[cur.id] = cur;
+          return acc;
+        }, {});
+        setUserMap(newUserMap);
+        console.log(newUserMap);
       })
       .catch((e) => console.error(e));
   };
 
   const handleSave = (isFinal) => {
+    if (workflowInfo.final === true) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Workflow is final and cannot be edited.",
+        confirmButtonColor: "#262626",
+      });
+      return;
+    }
+
     let data = {
       name: workflowInfo["name"],
-      isFinal: isFinal,
-      form_ids: attachedForms.map((item) => ({
-        id: item.id.id,
-        revisionNo: item.id.revisionNo,
-      })),
-      authorized_accounts_ids: authorizedUsers,
+      is_final: isFinal,
+      workflow_form_assignments: attachedForms
+        .filter(
+          (item) =>
+            //remaining objects in the array are the ones that have a non-null account property with an id property
+            item.hasOwnProperty("account") &&
+            item["account"] !== null &&
+            item["account"].hasOwnProperty("id")
+        )
+        .map((item) => ({
+          accountId: item["account"]["id"],
+          formId: { id: item.id.id, revisionNo: item.id.revisionNo },
+        })),
     };
 
-    if (data.form_ids.length === 0 && isFinal === true) {
+    // Checks
+    if (attachedForms.length !== data.workflow_form_assignments.length) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Make sure all forms have been assigned.",
+        confirmButtonColor: "#262626",
+      });
+      return;
+    }
+
+    if (data.workflow_form_assignments.length === 0) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -207,12 +225,7 @@ const ViewWorkflow = (props) => {
             attachedForms={attachedForms}
             setAttachedForms={setAttachedForms}
             disabled={workflowInfo["final"]}
-          />
-          {console.log("hehehe", authorizedUsers)}
-          <AuthorizedUsersSection
             userList={userList}
-            authorizedUsers={authorizedUsers}
-            setAuthorizedUsers={setAuthorizedUsers}
           />
         </Box>
       </Container>

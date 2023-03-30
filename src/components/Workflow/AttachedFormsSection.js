@@ -12,8 +12,10 @@ import { useState } from "react";
 
 const AttachedFormsSection = ({
   formOptions,
-  attachedForms,
+  attachedForms = [],
   setAttachedForms,
+  userList = [],
+  userMap,
   disabled,
 }) => {
   const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -26,9 +28,23 @@ const AttachedFormsSection = ({
     setAttachedForms(newSequence);
   };
 
-  const handleChange = (event, newValue) => {
-    console.log("hnewu value", newValue);
+  const handleAttachForm = (event, newValue) => {
+    let temp = [];
+    for (let i = 0; i < newValue.length; i++) {
+      temp.push({
+        account: null,
+        form: newValue[i]["id"],
+      });
+    }
+    console.log("new Valee", newValue);
     setAttachedForms(newValue);
+  };
+
+  const handleAssignUser = (newValue, idx) => {
+    let temp = [...attachedForms];
+    temp[idx]["account"] = newValue;
+    setAttachedForms(temp);
+    console.log("COMONMAN", temp);
   };
 
   return (
@@ -51,7 +67,7 @@ const AttachedFormsSection = ({
             getOptionLabel={(option) =>
               `${option.name} (id=${option.id.id}, revNo=${option.id.revisionNo})`
             }
-            onChange={handleChange}
+            onChange={handleAttachForm}
             value={attachedForms}
             isOptionEqualToValue={(option, value) =>
               option.id.id === value.id.id &&
@@ -81,60 +97,91 @@ const AttachedFormsSection = ({
           Approval Sequence
         </Typography>
 
-        {attachedForms.map((i) => {
-          return (
-            <Box
-              key={attachedForms.indexOf(i)}
-              sx={{
-                bgcolor: "white",
-                p: 3,
-                borderRadius: 2,
-                my: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}>
-              <Typography sx={{ fontWeight: "bold" }}>
-                {attachedForms.indexOf(i) + 1}.{" "}
-                {`${i.name} (id=${i.id.id}, revNo=${i.id.revisionNo})`}
-              </Typography>
-              <Box>
-                <Button
-                  variant="outlined"
-                  disabled={
-                    attachedForms.length == 1 || attachedForms.indexOf(i) == 0
-                      ? true
-                      : false
-                  }
-                  onClick={() => {
-                    swapSequence(
-                      attachedForms.indexOf(i),
-                      attachedForms.indexOf(i) - 1
-                    );
-                  }}
-                  sx={{ mr: 2 }}>
-                  Shift up
-                </Button>
-                <Button
-                  variant="outlined"
-                  disabled={
-                    attachedForms.length == 1 ||
-                    attachedForms.indexOf(i) == attachedForms.length - 1
-                      ? true
-                      : false
-                  }
-                  onClick={() => {
-                    swapSequence(
-                      attachedForms.indexOf(i),
-                      attachedForms.indexOf(i) + 1
-                    );
+        {attachedForms &&
+          attachedForms.map((i) => {
+            return (
+              <Box
+                key={attachedForms.indexOf(i)}
+                sx={{ bgcolor: "white", borderRadius: 2, py: 3, my: 2 }}>
+                <Box
+                  sx={{
+                    px: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}>
-                  Shift down
-                </Button>
+                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    {attachedForms.indexOf(i) + 1}.{" "}
+                    {`${i.name} (id=${i.id.id}, revNo=${i.id.revisionNo})`}
+                  </Typography>
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      disabled={
+                        attachedForms.length == 1 ||
+                        attachedForms.indexOf(i) == 0
+                          ? true
+                          : false
+                      }
+                      onClick={() => {
+                        swapSequence(
+                          attachedForms.indexOf(i),
+                          attachedForms.indexOf(i) - 1
+                        );
+                      }}
+                      sx={{ mr: 2 }}>
+                      Shift up
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      disabled={
+                        attachedForms.length == 1 ||
+                        attachedForms.indexOf(i) == attachedForms.length - 1
+                          ? true
+                          : false
+                      }
+                      onClick={() => {
+                        swapSequence(
+                          attachedForms.indexOf(i),
+                          attachedForms.indexOf(i) + 1
+                        );
+                      }}>
+                      Shift down
+                    </Button>
+                  </Box>
+                </Box>
+                <Box sx={{ px: 3, py: 2 }}>
+                  <Typography
+                    sx={{ color: "action.light", fontWeight: "bold" }}>
+                    Assign to User
+                  </Typography>
+
+                  <Box sx={{ mt: 1 }}>
+                    {/* {console.log(i.hasOwnProperty("id"))}
+                    {console.log(i)} */}
+                    {i.hasOwnProperty("id") && (
+                      <Autocomplete
+                        defaultValue={
+                          userList[userList.findIndex((x) => x.id === i.id)]
+                        }
+                        onChange={(event, newValue) => {
+                          handleAssignUser(newValue, attachedForms.indexOf(i));
+                        }}
+                        id="controllable-states-demo"
+                        options={userList}
+                        getOptionLabel={(option) => option["email"]}
+                        sx={{ width: 300, bgcolor: "white", mr: 2 }}
+                        renderInput={(params) => (
+                          <TextField {...params} label="Search User" />
+                        )}
+                        size="small"
+                      />
+                    )}
+                  </Box>
+                </Box>
               </Box>
-            </Box>
-          );
-        })}
+            );
+          })}
       </Box>
     </>
   );
