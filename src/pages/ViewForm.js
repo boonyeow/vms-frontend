@@ -109,7 +109,7 @@ const ViewForm = (props) => {
       ...prevData,
       [parseInt(id)]: value,
     }));
-    console.log(fieldResponses)
+    //console.log(fieldResponses)
   }
   const handleSubmit = async (event) => {
     const formData = {
@@ -265,7 +265,7 @@ if (!submittedResponse && role!=='VENDOR') {
               {form.name}
             </Typography>
             <Divider sx={{ marginY: 3 }} />
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{paddingX:2}}>
               {form.description}
             </Typography>
             <Divider sx={{ marginY: 3 }} />

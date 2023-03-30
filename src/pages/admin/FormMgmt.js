@@ -1,9 +1,7 @@
 import NavBar from "../../components/SharedComponents/NavBar";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -122,13 +120,13 @@ const columns = [
     sortable: false,
     disableClickEventBubbling: true,
     renderCell: (params) => {
-      if (params.row.status !== "NOT SUBMITTED") {
+      if (params.row.status !== "NOT SUBMITTED" || role==='VENDOR') {
         const onClick = (e) => {
-          const submissionId = params.row.id ? params.row.id : "";
-          const id = params.row.form?.id.id
+          const submissionId = params.row.id ? params.row.id : undefined;
+          const id = params.row.form
             ? params.row.form.id.id
             : params.row.formId;
-          const revisionNo = params.row.form?.id.revisionNo
+          const revisionNo = params.row.form
             ? params.row.form.id.revisionNo
             : params.row.revisionNo;
           if (submissionId) {
@@ -144,6 +142,7 @@ const columns = [
               variant="outlined"
               color="warning"
               size="small"
+              key={params.row.id+(params.row.workflow ? params.row.workflow.id: params.row.workflowId)}
               onClick={onClick}
             >
               View
@@ -151,7 +150,18 @@ const columns = [
           </Stack>
         );
       } else if (role === "ADMIN") {
-        return <SendEmailButton defaultRecipient={ params.row.email} defaultSubject={`Please submit form (ID:${params.row.formId} Name:${params.row.formName}) from workflow (ID:${params.row.workflowId})`} />;
+        return (
+          <SendEmailButton
+            key={
+              params.row.id +
+              (params.row.workflow
+                ? params.row.workflow.id
+                : params.row.workflowId)
+            }
+            defaultRecipient={params.row.email}
+            defaultSubject={`Please submit form (ID:${params.row.formId} Name:${params.row.formName}) from workflow (ID:${params.row.workflowId})`}
+          />
+        );
       }
     },
   },

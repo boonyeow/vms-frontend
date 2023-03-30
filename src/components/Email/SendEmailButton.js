@@ -6,34 +6,49 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import emailer from "../../utils/emailer";
 import { useAuthStore } from "../../store";
 
 function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
   const [open, setOpen] = useState(false);
-  const [recipient, setRecipient] = useState("");
+  const [recipient, setRecipient] = useState(defaultRecipient);
   const [msgBody, setMsgBody] = useState("");
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(defaultSubject);
   const [attachment, setAttachment] = useState("");
   const { token } = useAuthStore();
+  const [successAlert, setSuccessAlert] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('');
   const formRef = useRef();
   const handleOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
+    setRecipient(defaultRecipient);
+    setSubject(defaultSubject);
+    setSuccessAlert(false);
     setOpen(false);
   };
 
   const handleSubmit = () => {
     if (formRef.current.reportValidity()) {
-      emailer(recipient, msgBody, subject, attachment, token)
-        .then((response) => {
+       emailer(recipient, msgBody, subject, attachment, token)
+         .then((res) => {
+          setSuccessMessage("Email sent successfully!");
+          setSuccessAlert(true)
+           setTimeout(() => {
+             setSuccessAlert(false);
+             handleClose();
+           }, 2000);
           console.log("Email sent successfully!");
-          handleClose();
+
         })
-        .catch((error) => {
+         .catch((error) => {
+           setSuccessMessage("Error sending email!");
+           setSuccessAlert(true);
           console.error("Error sending email:", error);
         });
     } else {
@@ -47,6 +62,15 @@ function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
         Send Email
       </Button>
       <Dialog open={open} onClose={handleClose}>
+        <Snackbar
+          open={successAlert}
+          autoHideDuration={2000}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity={successMessage.includes('Error') ? 'error' : 'success'} sx={{ width: "100%" }}>
+           {successMessage}
+          </Alert>
+        </Snackbar>
         <DialogTitle>Send Email</DialogTitle>
         <form ref={formRef} onSubmit={handleSubmit}>
           <DialogContent>
@@ -56,7 +80,7 @@ function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
               label="Recipient"
               type="email"
               fullWidth
-              defaultValue={defaultRecipient}
+              value={recipient}
               required
               onChange={(event) => setRecipient(event.target.value)}
             />
@@ -66,7 +90,7 @@ function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
               type="text"
               fullWidth
               required
-              defaultValue={defaultSubject}
+              value={subject}
               onChange={(event) => setSubject(event.target.value)}
             />
             <TextField

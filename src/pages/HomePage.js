@@ -161,8 +161,6 @@ const WorkflowTable = ({ data, dataLoaded }) => {
     },
   ];
 
-  //console.log("rows", rows);
-  //console.log("columns", columns);
   return (
     <>
       {dataLoaded ? ( // only render DataGrid if data has finished loading
