@@ -16,30 +16,25 @@ const HomePage = () => {
   }, []);
 
   const fetchWorkflows = () => {
-    let url = null
-    if (role !== 'VENDOR') {
+    let url = null;
+    if (role !== "VENDOR") {
       url = process.env.REACT_APP_ENDPOINT_URL + "/api/workflows";
-
     } else {
       url =
         process.env.REACT_APP_ENDPOINT_URL +
         "/api/workflows/getWorkflowsByAccountId/" +
         accountId;
-
-      }
-      axios
-        .get(
-         url,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          setWorkflowData(res.data);
-          setDataLoaded(true);
-        });
+    }
+    axios
+      .get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setWorkflowData(res.data);
+        setDataLoaded(true);
+      });
   };
 
   return (
@@ -103,25 +98,21 @@ const WorkflowTable = ({ data, dataLoaded }) => {
           return (
             <Chip
               label={"Published"}
-              label={"Published"}
               sx={{
                 bgcolor: "#e8f4ff",
                 color: "primary.main",
                 bgcolor: "#e8f4ff",
                 color: "primary.main",
                 fontWeight: "bold",
-              }}
-            ></Chip>
+              }}></Chip>
           );
         } else {
           return (
             <Chip
               label={"Draft"}
-              label={"Draft"}
               sx={{
                 fontWeight: "bold",
-              }}
-            ></Chip>
+              }}></Chip>
           );
         }
       },
@@ -143,16 +134,14 @@ const WorkflowTable = ({ data, dataLoaded }) => {
               href={"/workflow/" + params.row["id"]}
               variant="contained"
               color="action"
-              size="small"
-            >
+              size="small">
               View
             </Button>
             <Button
               variant="outlined"
               color="error"
               size="small"
-              onClick={onClick}
-            >
+              onClick={onClick}>
               Delete
             </Button>
           </Stack>

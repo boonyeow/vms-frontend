@@ -157,26 +157,23 @@ const AttachedFormsSection = ({
                   </Typography>
 
                   <Box sx={{ mt: 1 }}>
-                    {/* {console.log(i.hasOwnProperty("id"))}
-                    {console.log(i)} */}
-                    {i.hasOwnProperty("id") && (
-                      <Autocomplete
-                        defaultValue={
-                          userList[userList.findIndex((x) => x.id === i.id)]
-                        }
-                        onChange={(event, newValue) => {
-                          handleAssignUser(newValue, attachedForms.indexOf(i));
-                        }}
-                        id="controllable-states-demo"
-                        options={userList}
-                        getOptionLabel={(option) => option["email"]}
-                        sx={{ width: 300, bgcolor: "white", mr: 2 }}
-                        renderInput={(params) => (
-                          <TextField {...params} label="Search User" />
-                        )}
-                        size="small"
-                      />
-                    )}
+                    <Autocomplete
+                      value={i["account"] != null ? i["account"] : ""}
+                      inputValue={
+                        i["account"] != null ? i["account"]["email"] : ""
+                      }
+                      onChange={(event, newValue) => {
+                        handleAssignUser(newValue, attachedForms.indexOf(i));
+                      }}
+                      id="controllable-states-demo"
+                      options={userList}
+                      getOptionLabel={(option) => option["email"]}
+                      sx={{ width: 300, bgcolor: "white", mr: 2 }}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Search User" />
+                      )}
+                      size="small"
+                    />
                   </Box>
                 </Box>
               </Box>

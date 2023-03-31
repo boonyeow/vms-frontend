@@ -45,10 +45,10 @@ const ViewWorkflow = (props) => {
         setAttachedForms(
           res.data["forms"].map((temp) => {
             return {
-              id: { id: temp["formId"], revisionNo: temp["revisionNo"] },
+              id: temp["id"],
               name: temp["name"],
               description: temp["description"],
-              account: userMap[temp["accountId"]],
+              account: temp["account"],
             };
           })
         );
