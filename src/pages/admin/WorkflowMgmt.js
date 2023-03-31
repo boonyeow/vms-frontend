@@ -49,7 +49,7 @@ const WorkflowMgmt = () => {
   };
 
   const handleCreateWorkflow = () => {
-    console.log("hehe");
+    axios.post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows");
   };
 
   return (
@@ -70,7 +70,6 @@ const WorkflowMgmt = () => {
           </Typography>
           <Button
             variant="contained"
-            size="large"
             startIcon={<AddIcon />}
             sx={{ my: 2 }}
             color="action"

@@ -60,7 +60,6 @@ const UserMgmt = () => {
             </Typography>
             <Button
               variant="contained"
-              size="large"
               startIcon={<AddIcon />}
               sx={{ my: 2 }}
               color="action"
