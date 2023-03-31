@@ -12,6 +12,7 @@ import TabComponent from "../components/TabComponent";
 const HomePage = () => {
   const { accountId, token, email, role } = useAuthStore();
   const [workflowData, setWorkflowData] = useState([]);
+  // const navigate = useNavigate();
   const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
   useEffect(() => {
     fetchWorkflows();
@@ -38,6 +39,7 @@ const HomePage = () => {
         setDataLoaded(true);
       });
   };
+
   return (
     <Box>
       <NavBar />
@@ -46,12 +48,14 @@ const HomePage = () => {
           sx={{
             display: "flex",
             justifyContent: "space-between",
-          }}>
+          }}
+        >
           <Typography
             component="h1"
             variant="h4"
             fontWeight="bold"
-            sx={{ color: "action.main", alignSelf: "center" }}>
+            sx={{ color: "action.main", alignSelf: "center" }}
+          >
             Home
           </Typography>
         </Box>

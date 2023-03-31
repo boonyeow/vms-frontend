@@ -1,6 +1,8 @@
 import { Tab, Tabs, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
+import SubmissionDataGrid from "./SubmissionDataGrid";
+import ApprovalDataGrid from "./ApprovalDataGrid";
 
 const TabComponent = ({ role }) => {
   const component =
@@ -23,7 +25,8 @@ const TabPanel = (props) => {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}>
+      {...other}
+    >
       {value === index && (
         <Box sx={{ p: 3 }}>
           <Typography>{children}</Typography>
@@ -55,10 +58,10 @@ const AdminView = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
-        heee
+        <ApprovalDataGrid />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        heee
+        <SubmissionDataGrid />
       </TabPanel>
     </Box>
   );
@@ -78,7 +81,7 @@ const VendorView = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
-        heee
+        <SubmissionDataGrid />
       </TabPanel>
     </Box>
   );
@@ -98,7 +101,7 @@ const ApproverView = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
-        heee
+        <ApprovalDataGrid />
       </TabPanel>
     </Box>
   );

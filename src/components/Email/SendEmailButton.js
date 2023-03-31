@@ -12,15 +12,19 @@ import {
 import emailer from "../../utils/emailer";
 import { useAuthStore } from "../../store";
 
-function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
+function SendEmailButton({
+  defaultRecipient = "",
+  defaultSubject = "",
+  defaultBody = "",
+}) {
   const [open, setOpen] = useState(false);
   const [recipient, setRecipient] = useState(defaultRecipient);
-  const [msgBody, setMsgBody] = useState("");
+  const [msgBody, setMsgBody] = useState(defaultBody);
   const [subject, setSubject] = useState(defaultSubject);
   const [attachment, setAttachment] = useState("");
   const { token } = useAuthStore();
-  const [successAlert, setSuccessAlert] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successAlert, setSuccessAlert] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const formRef = useRef();
   const handleOpen = () => {
     setOpen(true);
@@ -29,26 +33,26 @@ function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
   const handleClose = () => {
     setRecipient(defaultRecipient);
     setSubject(defaultSubject);
+    setMsgBody(defaultBody);
     setSuccessAlert(false);
     setOpen(false);
   };
 
   const handleSubmit = () => {
     if (formRef.current.reportValidity()) {
-       emailer(recipient, msgBody, subject, attachment, token)
-         .then((res) => {
+      emailer(recipient, msgBody, subject, attachment, token)
+        .then((res) => {
           setSuccessMessage("Email sent successfully!");
-          setSuccessAlert(true)
-           setTimeout(() => {
-             setSuccessAlert(false);
-             handleClose();
-           }, 2000);
+          setSuccessAlert(true);
+          setTimeout(() => {
+            setSuccessAlert(false);
+            handleClose();
+          }, 2000);
           console.log("Email sent successfully!");
-
         })
-         .catch((error) => {
-           setSuccessMessage("Error sending email!");
-           setSuccessAlert(true);
+        .catch((error) => {
+          setSuccessMessage("Error sending email!");
+          setSuccessAlert(true);
           console.error("Error sending email:", error);
         });
     } else {
@@ -67,8 +71,11 @@ function SendEmailButton({ defaultRecipient ='', defaultSubject='' }) {
           autoHideDuration={2000}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert severity={successMessage.includes('Error') ? 'error' : 'success'} sx={{ width: "100%" }}>
-           {successMessage}
+          <Alert
+            severity={successMessage.includes("Error") ? "error" : "success"}
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
           </Alert>
         </Snackbar>
         <DialogTitle>Send Email</DialogTitle>
