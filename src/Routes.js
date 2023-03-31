@@ -21,10 +21,9 @@ function AppRoutes() {
       <Route path="FormMgmt" element={<FormMgmt />} />
       <Route path="WorkflowCreation" element={<WorkflowCreation />} />
       <Route path="WorkflowEditing" element={<WorkflowEditing />} />
-      <Route path="WorkflowMgmt" element={<WorkflowMgmt />} />
-      <Route path="UserMgmt" element={<UserMgmt />} />
-      <Route path="FormTemplates" element={<FormTemplates />} />
-      {/* <Route path="/form" element={<NotFoundPage/>} /> to change this  */}
+      <Route path="workflow" element={<WorkflowMgmt />} />
+      <Route path="user" element={<UserMgmt />} />
+      <Route path="template" element={<FormTemplates />} />
       <Route path="form/:id/:revisionNo/:workflowId" element={<ViewForm />} />
       <Route
         path="formsubmission/:id/:revisionNo/:submissionid"
