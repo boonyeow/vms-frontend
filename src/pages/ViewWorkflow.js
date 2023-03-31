@@ -113,7 +113,7 @@ const ViewWorkflow = (props) => {
             item["account"].hasOwnProperty("id")
         )
         .map((item) => ({
-          accountId: item["account"]["id"],
+          account: item["account"],
           formId: { id: item.id.id, revisionNo: item.id.revisionNo },
         })),
     };

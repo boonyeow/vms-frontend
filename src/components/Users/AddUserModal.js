@@ -76,7 +76,7 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: "Account has been successfully created.",
+          text: "Account has been created.",
           confirmButtonColor: "#262626",
         });
       })

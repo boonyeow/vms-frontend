@@ -9,6 +9,7 @@ import { Button, Typography } from "@mui/material";
 import axios from "axios";
 import WorkflowTable from "../../components/Workflow/WorkflowTable";
 import AddIcon from "@mui/icons-material/Add";
+import Swal from "sweetalert2";
 
 const WorkflowMgmt = () => {
   const { accountId, token, email, role } = useAuthStore();
@@ -49,7 +50,21 @@ const WorkflowMgmt = () => {
   };
 
   const handleCreateWorkflow = () => {
-    axios.post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows");
+    axios
+      .post(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows", null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        fetchWorkflows();
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Workflow has been created.",
+          confirmButtonColor: "#262626",
+        });
+      });
   };
 
   return (
@@ -78,7 +93,11 @@ const WorkflowMgmt = () => {
           </Button>
         </Box>
         <Box sx={{ py: 2 }}>
-          <WorkflowTable data={workflowData} dataLoaded={dataLoaded} />
+          <WorkflowTable
+            data={workflowData}
+            dataLoaded={dataLoaded}
+            fetchWorkflows={fetchWorkflows}
+          />
         </Box>
       </Container>
     </Box>
