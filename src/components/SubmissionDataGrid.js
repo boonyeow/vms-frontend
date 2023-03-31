@@ -142,16 +142,18 @@ const SubmissionDataGrid = () => {
           console.log(res.data);
           const items = [];
           for (const item of res.data) {
-            items.push({
-              id: item.id,
-              formName: item.formName,
-              workflowId: item.workflowId,
-              formId: item.formId.id,
-              revisionNo: item.formId.revisionNo,
-              email: item.account.email,
-              company: item.account.company,
-              status: "NOT SUBMITTED",
-            });
+            if (item.formIsFinal == true) {
+              items.push({
+                id: item.id,
+                formName: item.formName,
+                workflowId: item.workflowId,
+                formId: item.formId.id,
+                revisionNo: item.formId.revisionNo,
+                email: item.account.email,
+                company: item.account.company,
+                status: "NOT SUBMITTED",
+              });
+            }
           }
           setToBeSubmittedList(items);
         })

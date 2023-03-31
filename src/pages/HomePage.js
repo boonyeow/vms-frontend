@@ -12,7 +12,6 @@ import TabComponent from "../components/TabComponent";
 const HomePage = () => {
   const { accountId, token, email, role } = useAuthStore();
   const [workflowData, setWorkflowData] = useState([]);
-  // const navigate = useNavigate();
   const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
   useEffect(() => {
     fetchWorkflows();
