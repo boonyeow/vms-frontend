@@ -30,7 +30,7 @@ const FormTemplates = () => {
     const onViewClick = (e) => {
       const formId = row.id;
       const formRevNo = row.revisionNo;
-      navigate("/FormCreation/" + formId + "/" + formRevNo);
+      navigate("/template/" + formId + "/" + formRevNo);
     };
 
     const onDeleteClick = async (e) => {

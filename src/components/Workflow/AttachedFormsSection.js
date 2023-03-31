@@ -158,10 +158,7 @@ const AttachedFormsSection = ({
 
                   <Box sx={{ mt: 1 }}>
                     <Autocomplete
-                      value={i["account"] != null ? i["account"] : ""}
-                      inputValue={
-                        i["account"] != null ? i["account"]["email"] : ""
-                      }
+                      value={i["account"] != null ? i["account"] : undefined}
                       onChange={(event, newValue) => {
                         handleAssignUser(newValue, attachedForms.indexOf(i));
                       }}
