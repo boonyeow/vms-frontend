@@ -1,5 +1,5 @@
 import NavBar from "../components/SharedComponents/NavBar";
-import { Box, Button, Chip, Grid, Typography } from "@mui/material";
+import { Box, Button, Chip, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { Container, Stack } from "@mui/system";
 import { useAuthStore } from "../store";
 import { DataGrid } from "@mui/x-data-grid";
@@ -7,6 +7,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WorkflowTable from "../components/Workflow/WorkflowTable";
+import TabComponent from "../components/TabComponent";
 
 const HomePage = () => {
   const { accountId, token, email, role } = useAuthStore();
@@ -37,7 +38,6 @@ const HomePage = () => {
         setDataLoaded(true);
       });
   };
-
   return (
     <Box>
       <NavBar />
@@ -55,26 +55,10 @@ const HomePage = () => {
             Home
           </Typography>
         </Box>
-        <Box sx={{ py: 1 }}>
-          {/* <Box sx={{ p: 1 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#1f1f1f" }}>
-              Action Items
-            </Typography>
-          <WorkflowTable data={workflowData} dataLoaded={dataLoaded} />
-          </Box> */}
-          <Box sx={{ py: 1 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#1f1f1f", mb: 1 }}>
-              Workflow
-            </Typography>
-            <WorkflowTable data={workflowData} dataLoaded={dataLoaded} />
-          </Box>
-        </Box>
+        <TabComponent role={role} />
       </Container>
     </Box>
   );
 };
+
 export default HomePage;
