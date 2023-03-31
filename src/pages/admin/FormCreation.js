@@ -10,13 +10,19 @@ import {
   CardActions,
   CardContent,
   TextField,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
   IconButton,
+  Typography,
   Stack,
   MenuItem,
   Grid,
   Checkbox,
   Tooltip,
   Alert,
+  Box,
   OutlinedInput,
   InputLabel,
   FormControl,
@@ -29,7 +35,7 @@ import {
 } from "@mui/material";
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import "../../form.css";
 import { useAuthStore } from "../../store";
@@ -61,20 +67,79 @@ const FormCreation = () => {
   const { token } = useAuthStore();
   const { id, revisionNo } = useParams();
   const navigate = useNavigate();
-  const [userList, setUserList] = useState([]);
+
   const [isDisabled, setIsDisabled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState(null);
-  useEffect(() => {
-    fetchUserList();
-    getFormData();
-  }, []);
+  const nextFieldTemplate = {
+    name: null,
+    fieldType: null,
+    options: [{ name: "" }],
+    helpText: null,
+    regexId: null,
+    isRequired: false,
+  };
 
+  const childOptionTemplate = { name:'' }
+
+  const parentFieldTemplate = {
+    name: '',
+    options: [],
+  };
+  const [formData, setFormData] = useState({
+    name: "",
+    description: null,
+    is_final: false,
+    workflows: [],
+    fields: [
+      {
+        name: "",
+        helpText: "",
+        isRequired: true,
+        fieldType: "RADIOBUTTON",
+        regexId: null,
+        options: [
+          {
+            name: null,
+            options: [],
+          },
+        ],
+      },
+    ],
+  });
+  useEffect(() => {
+    //getFormData();
+  }, []);
+  const addChildOption = (index, j, k) => {
+    const newFields = [...formData.fields];
+    if (newFields[index].options[j].options[k].options.length > 5) {
+      return
+    }
+      newFields[index].options[j].options[k].options.push(parentFieldTemplate);
+     setFormData((prevState) => ({
+       ...prevState,
+       fields: newFields,
+     }));
+
+}
   useBeforeUnload(
     useCallback(() => {
       localStorage.setItem(`formCreation${id}${revisionNo}`, formData);
     }, [])
   );
+
+  const addOption = (index) => {
+    const newFields = [...formData.fields]
+    console.log(newFields)
+    if (newFields[index].options.length > 10) {
+      return;
+    }
+    newFields[index].options.push(parentFieldTemplate);
+    setFormData((prevState) => ({
+      ...prevState,
+      fields: newFields,
+    }));
+
+  }
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -97,7 +162,7 @@ const FormCreation = () => {
           name: "",
           helpText: "",
           isRequired: true,
-          fieldType: "radio",
+          fieldType: "RADIOBUTTON",
           regexId: null,
           nextFieldsId: {},
         },
@@ -253,18 +318,6 @@ const FormCreation = () => {
       });
   };
 
-  const fetchUserList = async () => {
-    axios
-      .get(process.env.REACT_APP_ENDPOINT_URL + "/api/accounts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setUserList(res.data);
-      })
-      .catch((e) => console.error(e));
-  };
 
   const nextFieldOptionChange = (value, key, index) => {
     const newFields = [...formData.fields];
@@ -330,30 +383,25 @@ const FormCreation = () => {
       });
   };
 
-  const handleChangeFieldType = (index, input, isNextField) => {
+  const handleChangeFieldType = (index, input, isNextField,j) => {
     const newFields = [...formData.fields];
+    console.log(newFields)
     if (isNextField) {
-      if (!newFields[index].options) {
-        newFields[index].options = {};
-      }
-      const nextField = {
-        name: "",
-        helpText: "",
-        isRequired: false,
-        fieldType: "",
-        regexId: null,
-      };
+      const nextField = _.cloneDeep(nextFieldTemplate);
       nextField.fieldType = input.value;
-      if (input.value !== "text") {
-        nextField.options = { option1: null };
+      if (newFields[index]?.options[j]?.options?.length > 0) {
+        console.log(newFields[index].options[j].options);
+        newFields[index].options[j].options[0].fieldType = input.value;
+      } else {
+        newFields[index].options[j].options.push(nextField);
       }
-      newFields[index].options[formData.fields[index].name] = nextField;
     } else {
       newFields[index] = {
         ...newFields[index],
         fieldType: input.value,
       };
     }
+    console.log(newFields)
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
@@ -361,15 +409,10 @@ const FormCreation = () => {
   };
 
   const handleAddField = () => {
-    const newField = {
-      name: "",
-      helpText: "",
-      isRequired: true,
-      fieldType: "text",
-    };
+
     setFormData((prevState) => ({
       ...prevState,
-      fields: [...prevState.fields, newField],
+      fields: [...prevState.fields, nextFieldTemplate],
     }));
   };
 
@@ -498,226 +541,232 @@ const FormCreation = () => {
           </Stack>
           <Card sx={{ maxWidth: 1100, margin: "auto", marginTop: 2 }}>
             <CardContent>
-              {formData.fields.map((field, index) => (
+              {formData?.fields?.map((field, index) => (
                 <>
-                  <Grid
-                    container
-                    justifyContent="flex-start"
-                    alignItems="flex-start"
-                    key={index}>
-                    <Grid item xs={5}>
-                      <Stack>
+                  <FieldTypeMenu
+                    handleChangeFieldType={handleChangeFieldType}
+                    index={index}
+                    isNextField={false}
+                  />
+                  <Stack direction="row">
+                    <Stack spacing={4} alignItems="flex-start">
+                      <TextField
+                        label="Label"
+                        variant="standard"
+                        sx={{ width: "250px" }}
+                        onChange={(e) => {
+                          const newFields = [...formData.fields];
+                          newFields[index].name = e.target.value;
+                          setFormData((prevState) => ({
+                            ...prevState,
+                            fields: newFields,
+                          }));
+                        }}
+                      />
+                      <TextField
+                        size="small"
+                        variant="standard"
+                        sx={{
+                          marginTop: 2,
+                          maxWidth: "50%",
+                        }}
+                        defaultValue={field.helpText}
+                        inputProps={{ style: { fontSize: 12 } }}
+                        InputLabelProps={{ style: { fontSize: 12 } }}
+                        label="Help Text (optional)"
+                        onChange={(e) => {
+                          const newFields = [...formData.fields];
+                          newFields[index].helpText = e.target.value;
+                          setFormData((prevState) => ({
+                            ...prevState,
+                            fields: newFields,
+                          }));
+                        }}
+                      />
+                      {field?.options?.map((option, j) => (
                         <Stack
                           direction="row"
-                          spacing={3}
-                          justifyContent="flex-start"
-                          alignItems="center">
-                          <FieldTypeMenu
-                            handleChangeFieldType={handleChangeFieldType}
-                            index={index}
-                            isNextField={false}
-                          />
-
-                          {field.fieldType === "text" ? (
-                            ""
-                          ) : (
-                            <div>
-                              <input
-                                type={field.fieldType}
-                                key={index}
-                                name={
-                                  field.fieldType === "radio"
-                                    ? "radioGroup"
-                                    : field.name
-                                }
-                              />
-                            </div>
-                          )}
-
-                          <input
-                            type="text"
-                            placeholder=""
-                            className="option-text"
-                            value={field.name}
-                            onChange={(e) =>
-                              handleFieldNameChange(e.target.value, index)
-                            }
-                          />
-                        </Stack>
-                        {field.fieldType !== "text" ? (
-                          ""
-                        ) : (
-                          <Stack>
-                            <TextField
-                              fullWidth
-                              variant="outlined"
-                              key={index}
-                              size="small"
-                              sx={{
-                                marginTop: 2,
-                                paddingX: 3,
-                                marginLeft: 5,
-                                maxWidth: "70%",
-                              }}
-                              placeholder="User Input"
-                            />
-                          </Stack>
-                        )}
-                        <Stack
-                          justifyContent="flex-start"
-                          alignItems="flex-end"
-                          direction="row"
-                          spacing={2}
-                          sx={{ marginLeft: 8 }}>
-                          <TextField
-                            size="small"
-                            variant="standard"
-                            sx={{
-                              marginTop: 2,
-                              maxWidth: "50%",
-                            }}
-                            defaultValue={field.helpText}
-                            inputProps={{ style: { fontSize: 12 } }}
-                            InputLabelProps={{ style: { fontSize: 12 } }}
-                            label="Help Text (optional)"
-                            onBlur={(e) =>
-                              fieldDataChange(
-                                e.target.value,
-                                index,
-                                false,
-                                "helpText"
-                              )
-                            }
-                          />
-                        </Stack>
-
-                        <Stack
-                          direction="row"
-                          spacing={3}
                           justifyContent="flex-start"
                           alignItems="center"
-                          sx={{ marginTop: 3, marginLeft: 8 }}>
-                          <RequiredCheckBox
-                            fields={field}
-                            nextField={false}
-                            index={index}
-                            value={field.isRequired}
-                            fieldDataChange={fieldDataChange}
-                          />
-                          {field.fieldType === "text" ? (
-                            <RegexSelect
-                              field={field}
-                              index={index}
-                              isNextField={false}
-                              fieldDataChange={fieldDataChange}
-                            />
-                          ) : (
-                            ""
+                        >
+                          {field.fieldType == "RADIOBUTTON" && (
+                            <input type="radio" name={index} />
                           )}
-                        </Stack>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={1}>
-                      {field.fieldType !== "text" ? (
-                        <Tooltip title="Add Field Beside" placement="top-start">
-                          <div>
-                            <FieldTypeMenu
-                              handleChangeFieldType={handleChangeFieldType}
-                              index={index}
-                              isNextField={true}
-                            />
-                          </div>
-                        </Tooltip>
-                      ) : (
-                        ""
-                      )}
-                    </Grid>
-                    <Grid item xs={6}>
-                      {field.options &&
-                      Object.keys(field.options).length !== 0 ? (
-                        <>
-                          <Stack spacing={2}>
-                            <TextField
-                              id="outlined-basic"
-                              label="Label"
-                              value={field.options[field.name].name}
-                              variant="standard"
-                              sx={{ maxWidth: "250px" }}
-                              onChange={(e) => {
+                          {field.fieldType === "CHECKBOX" && (
+                            <input type="checkbox" name={`${index}-${j}`} />
+                          )}
+                          {field.fieldType === "TEXTBOX" && (
+                            <TextField variant="outlined" size="small" />
+                          )}
+                          {field.fieldType !== "TEXTBOX" && (
+                            <Stack direction="row" spacing={5}>
+                              <TextField
+                                variant="standard"
+                                value={option.name}
+                                onChange={(e) => {
+                                  const newFields = [...formData.fields];
+                                  newFields[index].options[j].name =
+                                    e.target.value;
+                                  setFormData((prevState) => ({
+                                    ...prevState,
+                                    fields: newFields,
+                                  }));
+                                }}
+                              />
+                              <FieldTypeMenu
+                                handleChangeFieldType={handleChangeFieldType}
+                                index={index}
+                                isNextField={true}
+                                j={j}
+                              />
+                            </Stack>
+                          )}
+                          {j > 0 && (
+                            <IconButton
+                              onClick={() => {
                                 const newFields = [...formData.fields];
-                                newFields[index].options[
-                                  newFields[index].name
-                                ].name = e.target.value;
+                                newFields[index].options.splice(j, 1);
                                 setFormData((prevState) => ({
                                   ...prevState,
                                   fields: newFields,
                                 }));
                               }}
-                            />
-                            <TextField
-                              size="small"
-                              variant="standard"
-                              defaultValue={field.options[field.name].helpText}
-                              sx={{
-                                marginTop: 2,
-                                maxWidth: "50%",
-                              }}
-                              inputProps={{ style: { fontSize: 12 } }}
-                              InputLabelProps={{ style: { fontSize: 12 } }}
-                              label="Help Text (optional)"
-                              onBlur={(e) =>
-                                fieldDataChange(
-                                  e.target.value,
-                                  index,
-                                  true,
-                                  "helpText"
-                                )
-                              }
-                            />
-                            <NextFields
-                              field={field.options[field.name]}
-                              index={index}
-                              nextFieldOptionChange={nextFieldOptionChange}
-                              addNextFieldOptions={addNextFieldOptions}
-                              deleteNextFieldOptions={deleteNextFieldOptions}
-                            />
-                          </Stack>
-                          <Grid
-                            item
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              marginTop: 10,
-                            }}>
-                            <RequiredCheckBox
-                              fields={field.options[field.name]}
-                              nextField={true}
-                              index={index}
-                              value={field.options[field.name].isRequired}
-                              fieldDataChange={fieldDataChange}
-                            />
-                            {field.options[field.name].fieldType === "text" ? (
-                              <RegexSelect
-                                field={field}
-                                index={index}
-                                isNextField={true}
-                                fieldDataChange={fieldDataChange}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                          {option?.options?.map((childField, k) => (
+                            <Stack sx={{ marginLeft: "70px" }}>
+                              <TextField
+                                label="Label"
+                                variant="standard"
+                                sx={{ width: "250px" }}
+                                value={childField.name}
+                                onChange={(e) => {
+                                  const newFields = [...formData.fields];
+                                  newFields[index].options[j].name =
+                                    e.target.value;
+                                  setFormData((prevState) => ({
+                                    ...prevState,
+                                    fields: newFields,
+                                  }));
+                                }}
                               />
-                            ) : (
-                              ""
-                            )}
-                          </Grid>
-                        </>
-                      ) : (
-                        ""
+                              <TextField
+                                size="small"
+                                variant="standard"
+                                sx={{
+                                  marginTop: 2,
+                                  maxWidth: "50%",
+                                }}
+                                defaultValue={childField.helpText}
+                                inputProps={{ style: { fontSize: 12 } }}
+                                InputLabelProps={{
+                                  style: { fontSize: 12 },
+                                }}
+                                label="Help Text (optional)"
+                                onChange={(e) => {
+                                  const newFields = [...formData.fields];
+                                  newFields[index].options[j].options[
+                                    k
+                                  ].helpText = e.target.value;
+                                  setFormData((prevState) => ({
+                                    ...prevState,
+                                    fields: newFields,
+                                  }));
+                                }}
+                              />
+                              {childField?.options?.map((childOption, n) => (
+                                <Stack
+                                  direction="row"
+                                  justifyContent="flex-start"
+                                  alignItems="center"
+                                >
+                                  {childField.fieldType == "RADIOBUTTON" && (
+                                    <input type="radio" name={n} />
+                                  )}
+                                  {childField.fieldType === "CHECKBOX" && (
+                                    <input type="checkbox" name={`${n}-${k}`} />
+                                  )}
+                                  {childField.fieldType === "TEXTBOX" && (
+                                    <TextField
+                                      variant="outlined"
+                                      size="small"
+                                    />
+                                  )}
+                                  {childField.fieldType !== "TEXTBOX" && (
+                                    <Stack direction="row" spacing={5}>
+                                      <TextField
+                                        variant="standard"
+                                        value={childOption.name}
+                                        onChange={(e) => {
+                                          const newFields = [
+                                            ...formData.fields,
+                                          ];
+                                          newFields[index].options[j].options[
+                                            k
+                                          ].options[n].name = e.target.value;
+                                          setFormData((prevState) => ({
+                                            ...prevState,
+                                            fields: newFields,
+                                          }));
+                                        }}
+                                      />
+                                    </Stack>
+                                  )}
+
+                                  <IconButton
+                                    onClick={() => {
+                                      const newFields = [...formData.fields];
+                                      if (n == 0) {
+                                        console.log(
+                                          newFields[index].options[j]
+                                        );
+                                        newFields[index].options[j].options= [];
+                                      } else {
+                                        newFields[index].options[j].options[
+                                          k
+                                        ].options.splice(n, 1);
+                                      }
+                                      setFormData((prevState) => ({
+                                        ...prevState,
+                                        fields: newFields,
+                                      }));
+                                    }}
+                                  >
+                                    <CloseIcon fontSize="small" />
+                                  </IconButton>
+                                </Stack>
+                              ))}
+                              {childField.fieldType != "TEXTBOX" && (
+                                <Button
+                                  color="secondary"
+                                  onClick={() => addChildOption(index, j, k)}
+                                >
+                                  Add option
+                                </Button>
+                              )}
+                            </Stack>
+                          ))}
+                        </Stack>
+                      ))}
+                      {field.fieldType != "TEXTBOX" && (
+                        <Button
+                          color="secondary"
+                          onClick={() => addOption(index)}
+                        >
+                          Add option
+                        </Button>
                       )}
-                    </Grid>
-                  </Grid>
+                    </Stack>
+                  </Stack>
+
                   <Grid
                     container
                     direction="row"
                     justifyContent="flex-end"
-                    alignItems="flex-end">
+                    alignItems="flex-end"
+                  >
                     {index !== 0 ? (
                       <IconButton onClick={() => deleteField(index)}>
                         <DeleteIcon />
@@ -744,10 +793,12 @@ const FormCreation = () => {
               justifyContent: "flex-end",
               width: "85%",
               gap: 10,
-            }}>
+            }}
+          >
             <Tooltip
               title="Once form is final, updating will create new revision."
-              placement="top-start">
+              placement="top-start"
+            >
               <ToggleButtonGroup
                 color="primary"
                 exclusive
@@ -755,7 +806,8 @@ const FormCreation = () => {
                 onChange={(e) =>
                   changeData(e.target.value === "true", "is_final")
                 }
-                aria-label="Platform">
+                aria-label="Platform"
+              >
                 <ToggleButton value={true}>Final</ToggleButton>
                 <ToggleButton value={false} disabled={isDisabled}>
                   Not Final
@@ -766,7 +818,8 @@ const FormCreation = () => {
               size="small"
               variant="contained"
               style={{ backgroundColor: "red" }}
-              onClick={handleCancelForm}>
+              onClick={handleCancelForm}
+            >
               Delete
             </Button>
 
@@ -776,7 +829,8 @@ const FormCreation = () => {
               style={{ backgroundColor: "grey" }}
               onClick={() => {
                 navigate("../../../FormTemplates");
-              }}>
+              }}
+            >
               Cancel
             </Button>
 
@@ -785,7 +839,8 @@ const FormCreation = () => {
               variant="contained"
               color="primary"
               disabled={isDisabled}
-              onClick={(e) => handleSubmitForm()}>
+              onClick={(e) => handleSubmitForm()}
+            >
               Submit
             </Button>
           </div>
@@ -794,4 +849,6 @@ const FormCreation = () => {
     </>
   );
 };
+
+
 export default FormCreation;

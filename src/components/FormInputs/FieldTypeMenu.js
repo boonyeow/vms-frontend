@@ -4,11 +4,11 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 
-const FieldTypeMenu = ({ handleChangeFieldType, index, isNextField }) => {
+const FieldTypeMenu = ({ handleChangeFieldType, index, isNextField ,j}) => {
       const inputTypes = [
-        { name: "Radiobutton", value: "radio", id: "RADIOBUTTON" },
-        { name: "CheckBox", value: "checkbox", id: "CHECKBOX" },
-        { name: "TextField", value: "text", id: "TEXTBOX" },
+        { name: "Radiobutton", value: "RADIOBUTTON", id: "RADIOBUTTON" },
+        { name: "CheckBox", value: "CHECKBOX", id: "CHECKBOX" },
+        { name: "TextField", value: "TEXTBOX", id: "TEXTBOX" },
         // can add more options
       ];
   return (
@@ -25,7 +25,7 @@ const FieldTypeMenu = ({ handleChangeFieldType, index, isNextField }) => {
                 <MenuItem
                   onClick={() => {
                     popupState.close();
-                    handleChangeFieldType(index, input, isNextField);
+                    handleChangeFieldType(index, input, isNextField,j);
                   }}
                   key={`${k}`}
                 >
