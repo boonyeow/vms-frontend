@@ -10,6 +10,7 @@ import WorkflowMgmt from "./pages/admin/WorkflowMgmt";
 import FormTemplates from "./pages/admin/FormTemplates";
 import ViewForm from "./pages/ViewForm";
 import ViewWorkflow from "./pages/ViewWorkflow";
+import Approval from "./pages/Approval";
 
 function AppRoutes() {
   return (
@@ -30,6 +31,7 @@ function AppRoutes() {
         element={<ViewForm />}
       />
       <Route path="workflow/:id" element={<ViewWorkflow />} />
+      <Route path="Approvals" element={<Approval />} />
     </Routes>
   );
 }

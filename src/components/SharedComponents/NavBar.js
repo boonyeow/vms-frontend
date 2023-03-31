@@ -28,14 +28,22 @@ function NavBar() {
       list: null,
       path: "/FormMgmt",
     },
-    // {
-    //   name: "Workflows",
-    //   list: null,
-    //   path: "/Workflows",
-    // },
+  ];
+
+  const approver = [
+    {
+      name: "Forms",
+      list: null,
+      path: "/FormMgmt",
+    },
+    {
+      name: "Approvals",
+      list: null,
+      path: "/Approvals",
+    },
   ];
   const { role } = useAuthStore();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const { accountId } = useAuthStore();
   const admin = [
     {
@@ -45,13 +53,18 @@ function NavBar() {
     },
     {
       name: "Forms",
-      list: [ "Manage Forms", "Form Templates"],
-      path: [ "/FormMgmt","/FormTemplates"],
+      list: ["Manage Forms", "Form Templates"],
+      path: ["/FormMgmt", "/FormTemplates"],
     },
     {
       name: "Workflows",
       list: ["Create Workflow", "Manage Workflow"],
       path: ["/WorkflowCreation", "/WorkflowMgmt"],
+    },
+    {
+      name: "Approvals",
+      list: null,
+      path: "/Approvals",
     },
   ];
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -72,12 +85,12 @@ function NavBar() {
     setAnchorElUser(null);
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
+  const open = Boolean(anchorEl);
 
-  const handleClick = (event,pageName) => {
-      setAnchorEl((prev) => ({
-          ...prev,
-          [pageName]:event.currentTarget,
+  const handleClick = (event, pageName) => {
+    setAnchorEl((prev) => ({
+      ...prev,
+      [pageName]: event.currentTarget,
     }));
   };
   const handleClose = (pageName) => {
@@ -89,9 +102,7 @@ function NavBar() {
   const logout = () => {
     useAuthStore.getState().clearStore();
     navigate("/");
-
-  }
-
+  };
 
   return (
     <div style={{ marginBottom: "6em" }}>
@@ -205,7 +216,8 @@ function NavBar() {
                       </Box>
                     )
                   )
-                : vendor.map((page) => (
+                : role === "VENDOR"
+                ? vendor.map((page) => (
                     <Box sx={{ flexGrow: 0 }} key={page.name}>
                       <Button>
                         <Link to={page.path} style={{ textDecoration: "none" }}>
@@ -218,7 +230,23 @@ function NavBar() {
                         </Link>
                       </Button>
                     </Box>
-                  ))}
+                  ))
+                : role === "APPROVER"
+                ? approver.map((page) => (
+                    <Box sx={{ flexGrow: 0 }} key={page.name}>
+                      <Button>
+                        <Link to={page.path} style={{ textDecoration: "none" }}>
+                          <Typography
+                            textAlign="center"
+                            sx={{ color: "white" }}
+                          >
+                            {page.name}
+                          </Typography>
+                        </Link>
+                      </Button>
+                    </Box>
+                  ))
+                : null}
             </Box>
             <Box sx={{ flexGrow: 0 }}>
               <Stack justifyContent="center" alignItems="center">
