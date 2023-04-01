@@ -1,13 +1,21 @@
-import NavBar from "../components/SharedComponents/NavBar";
-import React, { useState, useEffect, useCallback } from "react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  CssBaseline,
+  TextField,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
+import React, { useState } from "react";
 import { useAuthStore } from "../store";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Chip, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { Container, Stack } from "@mui/system";
-import PastSubmissionDataGrid from "../components/PastSubmissionDataGrid";
+import { useEffect } from "react";
+import NavBar from "../components/SharedComponents/NavBar";
+import PastApprovalDataGrid from "../components/PastApprovalDataGrid";
 
-const PastSubmissions = () => {
+const PastApprovals = () => {
   return (
     <>
       <NavBar />
@@ -29,13 +37,13 @@ const PastSubmissions = () => {
               marginBottom: "15px",
             }}
           >
-            Submission History
+            Approval History
           </Typography>
         </Box>
-        <PastSubmissionDataGrid />
+        <PastApprovalDataGrid />
       </Container>
     </>
   );
 };
 
-export default PastSubmissions;
+export default PastApprovals;

@@ -24,12 +24,7 @@ function NavBar() {
   const settings = ["Profile", "Account", "Dashboard", "Logout"];
   const vendor = [
     {
-      name: "Forms",
-      list: null,
-      path: "/FormMgmt",
-    },
-    {
-      name: "Past Submissions",
+      name: "Submission History",
       list: null,
       path: "/PastSubmissions",
     },
@@ -37,14 +32,9 @@ function NavBar() {
 
   const approver = [
     {
-      name: "Forms",
+      name: "Approval History",
       list: null,
-      path: "/FormMgmt",
-    },
-    {
-      name: "Approvals",
-      list: null,
-      path: "/Approvals",
+      path: "/PastApprovals",
     },
   ];
   const { role } = useAuthStore();
@@ -67,14 +57,9 @@ function NavBar() {
       path: "/workflow",
     },
     {
-      name: "Approvals",
-      list: null,
-      path: "/Approvals",
-    },
-    {
-      name: "Past Submissions",
-      list: null,
-      path: "/PastSubmissions",
+      name: "History",
+      list: ["View Approval History", "View Submission History"],
+      path: ["/PastApprovals", "/PastSubmissions"],
     },
   ];
   const [anchorElNav, setAnchorElNav] = React.useState(null);

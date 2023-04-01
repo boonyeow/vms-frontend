@@ -6,8 +6,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
 
-const PastSubmissionDataGrid = () => {
-  const { token, accountId, role } = useAuthStore();
+const PastApprovalDataGrid = () => {
+  const { token, accountId, role, email } = useAuthStore();
   const accId = accountId.toString();
   const navigate = useNavigate();
   const columns = [
@@ -15,48 +15,40 @@ const PastSubmissionDataGrid = () => {
       field: "id",
       headerName: "ID",
       width: 1,
-      valueGetter: (params) => (params.row.id ? params.row.id : "-"),
     },
     {
-      field: "name",
+      field: "formName",
       headerName: "Form Name",
       width: 120,
-      valueGetter: (params) =>
-        params.row.form && params.row.form.name
-          ? params.row.form.name
-          : params.row.formName,
     },
     {
       field: "workflowId",
       headerName: "Workflow ID",
       width: 90,
-      valueGetter: (params) =>
-        params.row.workflow ? params.row.workflow.id : params.row.workflowId,
     },
     {
-      field: "formid",
+      field: "formId",
       headerName: "Form ID",
-      width: 70,
-      valueGetter: (params) =>
-        params.row.form?.id ? params.row.form.id.id : params.row.formId,
+      width: 90,
     },
     {
-      field: "revisionNumber",
+      field: "revisionNo",
       headerName: "Revision #",
-      width: 80,
-      valueGetter: (params) =>
-        params.row.form?.id?.revisionNo
-          ? params.row.form.id.revisionNo
-          : params.row.revisionNo,
+      width: 90,
+    },
+    {
+      field: "submittedBy",
+      headerName: "Submitter",
+      width: 160,
+    },
+    {
+      field: "company",
+      headerName: "Company",
+      width: 120,
     },
     {
       field: "dateOfSubmission",
       headerName: "Date of Submission",
-      width: 160,
-    },
-    {
-      field: "reviewedBy",
-      headerName: "Latest Reviewer",
       width: 160,
     },
     {
@@ -88,6 +80,11 @@ const PastSubmissionDataGrid = () => {
           </div>
         );
       },
+    },
+    {
+      field: "reviewedBy",
+      headerName: "Latest Reviewer",
+      width: 160,
     },
     {
       field: "action",
@@ -123,7 +120,7 @@ const PastSubmissionDataGrid = () => {
   const fetchFormsList = () => {
     let url =
       process.env.REACT_APP_ENDPOINT_URL +
-      "/api/formsubmission/getByAccountId?accountId=" +
+      "/api/formsubmission/getByReviewerId?accountId=" +
       accId;
 
     axios
@@ -142,6 +139,8 @@ const PastSubmissionDataGrid = () => {
             workflowId: item.workflow.id,
             formId: item.form.id.id,
             revisionNo: item.form.id.revisionNo,
+            submittedBy: item.submittedBy.email,
+            company: item.submittedBy.company,
             dateOfSubmission: item.dateOfSubmission,
             status: item.status,
             reviewedBy:
@@ -170,7 +169,7 @@ const PastSubmissionDataGrid = () => {
           style={{
             height: 500,
             maxWidth: "100%",
-            width: "940px",
+            width: "1600px",
             backgroundColor: "white",
           }}
         >
@@ -199,4 +198,4 @@ const PastSubmissionDataGrid = () => {
   );
 };
 
-export default PastSubmissionDataGrid;
+export default PastApprovalDataGrid;
