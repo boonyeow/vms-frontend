@@ -107,7 +107,7 @@ const FormCreation = () => {
     }));
 
   }
-
+  const [snackbarAlertInfo,setSnackbarAlertInfo] = useState('')
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -292,9 +292,21 @@ const FormCreation = () => {
               "Content-Type": "application/json",
             },
           }
-        )
+      ).then(() => {
+        setSnackbarAlertInfo({type:'success', message:'Form submitted successfuly.'})
+        setOpen(true)
+        setTimeout(() => {
+             navigate("/template");
+        }, 2000);
+
+        })
         .catch((e) => {
           console.log(e);
+              setSnackbarAlertInfo({
+                type: "error",
+                message: "Error submitting form.",
+              });
+              setOpen(true);
         });
   };
 
@@ -360,14 +372,12 @@ const FormCreation = () => {
           newFields[index].options[j].options.push(nextField);
         }
        if (input.value === "TEXTBOX") {
-        console.log(newFields[index].options[j].options[0].options=[]);
        newFields[index].options[j].options[0].options = [
          { name: "", options: [] },
        ];
        }
     } else {
       if (input.value === 'TEXTBOX') {
-        console.log(newFields[index].options);
         newFields[index].options = [{name:'',options:[]}];
       }
       newFields[index] = {
@@ -389,62 +399,9 @@ const FormCreation = () => {
     }));
   };
 
-  const addNextFieldOptions = (index) => {
-    const newFields = [...formData.fields];
-    const length = Object.keys(
-      newFields[index].options[newFields[index].name].options
-    ).length;
-    newFields[index].options[newFields[index].name].options[
-      `option${length + 1}`
-    ] = null;
-    setFormData((prevData) => ({
-      ...prevData,
-      fields: newFields,
-    }));
-    // console.log(newFields);
-  };
-  const handleFieldNameChange = (value, index) => {
-    //console.log(formData);
-    const newFields = [...formData.fields];
-    const prevName = newFields[index].name;
-    //console.log(formData.fields);
-    newFields[index].name = value;
 
-    if (newFields[index].options && newFields[index].options[prevName]) {
-      newFields[index].options[value] = newFields[index].options[prevName];
-      delete newFields[index].options[prevName];
-    }
 
-    setFormData((prevData) => ({
-      ...prevData,
-      fields: newFields,
-    }));
-  };
 
-  const validateForm = (data) => {
-    const errors = {};
-    if (!data.name) errors.name = "Form Name is required.";
-    return errors;
-  };
-  const [errors, setErrors] = useState({});
-  const [formTitle, setFormTitle] = useState("");
-  const deleteNextFieldOptions = (index, key, isText) => {
-    const newFields = [...formData.fields];
-    if (!isText) {
-      delete newFields[index].options[newFields[index].name].options[key];
-    }
-    if (
-      isText ||
-      Object.keys(newFields[index].options[newFields[index].name].options)
-        .length === 0
-    ) {
-      newFields[index].options = {};
-    }
-    setFormData((prevData) => ({
-      ...prevData,
-      fields: newFields,
-    }));
-  };
   if (!formData) {
     return <div>Loading...</div>;
   }
@@ -463,11 +420,14 @@ const FormCreation = () => {
     <>
       <NavBar />
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Form submitted successfully!
+        <Alert
+          onClose={handleClose}
+          severity={snackbarAlertInfo.type}
+          sx={{ width: "100%" }}
+        >
+          {snackbarAlertInfo.message}
         </Alert>
       </Snackbar>
-      <h1 style={{ textAlign: "center" }}>{formTitle}</h1>
       <Card sx={{ maxWidth: 1000, margin: "auto" }}>
         {isFinalAlertComponent()}
         <CardContent>
@@ -498,8 +458,6 @@ const FormCreation = () => {
               variant="standard"
               onChange={(e) => changeData(e.target.value, "name")}
               required
-              error={errors.name ? true : false}
-              helperText={errors.name ? errors.name : ""}
             />
 
             <TextField
@@ -693,9 +651,6 @@ const FormCreation = () => {
                                     onClick={() => {
                                       const newFields = [...formData.fields];
                                       if (n == 0) {
-                                        console.log(
-                                          newFields[index].options[j]
-                                        );
                                         newFields[index].options[j].options =
                                           [];
                                       } else {
