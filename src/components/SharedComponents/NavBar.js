@@ -28,6 +28,11 @@ function NavBar() {
       list: null,
       path: "/FormMgmt",
     },
+    {
+      name: "Past Submissions",
+      list: null,
+      path: "/PastSubmissions",
+    },
   ];
 
   const approver = [
@@ -65,6 +70,11 @@ function NavBar() {
       name: "Approvals",
       list: null,
       path: "/Approvals",
+    },
+    {
+      name: "Past Submissions",
+      list: null,
+      path: "/PastSubmissions",
     },
   ];
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -108,7 +118,8 @@ function NavBar() {
     <div style={{ marginBottom: "6em" }}>
       <AppBar
         position="static"
-        style={{ top: 0, left: 0, position: "absolute" }}>
+        style={{ top: 0, left: 0, position: "absolute" }}
+      >
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -125,7 +136,8 @@ function NavBar() {
                 letterSpacing: ".1rem",
                 color: "inherit",
                 textDecoration: "none",
-              }}>
+              }}
+            >
               Quantum VMS
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -135,7 +147,8 @@ function NavBar() {
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={handleOpenNavMenu}
-                color="inherit">
+                color="inherit"
+              >
                 <MenuIcon />
               </IconButton>
             </Box>
@@ -153,7 +166,8 @@ function NavBar() {
                 fontWeight: 700,
                 letterSpacing: ".1rem",
                 textDecoration: "none",
-              }}>
+              }}
+            >
               Quantum VMS
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
@@ -169,7 +183,8 @@ function NavBar() {
                               <Button
                                 variant="contained"
                                 {...bindTrigger(popupState)}
-                                style={{ boxShadow: "none" }}>
+                                style={{ boxShadow: "none" }}
+                              >
                                 <Typography>{page.name}</Typography>
                                 <KeyboardArrowDownIcon
                                   style={{ color: "white", width: "0.7em" }}
@@ -179,10 +194,12 @@ function NavBar() {
                                 {page.list.map((item, index) => (
                                   <MenuItem
                                     onClick={popupState.close}
-                                    key={index}>
+                                    key={index}
+                                  >
                                     <Link
                                       to={page.path[index]}
-                                      style={{ textDecoration: "none" }}>
+                                      style={{ textDecoration: "none" }}
+                                    >
                                       <Typography textAlign="center">
                                         {item}
                                       </Typography>
@@ -199,10 +216,12 @@ function NavBar() {
                         <Button>
                           <Link
                             to={page.path}
-                            style={{ textDecoration: "none" }}>
+                            style={{ textDecoration: "none" }}
+                          >
                             <Typography
                               textAlign="center"
-                              sx={{ color: "white" }}>
+                              sx={{ color: "white" }}
+                            >
                               {page.name}
                             </Typography>
                           </Link>
@@ -217,7 +236,8 @@ function NavBar() {
                         <Link to={page.path} style={{ textDecoration: "none" }}>
                           <Typography
                             textAlign="center"
-                            sx={{ color: "white" }}>
+                            sx={{ color: "white" }}
+                          >
                             {page.name}
                           </Typography>
                         </Link>
@@ -231,7 +251,8 @@ function NavBar() {
                         <Link to={page.path} style={{ textDecoration: "none" }}>
                           <Typography
                             textAlign="center"
-                            sx={{ color: "white" }}>
+                            sx={{ color: "white" }}
+                          >
                             {page.name}
                           </Typography>
                         </Link>
@@ -247,7 +268,8 @@ function NavBar() {
                     <React.Fragment>
                       <IconButton
                         {...bindTrigger(popupState)}
-                        sx={{ padding: 0 }}>
+                        sx={{ padding: 0 }}
+                      >
                         <AccountCircleIcon fontSize="large" color="light" />
                       </IconButton>
                       <Menu {...bindMenu(popupState)}>

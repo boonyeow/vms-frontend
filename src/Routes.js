@@ -11,6 +11,7 @@ import FormTemplates from "./pages/admin/FormTemplates";
 import ViewForm from "./pages/ViewForm";
 import ViewWorkflow from "./pages/ViewWorkflow";
 import Approval from "./pages/Approval";
+import PastSubmissions from "./pages/PastSubmissions";
 
 function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ function AppRoutes() {
       />
       <Route path="workflow/:id" element={<ViewWorkflow />} />
       <Route path="Approvals" element={<Approval />} />
+      <Route path="PastSubmissions" element={<PastSubmissions />} />
     </Routes>
   );
 }
