@@ -71,11 +71,11 @@ const FormCreation = () => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [open, setOpen] = useState(false);
   const nextFieldTemplate = {
-    name: null,
-    fieldType: null,
-    options: [{ name: "" }],
-    helpText: null,
-    regexId: null,
+    name: '',
+    fieldType: 'RADIOBUTTON',
+    options: [{ name: "", options: [] }],
+    helpText: '',
+    regexId: '',
     isRequired: false,
   };
 
@@ -87,7 +87,7 @@ const FormCreation = () => {
   };
   const [formData, setFormData] = useState({
     name: "",
-    description: null,
+    description: '',
     is_final: false,
     workflows: [],
     fields: [
@@ -96,10 +96,10 @@ const FormCreation = () => {
         helpText: "",
         isRequired: true,
         fieldType: "RADIOBUTTON",
-        regexId: null,
+        regexId: '',
         options: [
           {
-            name: null,
+            name: '',
             options: [],
           },
         ],
@@ -114,7 +114,7 @@ const FormCreation = () => {
     if (newFields[index].options[j].options[k].options.length > 5) {
       return
     }
-      newFields[index].options[j].options[k].options.push(parentFieldTemplate);
+      newFields[index].options[j].options[k].options.push(childOptionTemplate);
      setFormData((prevState) => ({
        ...prevState,
        fields: newFields,
@@ -163,7 +163,7 @@ const FormCreation = () => {
           helpText: "",
           isRequired: true,
           fieldType: "RADIOBUTTON",
-          regexId: null,
+          regexId: '',
           nextFieldsId: {},
         },
       ],
@@ -282,70 +282,81 @@ const FormCreation = () => {
   };
 
   const handleSubmitForm = async () => {
-    let processedForm = await processForm(formData);
-    delete processedForm.id;
-
-    processedForm.fields.map((field) => {
-      delete field.id;
-      if (field.regexId === null) {
-        delete field.regexId;
+  let form = _.cloneDeep(formData);
+    form.fields.map((field) => {
+      let newOptions={}
+      field?.options?.map((option) => {
+        let childOp={}
+        if (option.options.length!==0) {
+          newOptions[option.name] = option.options[0]
+          option.options[0]?.options?.map((op) => {
+              childOp[op.name]=null
+          })
+         newOptions[option.name].options=childOp;
+        }
+      })
+      if (Object.keys(newOptions).length > 0) {
+        field.options = newOptions;
+      } else {
+        delete field.options
+      }
+       return field
+    })
+    let reversedForm = _.cloneDeep(form);
+     console.log(reversedForm);
+    reversedForm.fields.map((field) => {
+      //console.log(field)
+      if (!field.options) {
+        field["options"] = [{ name: '', options: [] }]
+        return
       }
 
-      if (field.options) {
-        for (const [key, value] of Object.entries(field.options)) {
-          delete field.options[key].id;
-          if (field.options[key].regexId === null) {
-            delete field.options[key].regexId;
-          }
+      for (const [key, value] of Object.entries(field.options)) {
+        let newOptions=[]
+        for (const [k, v] of Object.entries(value.options)) {
+          //console.log(k)
+          newOptions.push({name:k})
+
         }
+        //console.log(field)
+      //  console.log(newOptions)
+
       }
-      return field;
-    });
+    //  return field
 
-    await axios
-      .put(
-        process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
-        processedForm,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .catch((e) => {
-        console.log(e);
-      });
+    })
+   // console.log(reversedForm.fields)
+
+
+      // await axios
+      //   .put(
+      //     process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
+      //     form,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${token}`,
+      //         "Content-Type": "application/json",
+      //       },
+      //     }
+      //   )
+      //   .catch((e) => {
+      //     console.log(e);
+      //   });
   };
 
-
-  const nextFieldOptionChange = (value, key, index) => {
-    const newFields = [...formData.fields];
-    const object = newFields[index].options[newFields[index].name];
-    object.options[value] = object.options[key];
-    delete object.options[key];
-
-    setFormData((prevData) => ({
-      ...prevData,
-      fields: newFields,
-    }));
-  };
 
   const changeData = (data, type) => {
-    // if (type == 'isFinal') {
-    //  setIsDisabled(data);
-    // }
     setFormData((prevData) => ({
       ...prevData,
       [type]: data,
     }));
-    //  console.log(formData);
   };
 
-  const fieldDataChange = (value, index, isNextField, type) => {
+  const fieldDataChange = (value, index, isNextField, type,j) => {
     const newFields = [...formData.fields];
     if (isNextField) {
-      newFields[index].options[newFields[index].name][type] = value;
+      newFields[index].options[j].options[0][type] = value;
+      console.log(newFields[index].options[j].options[0]);
     } else {
       newFields[index][type] = value;
     }
@@ -385,23 +396,30 @@ const FormCreation = () => {
 
   const handleChangeFieldType = (index, input, isNextField,j) => {
     const newFields = [...formData.fields];
-    console.log(newFields)
     if (isNextField) {
       const nextField = _.cloneDeep(nextFieldTemplate);
       nextField.fieldType = input.value;
       if (newFields[index]?.options[j]?.options?.length > 0) {
-        console.log(newFields[index].options[j].options);
         newFields[index].options[j].options[0].fieldType = input.value;
       } else {
         newFields[index].options[j].options.push(nextField);
       }
+       if (input.value === "TEXTBOX") {
+        console.log(newFields[index].options[j].options[0].options=[]);
+       newFields[index].options[j].options[0].options = [
+         { name: "", options: [] },
+       ];
+       }
     } else {
+      if (input.value === 'TEXTBOX') {
+        console.log(newFields[index].options);
+        newFields[index].options = [{name:'',options:[]}];
+      }
       newFields[index] = {
         ...newFields[index],
         fieldType: input.value,
       };
     }
-    console.log(newFields)
     setFormData((prevState) => ({
       ...prevState,
       fields: newFields,
@@ -644,8 +662,8 @@ const FormCreation = () => {
                                 value={childField.name}
                                 onChange={(e) => {
                                   const newFields = [...formData.fields];
-                                  newFields[index].options[j].name =
-                                    e.target.value;
+                                 newFields[index].options[j].options[k].name =
+                                   e.target.value;
                                   setFormData((prevState) => ({
                                     ...prevState,
                                     fields: newFields,
@@ -722,7 +740,8 @@ const FormCreation = () => {
                                         console.log(
                                           newFields[index].options[j]
                                         );
-                                        newFields[index].options[j].options= [];
+                                        newFields[index].options[j].options =
+                                          [];
                                       } else {
                                         newFields[index].options[j].options[
                                           k
@@ -746,6 +765,15 @@ const FormCreation = () => {
                                   Add option
                                 </Button>
                               )}
+                              {childField.fieldType === "TEXTBOX" && (
+                                <RegexSelect
+                                  field={childField}
+                                  index={index}
+                                  isNextField={true}
+                                  j={j}
+                                  fieldDataChange={fieldDataChange}
+                                />
+                              )}
                             </Stack>
                           ))}
                         </Stack>
@@ -757,6 +785,14 @@ const FormCreation = () => {
                         >
                           Add option
                         </Button>
+                      )}
+                      {field.fieldType === "TEXTBOX" && (
+                        <RegexSelect
+                          field={field}
+                          index={index}
+                          isNextField={false}
+                          fieldDataChange={fieldDataChange}
+                        />
                       )}
                     </Stack>
                   </Stack>

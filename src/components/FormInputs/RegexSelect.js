@@ -26,7 +26,7 @@ const MenuProps = {
   },
 };
 
-export default function RegexSelect({ field, index, isNextField, fieldDataChange }) {
+export default function RegexSelect({ field, index, isNextField, fieldDataChange ,j}) {
   const { token } = useAuthStore();
   const [regexList, setRegexList] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -40,13 +40,8 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
 
     const initialChosenValue =async () => {
         let initialRegex = '';
-        let regexId = null;
-        if (isNextField && field.options[field.name].regexId) {
-            regexId = field.options[field.name].regexId;
-        } else if (field.regexId) {
-            regexId = field.regexId;
-        }
-            initialRegex = regexList.find((regex) => regex.id === regexId);
+        let regexId = field.regexId;
+        initialRegex = regexList.find((regex) => regex.id === regexId);
         return initialRegex;
 
     }
@@ -115,20 +110,29 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
 
   return (
     <div>
-      <FormControl sx={{ minWidth: 150 }} size="small">
+      <FormControl sx={{ minWidth: 150, marginTop:5 }} size="small">
         <InputLabel id="demo-multiple-name-label">Regex (optional)</InputLabel>
         <Select
           labelId="demo-multiple-name-label"
           id="demo-multiple-name"
           value={chosenRegex}
           onChange={(e) => {
-            fieldDataChange(e.target.value.id, index, isNextField, "regexId");
-            handleChange(e);
+            console.log(e)
+            if (e.target.value !== "addNewRegex") {
+              fieldDataChange(
+                e.target.value.id,
+                index,
+                isNextField,
+                "regexId",
+                j
+              );
+             handleChange(e);
+            }
           }}
           input={<OutlinedInput label="Regex" />}
           MenuProps={MenuProps}
         >
-          <MenuItem value="    " onClick={handleAddNewRegex}>
+          <MenuItem value="addNewRegex" onClick={handleAddNewRegex}>
             Add new regex
           </MenuItem>
           <Divider />
@@ -146,6 +150,13 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
               {regex.name}
             </MenuItem>
           ))}
+          {/* <MenuItem value={ {
+      id: 1,
+       name: "email",
+       pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+     }}>
+            test
+          </MenuItem> */}
         </Select>
       </FormControl>
       <Dialog open={openDialog} onClose={handleCloseDialog}>
