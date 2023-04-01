@@ -310,7 +310,6 @@ const FormCreation = () => {
     const newFields = [...formData.fields];
     if (isNextField) {
       newFields[index].options[j].options[0][type] = value;
-      console.log(newFields[index].options[j].options[0]);
     } else {
       newFields[index][type] = value;
     }
@@ -339,7 +338,7 @@ const FormCreation = () => {
         }
       )
       .then((res) => {
-        navigate("/FormTemplates");
+        navigate("/template");
         console.log("deleted", res.data);
       })
       .catch((e) => {
@@ -619,8 +618,8 @@ const FormCreation = () => {
                                 value={childField.name}
                                 onChange={(e) => {
                                   const newFields = [...formData.fields];
-                                 newFields[index].options[j].options[k].name =
-                                   e.target.value;
+                                  newFields[index].options[j].options[k].name =
+                                    e.target.value;
                                   setFormData((prevState) => ({
                                     ...prevState,
                                     fields: newFields,
@@ -658,7 +657,7 @@ const FormCreation = () => {
                                   alignItems="center"
                                 >
                                   {childField.fieldType == "RADIOBUTTON" && (
-                                    <input type="radio" name={n} />
+                                    <input type="radio" name={k} />
                                   )}
                                   {childField.fieldType === "CHECKBOX" && (
                                     <input type="checkbox" name={`${n}-${k}`} />
@@ -731,6 +730,13 @@ const FormCreation = () => {
                                   fieldDataChange={fieldDataChange}
                                 />
                               )}
+                              <RequiredCheckBox
+                                nextField={true}
+                                index={index}
+                                j={j}
+                                value={childField.isRequired}
+                                fieldDataChange={fieldDataChange}
+                              />
                             </Stack>
                           ))}
                         </Stack>
@@ -751,6 +757,12 @@ const FormCreation = () => {
                           fieldDataChange={fieldDataChange}
                         />
                       )}
+                      <RequiredCheckBox
+                        nextField={false}
+                        index={index}
+                        value={field.isRequired}
+                        fieldDataChange={fieldDataChange}
+                      />
                     </Stack>
                   </Stack>
 
@@ -821,7 +833,7 @@ const FormCreation = () => {
               variant="contained"
               style={{ backgroundColor: "grey" }}
               onClick={() => {
-                navigate("../../../FormTemplates");
+                navigate("/template");
               }}
             >
               Cancel

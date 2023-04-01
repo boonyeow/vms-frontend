@@ -4,7 +4,7 @@ import {
   FormGroup,
 } from "@mui/material";
 
-export default function RequiredCheckBox({ field, nextField, value, index, fieldDataChange }) {
+export default function RequiredCheckBox({ nextField, value, index, fieldDataChange,j }) {
   return (
     <>
       <FormGroup>
@@ -13,7 +13,7 @@ export default function RequiredCheckBox({ field, nextField, value, index, field
             <Checkbox
               checked={value}
               onChange={(e) =>
-                fieldDataChange(e.target.checked, index, nextField, 'isRequired')
+                fieldDataChange(e.target.checked, index, nextField, 'isRequired',j)
               }
             />
           }
