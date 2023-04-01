@@ -10,8 +10,17 @@ const TextboxComponentV2 = ({
   setFieldResponses,
   show,
   isParent,
+  initialResponses,
 }) => {
   const [inputError, setInputError] = useState("");
+  const [value, setValue] = useState();
+
+  useState(() => {
+    if (fieldData !== undefined && initialResponses !== undefined) {
+      setValue(initialResponses[fieldData.id]);
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     if (fieldData.regexId) {
       const newValue = e.target.value;
@@ -45,6 +54,7 @@ const TextboxComponentV2 = ({
           helperText={inputError}
           error={!!inputError}
           onChange={handleInputChange}
+          defaultValue={value}
           disabled={!show}></TextField>
       </Box>
     </>

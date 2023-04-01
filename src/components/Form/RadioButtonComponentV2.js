@@ -6,7 +6,7 @@ import {
   RadioGroup,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const RadioButtonComponentV2 = ({
   idx,
@@ -18,14 +18,32 @@ const RadioButtonComponentV2 = ({
   displayMap,
   setDisplayMap,
   fetchFieldMap,
+  initialResponses,
 }) => {
   const options = Object.entries(fieldData.options);
   const optionNames = options.map(([name]) => name);
   const [selectedOption, setSelectedOption] = useState(
     Array(options.length).fill(false)
   );
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    if (fieldData !== undefined && initialResponses !== undefined) {
+      console.log(initialResponses);
+      let temp = JSON.parse(initialResponses[fieldData.id]);
+      let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
+      setValue(tempValue);
+
+      let nextFieldId = fieldData["options"][tempValue];
+      console.log("nextfieldId", nextFieldId);
+      let tempDisplayMap = { ...displayMap };
+      tempDisplayMap[nextFieldId] = true;
+      setDisplayMap(tempDisplayMap);
+    }
+  }, []);
 
   const handleChange = (e) => {
+    setValue(e.target.value);
     let prevOptionIndex = selectedOption.indexOf(true);
     let optionIndex = e.target.name;
     let updatedSelectedOption = [...selectedOption];
@@ -47,6 +65,16 @@ const RadioButtonComponentV2 = ({
     let tempDisplayMap = { ...displayMap };
     tempDisplayMap[previousFieldId] = false;
     tempDisplayMap[nextFieldId] = true;
+
+    if (initialResponses !== undefined) {
+      let temp = JSON.parse(initialResponses[fieldData.id]);
+      let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
+      let initialNextFieldId = fieldData["options"][tempValue];
+
+      if (nextFieldId !== initialNextFieldId) {
+        tempDisplayMap[initialNextFieldId] = false;
+      }
+    }
     setDisplayMap(tempDisplayMap);
   };
 
@@ -57,7 +85,10 @@ const RadioButtonComponentV2 = ({
         <FormLabel id="demo-radio-buttons-group-label">
           {isParent ? `${idx + "."} ${fieldData.name}` : fieldData.name}
         </FormLabel>
-        <RadioGroup name="radio-buttons-group" onChange={handleChange}>
+        <RadioGroup
+          name="radio-buttons-group"
+          onChange={handleChange}
+          value={value}>
           {options.map(([name], index) => (
             <FormControlLabel
               key={index}

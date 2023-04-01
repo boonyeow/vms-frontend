@@ -23,6 +23,7 @@ const ViewForm = () => {
   const [displayMap, setDisplayMap] = useState({});
   const [formDetails, setFormDetails] = useState({});
   const [formResponse, setFormResponse] = useState({});
+  const [initialResponses, setInitialResponses] = useState({});
 
   let parentCounter = 0;
   const navigate = useNavigate();
@@ -31,9 +32,11 @@ const ViewForm = () => {
     fetchRegexMap();
     fetchForm();
     fetchFormDetails();
+    // Find existing submission that is draft
+    fetchDraftSubmission();
   }, []);
 
-  const initiateData = (data) => {
+  const initializeData = (data) => {
     let tempChildFields = [];
     let tempIdToIndex = {};
     let tempFieldMap = {};
@@ -61,29 +64,7 @@ const ViewForm = () => {
     setDisplayMap(tempDisplayMap);
   };
 
-  // TODO auto saving feature
   useEffect(() => {
-    // const interval = setInterval(() => {
-    //   // Auto save
-    //   // axios
-    //   //   .post(
-    //   //     `${process.env.REACT_APP_ENDPOINT_URL}/api/data`,
-    //   //     fieldResponses,
-    //   //     {
-    //   //       headers: {
-    //   //         Authorization: `Bearer ${token}`,
-    //   //       },
-    //   //     }
-    //   //   )
-    //   //   .then((response) => {
-    //   //     console.log(response.data);
-    //   //   })
-    //   //   .catch((error) => {
-    //   //     console.log(error);
-    //   //   });
-    // }, 30000);
-
-    // return () => clearInterval(interval);
     let temp = {
       workflow_id: workflowId,
       fck: {
@@ -99,6 +80,33 @@ const ViewForm = () => {
     setFormResponse(temp);
     console.log(temp);
   }, [fieldResponses]);
+
+  const fetchDraftSubmission = () => {
+    axios
+      .get(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/getByWorkflowAndForm?workflowId=${workflowId}&formId=${id}&revisionNo=${revisionNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.length > 0) {
+          let latestSubmission = res.data[res.data.length - 1];
+          setInitialResponses(latestSubmission["fieldResponses"]);
+          let tempFieldResponses = { ...fieldResponses };
+
+          tempFieldResponses = latestSubmission["fieldResponses"];
+          setFieldResponses(tempFieldResponses);
+
+          let tempFormResponse = { ...formResponse };
+          // console.log("formResponse", tempFormResponse);
+          tempFormResponse["fieldResponses"] = tempFieldResponses;
+          setFormResponse(tempFormResponse);
+        }
+      });
+  };
 
   const fetchFormDetails = async () => {
     await axios
@@ -127,12 +135,16 @@ const ViewForm = () => {
       )
       .then((res) => {
         setFormData(res.data);
-        initiateData(res.data);
-        let temp = {};
-        for (let i = 0; i < res.data.length; i++) {
-          temp[res.data[i].id] = null;
+        initializeData(res.data);
+
+        console.log("obj key init res", Object.keys(initialResponses));
+        if (Object.keys(initialResponses).length == 0) {
+          let temp = {};
+          for (let i = 0; i < res.data.length; i++) {
+            temp[res.data[i].id] = null;
+          }
+          setFieldResponses(temp);
         }
-        setFieldResponses(temp);
       });
   };
 
@@ -154,6 +166,30 @@ const ViewForm = () => {
   };
 
   const saveAsDraft = () => {
+    axios
+      .post(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
+        formResponse,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `Draft has been saved. Redirecting...`,
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => navigate("/PastSubmissions"));
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const submitForm = () => {
+    formResponse["status"] = "AWAITING_ADMIN";
     axios
       .post(
         `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
@@ -196,7 +232,8 @@ const ViewForm = () => {
                     fieldResponses={fieldResponses}
                     setFieldResponses={setFieldResponses}
                     isParent={true}
-                    show={true}></TextboxComponentV2>
+                    show={true}
+                    initialResponses={initialResponses}></TextboxComponentV2>
                 );
               } else if (field.fieldType === "RADIOBUTTON") {
                 parentElement = (
@@ -209,6 +246,7 @@ const ViewForm = () => {
                     show={true}
                     displayMap={displayMap}
                     setDisplayMap={setDisplayMap}
+                    initialResponses={initialResponses}
                   />
                 );
               } else {
@@ -220,6 +258,7 @@ const ViewForm = () => {
                     setFieldResponses={setFieldResponses}
                     isParent={true}
                     show={true}
+                    initialResponses={initialResponses}
                   />
                 );
               }
@@ -279,7 +318,7 @@ const ViewForm = () => {
             <Button variant="outlined" sx={{ mr: 2 }} onClick={saveAsDraft}>
               Save as Draft
             </Button>
-            <Button variant="contained" color="action">
+            <Button variant="contained" color="action" onClick={submitForm}>
               Submit
             </Button>
           </Box>

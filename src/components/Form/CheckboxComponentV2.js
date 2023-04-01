@@ -5,7 +5,7 @@ import {
   FormLabel,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const CheckboxComponentV2 = ({
   idx,
@@ -14,16 +14,26 @@ const CheckboxComponentV2 = ({
   setFieldResponses,
   show,
   isParent,
+  initialResponses,
 }) => {
   const options = Object.entries(fieldData.options);
   const optionNames = options.map(([name]) => name);
   const [selectedOptions, setSelectedOptions] = useState(
     Array(options.length).fill(false)
   );
+
+  useEffect(() => {
+    if (fieldData !== undefined && initialResponses !== undefined) {
+      let temp = JSON.parse(initialResponses[fieldData.id]);
+      setSelectedOptions(temp.ans);
+    }
+  }, []);
+
   const handleChange = (optionIndex, checked) => {
     const updatedSelectedOptions = [...selectedOptions];
     updatedSelectedOptions[optionIndex] = checked;
     setSelectedOptions(updatedSelectedOptions);
+    console.log("heheheupdated", updatedSelectedOptions);
     const newValue = {
       type: "checkbox",
       name: optionNames,
@@ -49,6 +59,7 @@ const CheckboxComponentV2 = ({
                 <Checkbox
                   required={fieldData.isRequired}
                   inputProps={{ "aria-label": name }}
+                  checked={selectedOptions[index]}
                   onChange={(e) => handleChange(index, e.target.checked)}
                 />
               }

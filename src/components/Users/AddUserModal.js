@@ -30,6 +30,14 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
           return { ...state, company: action.payload };
         case "accountType":
           return { ...state, accountType: action.payload };
+        case "contactNumber":
+          return { ...state, contactNumber: action.payload };
+        case "natureOfBusiness":
+          return { ...state, natureOfBusiness: action.payload };
+        case "registrationNumber":
+          return { ...state, registrationNumber: action.payload };
+        case "gstRegistrationNumber":
+          return { ...state, gstRegistrationNumber: action.payload };
         default:
           return state;
       }
@@ -40,6 +48,11 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
       company: "",
       accountType: "",
       password: "blopblopblop",
+      contactNumber: "",
+      natureOfBusiness: "",
+      registrationNumber: "",
+      gstRegistrationNumber: "",
+      isArchived: false,
     }
   );
 
@@ -129,11 +142,55 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
           <TextField
             autoFocus
             margin="dense"
+            id="contactNumber"
+            label="Contact Number"
+            fullWidth
+            variant="standard"
+            value={state.contactNumber}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
             id="company"
             label="Company"
             fullWidth
             variant="standard"
             value={state.company}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="natureOfBusiness"
+            label="Nature of Business"
+            fullWidth
+            variant="standard"
+            value={state.natureOfBusiness}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="registrationNumber"
+            label="Registration Number"
+            fullWidth
+            variant="standard"
+            value={state.registrationNumber}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="gstRegistrationNumber"
+            label="GST Registration Number"
+            fullWidth
+            variant="standard"
+            value={state.gstRegistrationNumber}
             onChange={handleInputChange}
             required
           />
