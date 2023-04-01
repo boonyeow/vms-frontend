@@ -17,32 +17,29 @@ import PastApprovalDataGrid from "../components/PastApprovalDataGrid";
 
 const PastApprovals = () => {
   return (
-    <>
+    <Box>
       <NavBar />
       <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-          }}
-        >
+          }}>
           <Typography
             component="h1"
             variant="h4"
             fontWeight="bold"
             sx={{
               color: "action.main",
-              alignSelf: "center",
-              marginLeft: "110px",
-              marginBottom: "15px",
-            }}
-          >
+            }}>
             Approval History
           </Typography>
         </Box>
-        <PastApprovalDataGrid />
+        <Box sx={{ my: 2, py: 1 }}>
+          <PastApprovalDataGrid />
+        </Box>
       </Container>
-    </>
+    </Box>
   );
 };
 

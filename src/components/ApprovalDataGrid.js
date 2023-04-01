@@ -7,6 +7,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
 import SendEmailButton from "../components/Email/SendEmailButton";
+import { Box } from "@mui/system";
 
 const ApprovalDataGrid = () => {
   const { token, accountId, role } = useAuthStore();
@@ -118,8 +119,7 @@ const ApprovalDataGrid = () => {
               variant="outlined"
               color="warning"
               size="small"
-              onClick={onClick}
-            >
+              onClick={onClick}>
               View
             </Button>
           </Stack>
@@ -166,31 +166,26 @@ const ApprovalDataGrid = () => {
 
   return (
     <>
-      <Stack spacing={2} alignItems="center">
-        <div
-          style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
-        >
-          <DataGrid
-            rows={formList}
-            columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            getRowId={(row) =>
-              row.id +
-              row.status +
-              (row.workflow?.id ? row.workflow.id : row.workflowId) +
-              (row.form?.id?.id ? row.form.id.id : row.formId) +
-              (row.form?.id?.revisionNo
-                ? row.form.id.revisionNo
-                : row.revisionNo)
-            }
-            checkboxSelection
-            slots={{
-              toolbar: GridToolbar,
-            }}
-          />
-        </div>
-      </Stack>
+      <Box style={{ height: 500, width: "100%" }}>
+        <DataGrid
+          sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
+          rows={formList}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          getRowId={(row) =>
+            row.id +
+            row.status +
+            (row.workflow?.id ? row.workflow.id : row.workflowId) +
+            (row.form?.id?.id ? row.form.id.id : row.formId) +
+            (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
+          }
+          checkboxSelection
+          slots={{
+            toolbar: GridToolbar,
+          }}
+        />
+      </Box>
     </>
   );
 };

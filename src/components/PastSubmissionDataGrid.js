@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
+import { Box } from "@mui/system";
 
 const PastSubmissionDataGrid = () => {
   const { token, accountId, role } = useAuthStore();
@@ -100,19 +101,17 @@ const PastSubmissionDataGrid = () => {
           const submissionId = params.row.submissionid;
           const formid = params.row.formId;
           const revisionNo = params.row.revisionNo;
-          navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
+          console.log("hey row", params.row);
+          // navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
         };
         return (
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              color="warning"
-              size="small"
-              onClick={onClick}
-            >
-              View
-            </Button>
-          </Stack>
+          <Button
+            variant="contained"
+            color="action"
+            size="small"
+            onClick={onClick}>
+            View
+          </Button>
         );
       },
     },
@@ -133,7 +132,6 @@ const PastSubmissionDataGrid = () => {
         },
       })
       .then((res) => {
-        console.log(res.data);
         const items = [];
         for (const item of res.data) {
           items.push({
@@ -164,38 +162,30 @@ const PastSubmissionDataGrid = () => {
   }, []);
 
   return (
-    <>
-      <Stack spacing={2} alignItems="center">
-        <div
-          style={{
-            height: 500,
-            maxWidth: "100%",
-            width: "940px",
-            backgroundColor: "white",
-          }}
-        >
-          <DataGrid
-            rows={formList}
-            columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            getRowId={(row) =>
-              row.id +
-              row.status +
-              (row.workflow?.id ? row.workflow.id : row.workflowId) +
-              (row.form?.id?.id ? row.form.id.id : row.formId) +
-              (row.form?.id?.revisionNo
-                ? row.form.id.revisionNo
-                : row.revisionNo)
-            }
-            checkboxSelection
-            slots={{
-              toolbar: GridToolbar,
-            }}
-          />
-        </div>
-      </Stack>
-    </>
+    <Box
+      style={{
+        height: 500,
+        width: "100%",
+      }}>
+      <DataGrid
+        sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
+        rows={formList}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        getRowId={(row) =>
+          row.id +
+          row.status +
+          (row.workflow?.id ? row.workflow.id : row.workflowId) +
+          (row.form?.id?.id ? row.form.id.id : row.formId) +
+          (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
+        }
+        checkboxSelection
+        slots={{
+          toolbar: GridToolbar,
+        }}
+      />
+    </Box>
   );
 };
 

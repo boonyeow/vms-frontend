@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
+import { Box } from "@mui/system";
 
 const SubmissionDataGrid = () => {
   const { token, accountId, role } = useAuthStore();
@@ -103,21 +104,19 @@ const SubmissionDataGrid = () => {
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (e) => {
-          const formid = params.row.formId;
+          const formId = params.row.formId;
           const revisionNo = params.row.revisionNo;
-          navigate("/FormMgmt");
+          const workflowId = params.row.workflowId;
+          navigate(`/form/${formId}/${revisionNo}/${workflowId}`);
         };
         return (
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              color="warning"
-              size="small"
-              onClick={onClick}
-            >
-              View
-            </Button>
-          </Stack>
+          <Button
+            variant="contained"
+            color="action"
+            size="small"
+            onClick={onClick}>
+            View
+          </Button>
         );
       },
     },
@@ -169,31 +168,30 @@ const SubmissionDataGrid = () => {
 
   return (
     <>
-      <Stack spacing={2} alignItems="center">
-        <div
-          style={{ height: 500, maxWidth: "100%", backgroundColor: "white" }}
-        >
-          <DataGrid
-            rows={toBeSubmittedList}
-            columns={columnsTwo}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            getRowId={(row) =>
-              row.id +
-              row.status +
-              (row.workflow?.id ? row.workflow.id : row.workflowId) +
-              (row.form?.id?.id ? row.form.id.id : row.formId) +
-              (row.form?.id?.revisionNo
-                ? row.form.id.revisionNo
-                : row.revisionNo)
-            }
-            checkboxSelection
-            slots={{
-              toolbar: GridToolbar,
-            }}
-          />
-        </div>
-      </Stack>
+      <Box
+        style={{
+          height: 500,
+          width: "100%",
+        }}>
+        <DataGrid
+          sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
+          rows={toBeSubmittedList}
+          columns={columnsTwo}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          getRowId={(row) =>
+            row.id +
+            row.status +
+            (row.workflow?.id ? row.workflow.id : row.workflowId) +
+            (row.form?.id?.id ? row.form.id.id : row.formId) +
+            (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
+          }
+          checkboxSelection
+          slots={{
+            toolbar: GridToolbar,
+          }}
+        />
+      </Box>
     </>
   );
 };

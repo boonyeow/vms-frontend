@@ -29,10 +29,6 @@ const ViewWorkflow = (props) => {
     fetchWorkflowInfo();
   }, [userMap]);
 
-  useEffect(() => {
-    console.log("attach", attachedForms);
-  }, [attachedForms]);
-
   const fetchWorkflowInfo = () => {
     axios
       .get(process.env.REACT_APP_ENDPOINT_URL + "/api/workflows/" + id, {
@@ -66,7 +62,6 @@ const ViewWorkflow = (props) => {
       )
       .then((res) => {
         setFormTemplateInfo(res.data);
-        console.log("fFORM TEMPLATE INFO", res.data);
       })
       .catch((e) => console.error(e));
   };
@@ -85,7 +80,6 @@ const ViewWorkflow = (props) => {
           return acc;
         }, {});
         setUserMap(newUserMap);
-        console.log(newUserMap);
       })
       .catch((e) => console.error(e));
   };
@@ -171,6 +165,12 @@ const ViewWorkflow = (props) => {
       });
   };
 
+  const onTitleChange = (e) => {
+    let temp = { ...workflowInfo };
+    temp["name"] = e.target.value;
+    setWorkflowInfo(temp);
+  };
+
   return (
     <Box>
       <NavBar />
@@ -201,6 +201,7 @@ const ViewWorkflow = (props) => {
               variant="contained"
               sx={{ my: 2 }}
               color="action"
+              disabled={workflowInfo["final"] === true ? true : false}
               onClick={() => {
                 handleSave(true);
               }}>
@@ -217,7 +218,9 @@ const ViewWorkflow = (props) => {
             </Typography>
             <TextField
               sx={{ bgcolor: "white", my: 1, width: "100%" }}
+              defaultValue={workflowInfo.name}
               value={workflowInfo.name}
+              onChange={onTitleChange}
               disabled={workflowInfo.final === true ? true : false}></TextField>
           </Box>
           <AttachedFormsSection
