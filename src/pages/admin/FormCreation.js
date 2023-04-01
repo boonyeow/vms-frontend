@@ -1,5 +1,4 @@
 import NavBar from "../../components/SharedComponents/NavBar";
-import NextFields from "../../components/FormInputs/NextFields";
 import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
 import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
@@ -10,24 +9,11 @@ import {
   CardActions,
   CardContent,
   TextField,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   IconButton,
-  Typography,
   Stack,
-  MenuItem,
   Grid,
-  Checkbox,
   Tooltip,
   Alert,
-  Box,
-  OutlinedInput,
-  InputLabel,
-  FormControl,
-  ListItemText,
-  Chip,
   Divider,
   ToggleButton,
   ToggleButtonGroup,
@@ -40,28 +26,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import "../../form.css";
 import { useAuthStore } from "../../store";
 import { useNavigate } from "react-router-dom";
-import Select from "@mui/material/Select";
 import _ from "lodash";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-const fieldTypeMatching = {
-  text: "TEXTBOX",
-  radio: "RADIOBUTTON",
-  checkbox: "CHECKBOX",
-  TEXTBOX: "text",
-  RADIOBUTTON: "radio",
-  CHECKBOX: "checkbox",
-};
 
 const FormCreation = () => {
   const { token } = useAuthStore();
@@ -107,7 +75,7 @@ const FormCreation = () => {
     ],
   });
   useEffect(() => {
-    //getFormData();
+    getFormData();
   }, []);
   const addChildOption = (index, j, k) => {
     const newFields = [...formData.fields];
@@ -129,7 +97,6 @@ const FormCreation = () => {
 
   const addOption = (index) => {
     const newFields = [...formData.fields]
-    console.log(newFields)
     if (newFields[index].options.length > 10) {
       return;
     }
@@ -148,10 +115,7 @@ const FormCreation = () => {
     setOpen(false);
   };
   const getFormData = async () => {
-    const savedFormData = localStorage.getItem(
-      `formCreation${id}${revisionNo}`
-    );
-    console.log(savedFormData);
+
     let data = {
       name: "",
       description: null,
@@ -194,9 +158,7 @@ const FormCreation = () => {
             }
           )
           .then(async (res) => {
-            console.log(res.data);
             data.fields = res.data;
-            // setFormTitle("Edit Form")
             const promises = [];
             res.data.forEach((field, index) => {
               if (field.nextFieldsId) {
@@ -222,7 +184,6 @@ const FormCreation = () => {
                 }
               }
             });
-            // Wait for all axios calls to finish
             await Promise.all(promises);
           })
           .catch((e) => console.error(e));
@@ -230,17 +191,49 @@ const FormCreation = () => {
           (obj) => !fieldtoDelete.includes(obj.id)
         );
         let form = await replaceKey(data);
-        let processedForm = await processForm(form);
-        //console.log(replaceKey(processedForm));
-        console.log(processedForm);
-        setFormData(processedForm);
+        form.fields.map((field) => {
+          if (field?.id) {
+            delete field.id
+            if (field.options) {
+              for (const [key, value] of Object.entries(field.options)) {
+                if (value) {
+                  delete value.id
+               }
+              }
+            }
+          }
+          return field
+        })
+         form.fields.map((field) => {
+           if (!field.options) {
+             field["options"] = [{ name: "", options: [] }];
+             return;
+           }
+           let test = [];
+           for (const [key, value] of Object.entries(field.options)) {
+             let newOptions = [];
+             if (value?.options) {
+               for (const [k, v] of Object.entries(value.options)) {
+                 newOptions.push({ name: k });
+                }
+             } else {
+               newOptions.push({ name: '' });
+              }
+             if (value) {
+               test.push({ name: key, options: [{ ...value, options:newOptions}], });
+             } else {
+               test.push({ name: key })
+              }
+               field.options = test;
+           }
+           return field;
+         });
+        setFormData(form);
       })
-
       .catch((e) => console.error(e));
   };
 
   const replaceKey = (obj) => {
-    // console.log(obj)
     let converedObj = _.cloneDeep(obj);
     converedObj.fields.map((field) => {
       if (field.nextFieldsId) {
@@ -261,87 +254,48 @@ const FormCreation = () => {
     return converedObj;
   };
 
-  const processForm = (form) => {
-    let newForm = _.cloneDeep(form);
-    newForm.fields.map((field) => {
-      // Check if fieldType exists and set it to null
-      if (field.fieldType) {
-        field.fieldType = fieldTypeMatching[field.fieldType];
-      }
-      // Check if options exists and recursively set its fieldType to null
-      if (field.options) {
-        Object.values(field.options).forEach((nestedField) => {
-          if (nestedField?.fieldType) {
-            //console.log( nestedField.fieldType)
-            nestedField.fieldType = fieldTypeMatching[nestedField.fieldType];
-          }
-        });
-      }
-    });
-    return newForm;
-  };
 
   const handleSubmitForm = async () => {
-  let form = _.cloneDeep(formData);
-    form.fields.map((field) => {
-      let newOptions={}
-      field?.options?.map((option) => {
-        let childOp={}
-        if (option.options.length!==0) {
-          newOptions[option.name] = option.options[0]
-          option.options[0]?.options?.map((op) => {
-              childOp[op.name]=null
-          })
-         newOptions[option.name].options=childOp;
-        }
-      })
-      if (Object.keys(newOptions).length > 0) {
-        field.options = newOptions;
-      } else {
-        delete field.options
-      }
-       return field
-    })
-    let reversedForm = _.cloneDeep(form);
-     console.log(reversedForm);
-    reversedForm.fields.map((field) => {
-      //console.log(field)
-      if (!field.options) {
-        field["options"] = [{ name: '', options: [] }]
-        return
-      }
+    let form = _.cloneDeep(formData);
+    if (form.id) {
+      delete form.id
+    }
+     form.fields.map((field) => {
+       let newOptions = {};
+       field?.options?.map((option) => {
+         let childOp = {};
+         if (option.options && option?.options?.length !== 0) {
+           newOptions[option.name] = option.options[0];
+           option.options[0]?.options?.map((op) => {
+             childOp[op.name] = null;
+           });
+           newOptions[option.name].options = childOp;
 
-      for (const [key, value] of Object.entries(field.options)) {
-        let newOptions=[]
-        for (const [k, v] of Object.entries(value.options)) {
-          //console.log(k)
-          newOptions.push({name:k})
-
-        }
-        //console.log(field)
-      //  console.log(newOptions)
-
-      }
-    //  return field
-
-    })
-   // console.log(reversedForm.fields)
-
-
-      // await axios
-      //   .put(
-      //     process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
-      //     form,
-      //     {
-      //       headers: {
-      //         Authorization: `Bearer ${token}`,
-      //         "Content-Type": "application/json",
-      //       },
-      //     }
-      //   )
-      //   .catch((e) => {
-      //     console.log(e);
-      //   });
+         } else {
+           newOptions[option.name] = null;
+         }
+       });
+       if (Object.keys(newOptions).length > 0) {
+         field.options = newOptions;
+       } else {
+         delete field.options;
+       }
+       return field;
+     });
+      await axios
+        .put(
+          process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
+          form,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .catch((e) => {
+          console.log(e);
+        });
   };
 
 
@@ -385,7 +339,6 @@ const FormCreation = () => {
         }
       )
       .then((res) => {
-        // Login successful
         navigate("/FormTemplates");
         console.log("deleted", res.data);
       })
@@ -399,11 +352,14 @@ const FormCreation = () => {
     if (isNextField) {
       const nextField = _.cloneDeep(nextFieldTemplate);
       nextField.fieldType = input.value;
-      if (newFields[index]?.options[j]?.options?.length > 0) {
-        newFields[index].options[j].options[0].fieldType = input.value;
-      } else {
-        newFields[index].options[j].options.push(nextField);
+      if (!newFields[index].options[j].options) {
+        newFields[index].options[j].options=[]
       }
+        if (newFields[index]?.options[j]?.options?.length > 0) {
+          newFields[index].options[j].options[0].fieldType = input.value;
+        } else {
+          newFields[index].options[j].options.push(nextField);
+        }
        if (input.value === "TEXTBOX") {
         console.log(newFields[index].options[j].options[0].options=[]);
        newFields[index].options[j].options[0].options = [
@@ -572,6 +528,7 @@ const FormCreation = () => {
                         label="Label"
                         variant="standard"
                         sx={{ width: "250px" }}
+                        value={field.name}
                         onChange={(e) => {
                           const newFields = [...formData.fields];
                           newFields[index].name = e.target.value;
