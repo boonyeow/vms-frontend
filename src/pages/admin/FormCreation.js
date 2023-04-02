@@ -128,7 +128,7 @@ const FormCreation = () => {
           isRequired: true,
           fieldType: "RADIOBUTTON",
           regexId: '',
-          nextFieldsId: {},
+          options: {},
         },
       ],
     };
@@ -161,8 +161,8 @@ const FormCreation = () => {
             data.fields = res.data;
             const promises = [];
             res.data.forEach((field, index) => {
-              if (field.nextFieldsId) {
-                for (const [key, value] of Object.entries(field.nextFieldsId)) {
+              if (field.options) {
+                for (const [key, value] of Object.entries(field.options)) {
                   promises.push(
                     axios
                       .get(
@@ -175,8 +175,7 @@ const FormCreation = () => {
                         }
                       )
                       .then((res) => {
-                        data.fields[index].nextFieldsId[key] = res.data;
-                        //console.log(value)
+                        data.fields[index].options[key] = res.data;
                         fieldtoDelete.push(value);
                       })
                       .catch((e) => console.error(e))
@@ -190,21 +189,21 @@ const FormCreation = () => {
         data.fields = data.fields.filter(
           (obj) => !fieldtoDelete.includes(obj.id)
         );
-        let form = await replaceKey(data);
-        form.fields.map((field) => {
+        //let form = await replaceKey(data);
+        data.fields.map((field) => {
           if (field?.id) {
-            delete field.id
+            delete field.id;
             if (field.options) {
               for (const [key, value] of Object.entries(field.options)) {
                 if (value) {
-                  delete value.id
-               }
+                  delete value.id;
+                }
               }
             }
           }
-          return field
-        })
-         form.fields.map((field) => {
+          return field;
+        });
+         data.fields.map((field) => {
            if (!field.options) {
              field["options"] = [{ name: "", options: [] }];
              return;
@@ -215,44 +214,46 @@ const FormCreation = () => {
              if (value?.options) {
                for (const [k, v] of Object.entries(value.options)) {
                  newOptions.push({ name: k });
-                }
+               }
              } else {
-               newOptions.push({ name: '' });
-              }
+               newOptions.push({ name: "" });
+             }
              if (value) {
-               test.push({ name: key, options: [{ ...value, options:newOptions}], });
+               test.push({
+                 name: key,
+                 options: [{ ...value, options: newOptions }],
+               });
              } else {
-               test.push({ name: key })
-              }
-               field.options = test;
+               test.push({ name: key });
+             }
+             field.options = test;
            }
            return field;
          });
-        setFormData(form);
+        setFormData(data);
       })
       .catch((e) => console.error(e));
   };
 
-  const replaceKey = (obj) => {
-    let converedObj = _.cloneDeep(obj);
-    converedObj.fields.map((field) => {
-      if (field.nextFieldsId) {
-        let data = field.nextFieldsId;
-        field.options = data;
-        delete field.nextFieldsId;
-        if (Object.keys(field.options).length > 0) {
-          for (const [key, value] of Object.entries(field.options)) {
-            if (value?.nextFieldsId) {
-              let nesteddata = value.nextFieldsId;
-              field.options[key].options = nesteddata;
-              delete field.options[key].nextFieldsId;
-            }
-          }
-        }
-      }
-    });
-    return converedObj;
-  };
+
+  // const replaceKey = (obj) => {
+  //   let converedObj = _.cloneDeep(obj);
+  //   console.log(converedObj)
+  //   converedObj.fields.map((field) => {
+  //     if (field.options) {
+  //       if (Object.keys(field.options).length > 0) {
+  //         for (const [key, value] of Object.entries(field.options)) {
+  //           if (value) {
+  //             let nesteddata = value.nextFieldsId;
+  //             field.options[key].options = nesteddata;
+  //             delete field.options[key].nextFieldsId;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  //   return converedObj;
+  // };
 
 
   const handleSubmitForm = async () => {
