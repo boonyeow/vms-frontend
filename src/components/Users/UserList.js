@@ -5,13 +5,17 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useAuthStore } from "../../store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EditUserModal from "../Users/EditUserModal";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box } from "@mui/system";
+// import { Box } from "@mui/system";
 import { Subject } from "@mui/icons-material";
+
+import Box from "@mui/material/Box";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import Stack from "@mui/material/Stack";
 
 const UserList = ({ data, onUserUpdate }) => {
   const { email } = useAuthStore();
@@ -28,84 +32,127 @@ const UserList = ({ data, onUserUpdate }) => {
     setOpen(false);
   };
 
+  const columns = [
+    {
+      field: "id",
+      headerName: "ID",
+      width: 1,
+    },
+    {
+      field: "name",
+      headerName: "Name",
+      width: 120,
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      width: 160,
+    },
+    {
+      field: "company",
+      headerName: "Company",
+      width: 160,
+    },
+    {
+      field: "accountType",
+      headerName: "Account Type",
+      width: 120,
+    },
+    {
+      field: "contactNumber",
+      headerName: "Contact No.",
+      width: 100,
+      sortable: false,
+    },
+    {
+      field: "businessNature",
+      headerName: "Nature of Biz",
+      width: 120,
+    },
+    {
+      field: "registrationNo",
+      headerName: "Registration No.",
+      width: 130,
+      sortable: false,
+    },
+    {
+      field: "gstNo",
+      headerName: "GST Reg. No.",
+      width: 130,
+      sortable: false,
+    },
+    {
+      field: "archived",
+      headerName: "Archived",
+      width: 90,
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 125,
+      sortable: false,
+      disableClickEventBubbling: true,
+      renderCell: (params) => {
+        return (
+          <Stack direction="row" spacing={2}>
+            <IconButton
+              aria-label="edit"
+              color="primary"
+              disabled={params.email == email ? true : false}
+              onClick={() => {
+                editUser(params.id);
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton aria-label="delete" color="error" disabled>
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
+        );
+      },
+    },
+  ];
+
+  const [formList, setFormList] = useState([]);
+  const fetchFormsList = () => {
+    console.log(data);
+    const items = [];
+    for (const item of data) {
+      items.push({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        company: item.company,
+        accountType: item.accountType,
+        contactNumber: item.contactNumber,
+        businessNature: item.natureOfBusiness,
+        registrationNo: item.registrationNumber,
+        gstNo: item.gstRegistrationNumber,
+        archived: item.isArchived,
+      });
+    }
+    setFormList(items);
+  };
+
+  useEffect(() => {
+    fetchFormsList();
+  }, [data]);
+
   return (
     <>
-      <Box mt={2} pt={3} pb={5} px={5} bgcolor="white" borderRadius="0.5rem">
-        <Table sx={{ border: 0 }}>
-          <TableHead>
-            <TableRow>
-              {["#", "Name", "Email", "Company", "Role", "Actions"].map(
-                (col) => (
-                  <TableCell
-                    key={col}
-                    sx={{
-                      color: "grey.500",
-                      fontWeight: "semibold",
-                    }}>
-                    {col}
-                  </TableCell>
-                )
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody sx={{ color: "action.lighter" }}>
-            {data &&
-              data.map((row, index) => {
-                return (
-                  <TableRow
-                    hover
-                    key={row.name}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                    }}>
-                    <TableCell
-                      sx={{ color: "action.dark", fontWeight: "500" }}
-                      component="th"
-                      scope="row">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell sx={{ color: "action.dark", fontWeight: "500" }}>
-                      {row.name}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "500" }}>
-                      <Link href={"mailto:"+row.email+"?subject=Welcome to XXX &body=Hi there! Welcome to XXX. Please follow the instructions below to verify your registration."} underline="none">
-                        {row.email}
-                      </Link>
-                    </TableCell>
-                    <TableCell sx={{ color: "action.dark", fontWeight: "500" }}>
-                      {row.company}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.accountType}
-                        sx={{
-                          bgcolor: "#e8f4ff",
-                          color: "primary.main",
-                          fontWeight: "bold",
-                        }}></Chip>
-                    </TableCell>
-                    <TableCell>
-                      <Box>
-                        <IconButton
-                          aria-label="edit"
-                          color="primary"
-                          disabled={row.email == email ? true : false}
-                          onClick={() => {
-                            editUser(row);
-                          }}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton aria-label="delete" color="error" disabled>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            <TableRow></TableRow>
-          </TableBody>
-        </Table>
+      <Box style={{ height: 500, width: "100%" }}>
+        <DataGrid
+          sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
+          rows={formList}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          checkboxSelection
+          slots={{
+            toolbar: GridToolbar,
+          }}
+        />
         <EditUserModal
           open={open}
           onClose={handleClose}
