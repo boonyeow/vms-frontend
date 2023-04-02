@@ -38,16 +38,13 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
 
     }, []);
 
-    const initialChosenValue =async () => {
+  const initialChosenValue = () => {
         let initialRegex = '';
         let regexId = field.regexId;
-        initialRegex = regexList.find((regex) => regex.id === regexId);
-        return initialRegex;
-
+        initialRegex = regexList.find((regex) => regex.id == regexId);
+        setChosenRegex(initialRegex);
     }
-    const [chosenRegex, setChosenRegex] = useState(
-      initialChosenValue() || ''
-    );
+    const [chosenRegex, setChosenRegex] = useState('');
 
 
   const fetchRegexList = async () => {
@@ -58,8 +55,10 @@ export default function RegexSelect({ field, index, isNextField, fieldDataChange
         },
       })
       .then((res) => {
-        //console.log(res.data)
         setRegexList(res.data);
+        let regexId = field.regexId;
+        let initialRegex = res.data.find((regex) => regex.id == regexId);
+        setChosenRegex(initialRegex);
       })
       .catch((e) => console.error(e));
   };
