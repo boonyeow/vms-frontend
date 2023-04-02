@@ -33,7 +33,8 @@ const RadioButtonComponentV2 = ({
       fieldData !== undefined &&
       Object.keys(fieldData).length !== 0 &&
       initialResponses !== undefined &&
-      Object.keys(initialResponses).length !== 0
+      Object.keys(initialResponses).length !== 0 &&
+      initialResponses.hasOwnProperty(fieldData.id)
     ) {
       let temp = JSON.parse(initialResponses[fieldData.id]);
       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
