@@ -19,6 +19,7 @@ const RadioButtonComponentV2 = ({
   setDisplayMap,
   fetchFieldMap,
   initialResponses,
+  isSubmission,
 }) => {
   const options = Object.entries(fieldData.options);
   const optionNames = options.map(([name]) => name);
@@ -96,19 +97,35 @@ const RadioButtonComponentV2 = ({
         <FormLabel id="demo-radio-buttons-group-label">
           {isParent ? `${idx + "."} ${fieldData.name}` : fieldData.name}
         </FormLabel>
-        <RadioGroup
-          name="radio-buttons-group"
-          onChange={handleChange}
-          value={value}>
-          {options.map(([name], index) => (
-            <FormControlLabel
-              key={index}
-              value={name}
-              control={<Radio name={index} disabled={!show} />}
-              label={name}
-            />
-          ))}
-        </RadioGroup>
+        {isSubmission ? (
+          <RadioGroup
+            name="radio-buttons-group"
+            onChange={handleChange}
+            value={value}>
+            {options.map(([name], index) => (
+              <FormControlLabel
+                key={index}
+                value={name}
+                control={<Radio name={index} disabled={true} />}
+                label={name}
+              />
+            ))}
+          </RadioGroup>
+        ) : (
+          <RadioGroup
+            name="radio-buttons-group"
+            onChange={handleChange}
+            value={value}>
+            {options.map(([name], index) => (
+              <FormControlLabel
+                key={index}
+                value={name}
+                control={<Radio name={index} disabled={!show} />}
+                label={name}
+              />
+            ))}
+          </RadioGroup>
+        )}
       </FormControl>
     </Box>
   );

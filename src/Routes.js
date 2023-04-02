@@ -28,7 +28,7 @@ function AppRoutes() {
       <Route path="template" element={<FormTemplates />} />
       <Route path="form/:id/:revisionNo/:workflowId" element={<ViewForm />} />
       <Route
-        path="formsubmission/:id/:revisionNo/:submissionid"
+        path="formsubmission/:id/:revisionNo/:submissionId"
         element={<ViewSubmmittedForm />}
       />
       <Route path="workflow/:id" element={<ViewWorkflow />} />

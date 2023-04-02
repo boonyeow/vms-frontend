@@ -11,6 +11,7 @@ const TextboxComponentV2 = ({
   show,
   isParent,
   initialResponses,
+  isSubmission,
 }) => {
   const [inputError, setInputError] = useState("");
   const [value, setValue] = useState();
@@ -51,16 +52,29 @@ const TextboxComponentV2 = ({
         <InputLabel>
           {isParent ? `${idx + "."} ${fieldData.name}` : fieldData.name}
         </InputLabel>
-        <TextField
-          sx={{ mt: 1, width: "100%" }}
-          variant="outlined"
-          size="small"
-          required={fieldData.isRequired}
-          helperText={inputError}
-          error={!!inputError}
-          onChange={handleInputChange}
-          defaultValue={value}
-          disabled={!show}></TextField>
+        {isSubmission ? (
+          <TextField
+            sx={{ mt: 1, width: "100%" }}
+            variant="outlined"
+            size="small"
+            required={fieldData.isRequired}
+            helperText={inputError}
+            error={!!inputError}
+            onChange={handleInputChange}
+            defaultValue={value}
+            disabled={true}></TextField>
+        ) : (
+          <TextField
+            sx={{ mt: 1, width: "100%" }}
+            variant="outlined"
+            size="small"
+            required={fieldData.isRequired}
+            helperText={inputError}
+            error={!!inputError}
+            onChange={handleInputChange}
+            defaultValue={value}
+            disabled={!show}></TextField>
+        )}
       </Box>
     </>
   );
