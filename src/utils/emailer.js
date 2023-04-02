@@ -1,24 +1,35 @@
 import axios from "axios";
 
-export default function emailer(
+export default async function emailer(
   recipient,
   msgBody,
   subject,
   attachment,
   token
 ) {
-  return axios.post(
-    process.env.REACT_APP_ENDPOINT_URL + "/api/email" + "/sendSimpleEmail",
-    {
-      recipient: recipient,
-      msgBody: msgBody,
-      subject: subject,
-      attachment: attachment,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
+  await axios
+    .post(
+      process.env.REACT_APP_ENDPOINT_URL + "/api/email" + "/sendSimpleEmail",
+      {
+        recipient: recipient,
+        msgBody: msgBody,
+        subject: subject,
+        attachment: attachment,
       },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error("Email failed to send.");
+      }
+
+      return response;
+    })
+    .catch((error) => {
+      throw error;
+    });
 }

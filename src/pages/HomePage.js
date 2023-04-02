@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WorkflowTable from "../components/Workflow/WorkflowTable";
 import TabComponent from "../components/TabComponent";
+import ReminderEmailButton from "../components/ReminderEmailButton";
 
 const HomePage = () => {
   const { accountId, token, email, role } = useAuthStore();
@@ -57,6 +58,7 @@ const HomePage = () => {
           >
             Home
           </Typography>
+          {role === "ADMIN" ? <ReminderEmailButton /> : null}
         </Box>
         <TabComponent role={role} />
       </Container>
