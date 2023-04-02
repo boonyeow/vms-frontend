@@ -53,7 +53,15 @@ const EditUserModal = ({ open, onClose, onUserUpdate, data }) => {
   useEffect(() => {
     dispatch({
       type: "init",
-      payload: { name: data?.name, email: data?.email, company: data?.company },
+      payload: {
+        name: data?.name,
+        email: data?.email,
+        company: data?.company,
+        contactNumber: data?.contactNumber,
+        natureOfBusiness: data?.natureOfBusiness,
+        registrationNumber: data?.registrationNumber,
+        gstRegistrationNumber: data?.gstRegistrationNumber,
+      },
     });
   }, [data]);
 
@@ -108,7 +116,8 @@ const EditUserModal = ({ open, onClose, onUserUpdate, data }) => {
       component="form"
       onSubmit={handleSubmit}
       open={open}
-      onClose={onClose}>
+      onClose={onClose}
+    >
       <DialogTitle>Edit user details</DialogTitle>
       <DialogContent>
         <DialogContentText>

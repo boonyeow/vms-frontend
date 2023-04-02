@@ -135,8 +135,11 @@ const UserList = ({ data, onUserUpdate }) => {
                       text: `${params.row.email} account has been archived.`,
                       showConfirmButton: true,
                       confirmButtonColor: "#262626",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.location.reload();
+                      }
                     });
-                    fetchFormsList();
                   })
                   .catch((e) => {
                     console.log(e.message);
