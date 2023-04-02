@@ -29,6 +29,7 @@ const RadioButtonComponentV2 = ({
   const [value, setValue] = useState("");
 
   useEffect(() => {
+    console.log(initialResponses);
     if (
       fieldData !== undefined &&
       Object.keys(fieldData).length !== 0 &&
@@ -39,8 +40,8 @@ const RadioButtonComponentV2 = ({
       let temp = JSON.parse(initialResponses[fieldData.id]);
       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
       setValue(tempValue);
+      console.log(tempValue);
       let nextFieldId = fieldData["options"][tempValue];
-
       if (isParent) {
         let tempDisplayMap = { ...displayMap };
         tempDisplayMap[nextFieldId] = true;

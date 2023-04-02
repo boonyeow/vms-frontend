@@ -10,6 +10,7 @@ import CheckboxComponentV2 from "../components/Form/CheckboxComponentV2";
 import RadioButtonComponentV2 from "../components/Form/RadioButtonComponentV2";
 import FormHeader from "../components/Form/FormHeader";
 import Swal from "sweetalert2";
+import { CollectionsBookmarkRounded } from "@mui/icons-material";
 
 const ViewForm = () => {
   const { id, revisionNo, workflowId } = useParams();
@@ -35,6 +36,7 @@ const ViewForm = () => {
     // Find existing submission that is draft
     fetchDraftSubmission();
   }, []);
+
 
   const initializeData = (data) => {
     let tempChildFields = [];
@@ -78,7 +80,7 @@ const ViewForm = () => {
     };
 
     setFormResponse(temp);
-    console.log(temp);
+    //console.log(temp);
   }, [fieldResponses]);
 
   const fetchDraftSubmission = () => {
@@ -121,6 +123,7 @@ const ViewForm = () => {
         }
       )
       .then((res) => {
+        //console.log(res.data)
         setFormDetails(res.data);
       });
   };
@@ -136,10 +139,11 @@ const ViewForm = () => {
         }
       )
       .then((res) => {
+        //console.log(res.data)
         setFormData(res.data);
         initializeData(res.data);
 
-        console.log("obj key init res", Object.keys(initialResponses));
+       // console.log("obj key init res", Object.keys(initialResponses));
         if (Object.keys(initialResponses).length == 0) {
           let temp = {};
           for (let i = 0; i < res.data.length; i++) {
@@ -312,6 +316,8 @@ const ViewForm = () => {
                     fieldResponses={fieldResponses}
                     setFieldResponses={setFieldResponses}
                     isParent={true}
+                    displayMap={displayMap}
+                    setDisplayMap={setDisplayMap}
                     show={true}
                     initialResponses={initialResponses}
                   />
@@ -320,11 +326,14 @@ const ViewForm = () => {
               // Proceed to render child if there are any
               let childElements;
               if (field.hasOwnProperty("options")) {
+                //console.log(field)
                 let childToRender = Object.values(field.options).filter(
                   (value) => value != null
                 );
                 childElements = childToRender.map((i) => {
+                  //console.log(childToRender);
                   if (fieldMap[i].fieldType === "TEXTBOX") {
+                    console.log(fieldMap[i])
                     return (
                       <TextboxComponentV2
                         fieldData={fieldMap[i]}
@@ -358,6 +367,7 @@ const ViewForm = () => {
                         setFieldResponses={setFieldResponses}
                         isParent={false}
                         show={displayMap[i]}
+                        initialResponses={initialResponses}
                       />
                     );
                   }

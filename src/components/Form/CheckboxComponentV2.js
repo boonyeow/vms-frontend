@@ -14,6 +14,8 @@ const CheckboxComponentV2 = ({
   setFieldResponses,
   show,
   isParent,
+  displayMap,
+  setDisplayMap,
   initialResponses,
   isSubmission,
 }) => {
@@ -24,6 +26,7 @@ const CheckboxComponentV2 = ({
   );
 
   useEffect(() => {
+    console.log(initialResponses);
     if (
       fieldData !== undefined &&
       Object.keys(fieldData).length !== 0 &&
@@ -32,6 +35,14 @@ const CheckboxComponentV2 = ({
       initialResponses.hasOwnProperty(fieldData.id)
     ) {
       let temp = JSON.parse(initialResponses[fieldData.id]);
+      let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
+      let nextFieldId = fieldData["options"][tempValue];
+       if (isParent) {
+         let tempDisplayMap = { ...displayMap };
+         tempDisplayMap[nextFieldId] = true;
+         setDisplayMap(tempDisplayMap);
+         console.log(tempDisplayMap);
+       }
       setSelectedOptions(temp.ans);
     }
   }, [fieldData, initialResponses]);
@@ -40,7 +51,6 @@ const CheckboxComponentV2 = ({
     const updatedSelectedOptions = [...selectedOptions];
     updatedSelectedOptions[optionIndex] = checked;
     setSelectedOptions(updatedSelectedOptions);
-    console.log("heheheupdated", updatedSelectedOptions);
     const newValue = {
       type: "checkbox",
       name: optionNames,
@@ -50,6 +60,49 @@ const CheckboxComponentV2 = ({
     let temp = { ...fieldResponses };
     temp[fieldData.id] = JSON.stringify(newValue);
     setFieldResponses(temp);
+
+     let curOptionIndex = updatedSelectedOptions.reduce((acc, cur, index) => {
+       if (cur) {
+         acc.push(index);
+       }
+       return acc;
+     }, []);
+    let unchecked = updatedSelectedOptions.reduce((acc, cur, index) => {
+      if (!cur) {
+        acc.push(index);
+      }
+      return acc;
+    }, []);
+
+    let nextFieldId = curOptionIndex.map(
+      (id) => fieldData["options"][optionNames[id]]
+    );
+    let remove = unchecked.map(
+      (id) => fieldData["options"][optionNames[id]]
+    );
+    let tempDisplayMap = { ...displayMap };
+    for (let id of remove) {
+      tempDisplayMap[id] = false;
+    }
+    for (let id of nextFieldId) {
+      tempDisplayMap[id] = true;
+    }
+     if (
+       initialResponses !== undefined &&
+       Object.keys(initialResponses).length !== 0
+     ) {
+       let temp = JSON.parse(initialResponses[fieldData.id]);
+       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
+       let initialNextFieldId = fieldData["options"][tempValue];
+
+       if (nextFieldId !== initialNextFieldId) {
+         tempDisplayMap[initialNextFieldId] = false;
+       }
+     }
+    if (isParent) {
+       console.log(tempDisplayMap);
+       setDisplayMap(tempDisplayMap);
+     }
   };
   let displayStyle = show ? "block" : "none";
   return (

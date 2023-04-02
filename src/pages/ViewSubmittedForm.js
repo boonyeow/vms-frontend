@@ -404,6 +404,8 @@ const ViewSubmittedForm = () => {
                     setFieldResponses={setFieldResponses}
                     isParent={true}
                     show={true}
+                    displayMap={displayMap}
+                    setDisplayMap={setDisplayMap}
                     initialResponses={initialResponses}
                     isSubmission={true}
                   />
