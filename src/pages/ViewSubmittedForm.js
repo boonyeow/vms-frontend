@@ -4,10 +4,11 @@ import FormHeader from "../components/Form/FormHeader";
 import RadioButtonComponentV2 from "../components/Form/RadioButtonComponentV2";
 import TextboxComponentV2 from "../components/Form/TextboxComponentV2";
 import CheckboxComponentV2 from "../components/Form/CheckboxComponentV2";
-import { Button } from "@mui/material";
+import { useReactToPrint } from "react-to-print";
+import { Button, Paper } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "../store";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -25,7 +26,10 @@ const ViewSubmittedForm = () => {
   const [formResponse, setFormResponse] = useState({});
   const [initialResponses, setInitialResponses] = useState({});
   const [submissionDetails, setSubmissionDetails] = useState({});
-
+  const componentRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
   let parentCounter = 0;
   const navigate = useNavigate();
 
@@ -225,7 +229,7 @@ const ViewSubmittedForm = () => {
     return component;
   };
 
-  const AdminActions = ({ handleApprove, handleReject }) => {
+  const AdminActions = ({ handleApprove, handleReject, handlePrint }) => {
     let component;
     if (submissionDetails && submissionDetails.status === "AWAITING_ADMIN") {
       component = (
@@ -234,11 +238,20 @@ const ViewSubmittedForm = () => {
             variant="contained"
             color="action"
             sx={{ mr: 2 }}
-            onClick={() => handleApprove("AWAITING_APPROVER")}>
+            onClick={() => handleApprove("AWAITING_APPROVER")}
+          >
             Approve
           </Button>
-          <Button variant="outlined" color="error" onClick={handleReject}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleReject}
+            sx={{ mr: 2 }}
+          >
             Reject
+          </Button>
+          <Button variant="contained" onClick={handlePrint}>
+            Print
           </Button>
         </Box>
       );
@@ -256,7 +269,8 @@ const ViewSubmittedForm = () => {
             navigate(
               `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
             );
-          }}>
+          }}
+        >
           Edit Submission
         </Button>
       );
@@ -268,14 +282,16 @@ const ViewSubmittedForm = () => {
             color="action"
             sx={{ mr: 2 }}
             onClick={() => handleApprove("APPROVED")}
-            disabled={true}>
+            disabled={true}
+          >
             Approve
           </Button>
           <Button
             variant="outlined"
             color="error"
             onClick={handleReject}
-            disabled={true}>
+            disabled={true}
+          >
             Reject
           </Button>
         </Box>
@@ -328,7 +344,12 @@ const ViewSubmittedForm = () => {
   return (
     <Box>
       <NavBar />
-      <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
+      <Container
+        component="main"
+        maxWidth="lg"
+        sx={{ p: 5 }}
+        ref={componentRef}
+      >
         <Stack spacing={3} sx={{ my: 2, px: 10 }}>
           <FormHeader formDetails={formDetails} />
           {formData?.map((field, idx) => {
@@ -347,7 +368,8 @@ const ViewSubmittedForm = () => {
                     isParent={true}
                     show={true}
                     initialResponses={initialResponses}
-                    isSubmission={true}></TextboxComponentV2>
+                    isSubmission={true}
+                  ></TextboxComponentV2>
                 );
               } else if (field.fieldType === "RADIOBUTTON") {
                 parentElement = (
@@ -396,7 +418,8 @@ const ViewSubmittedForm = () => {
                         isParent={false}
                         show={displayMap[i]}
                         initialResponses={initialResponses}
-                        isSubmission={true}></TextboxComponentV2>
+                        isSubmission={true}
+                      ></TextboxComponentV2>
                     );
                   } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
                     return (
@@ -429,7 +452,8 @@ const ViewSubmittedForm = () => {
               return (
                 <Stack
                   sx={{ bgcolor: "white", p: 5, borderRadius: 2 }}
-                  spacing={2}>
+                  spacing={2}
+                >
                   {parentElement} {childElements?.map((i) => i)}
                 </Stack>
               );
@@ -439,7 +463,12 @@ const ViewSubmittedForm = () => {
           <Box sx={{ display: "flex", alignSelf: "end" }}>
             {role === "VENDOR" ? <VendorActions /> : ""}
             {role === "ADMIN" ? (
-              <AdminActions handleApprove={handleApprove} />
+              <>
+                <AdminActions
+                  handleApprove={handleApprove}
+                  handlePrint={handlePrint}
+                />
+              </>
             ) : (
               ""
             )}
