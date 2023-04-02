@@ -30,7 +30,9 @@ const HomePage = () => {
           >
             Home
           </Typography>
-          {role === "ADMIN" ? <ReminderEmailButton /> : null}
+          {role === "ADMIN" || role === "APPROVER" ? (
+            <ReminderEmailButton />
+          ) : null}
         </Box>
         <TabComponent role={role} />
       </Container>

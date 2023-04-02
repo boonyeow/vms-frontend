@@ -208,7 +208,8 @@ const ViewSubmittedForm = () => {
             navigate(
               `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
             );
-          }}>
+          }}
+        >
           Edit Submission
         </Button>
       );
@@ -222,7 +223,8 @@ const ViewSubmittedForm = () => {
             `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
           );
         }}
-        disabled={true}>
+        disabled={true}
+      >
         Edit Submission
       </Button>;
     }
@@ -309,7 +311,8 @@ const ViewSubmittedForm = () => {
             variant="contained"
             color="action"
             sx={{ mr: 2 }}
-            onClick={() => handleApprove("APPROVED")}>
+            onClick={() => handleApprove("APPROVED")}
+          >
             Approve
           </Button>
           <Button variant="outlined" color="error" onClick={handleReject}>
@@ -325,14 +328,16 @@ const ViewSubmittedForm = () => {
             color="action"
             sx={{ mr: 2 }}
             onClick={handleReject}
-            disabled={true}>
+            disabled={true}
+          >
             Approve
           </Button>
           <Button
             variant="outlined"
             color="error"
             onClick={handleReject}
-            disabled={true}>
+            disabled={true}
+          >
             Reject
           </Button>
         </Box>
@@ -467,6 +472,7 @@ const ViewSubmittedForm = () => {
                 <AdminActions
                   handleApprove={handleApprove}
                   handlePrint={handlePrint}
+                  handleReject={handleReject}
                 />
               </>
             ) : (
