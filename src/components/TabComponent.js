@@ -3,6 +3,7 @@ import { Box } from "@mui/system";
 import { useState } from "react";
 import SubmissionDataGrid from "./SubmissionDataGrid";
 import ApprovalDataGrid from "./ApprovalDataGrid";
+import AwaitingSubmissionsDataGrid from "./AwaitingSubmissionsDataGrid";
 
 const TabComponent = ({ role }) => {
   const component =
@@ -25,7 +26,8 @@ const TabPanel = (props) => {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}>
+      {...other}
+    >
       {value === index && (
         <Box sx={{ py: 3 }}>
           <Typography>{children}</Typography>
@@ -54,6 +56,7 @@ const AdminView = () => {
         <Tabs value={tabValue} onChange={handleChangeTab}>
           <Tab label="Awaiting your review" />
           <Tab label="Awaiting your submission" />
+          <Tab label="Awaiting vendor's response" />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
@@ -61,6 +64,9 @@ const AdminView = () => {
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
         <SubmissionDataGrid />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <AwaitingSubmissionsDataGrid />
       </TabPanel>
     </Box>
   );
