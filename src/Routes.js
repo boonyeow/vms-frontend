@@ -13,6 +13,7 @@ import ViewWorkflow from "./pages/ViewWorkflow";
 import PastSubmissions from "./pages/PastSubmissions";
 import PastApprovals from "./pages/PastApprovals";
 import ViewSubmmittedForm from "./pages/ViewSubmittedForm";
+import ViewAllSubmissions from "./pages/ViewAllSubmissions";
 
 function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ function AppRoutes() {
         path="formsubmission/:id/:revisionNo/:submissionId"
         element={<ViewSubmmittedForm />}
       />
+      <Route path="submissions/all" element={<ViewAllSubmissions />} />
       <Route path="workflow/:id" element={<ViewWorkflow />} />
       <Route path="PastSubmissions" element={<PastSubmissions />} />
       <Route path="PastApprovals" element={<PastApprovals />} />

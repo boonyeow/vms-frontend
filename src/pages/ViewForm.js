@@ -214,7 +214,12 @@ const ViewForm = () => {
   };
 
   const submitForm = () => {
-    formResponse["status"] = "AWAITING_ADMIN";
+    let status = "AWAITING_ADMIN";
+    if (role == "ADMIN") {
+      status = "AWAITING_APPROVER";
+    }
+
+    formResponse["status"] = status;
 
     if (submissionId === "") {
       axios
