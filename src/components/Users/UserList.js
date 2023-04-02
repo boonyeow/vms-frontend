@@ -16,9 +16,11 @@ import { Subject } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const UserList = ({ data, onUserUpdate }) => {
-  const { email } = useAuthStore();
+  const { email, token } = useAuthStore();
   const [currentUserData, setCurrentUserData] = useState({});
   const [open, setOpen] = useState(false);
 
