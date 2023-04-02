@@ -242,18 +242,27 @@ const FormCreation = () => {
     }
      form.fields.map((field) => {
        let newOptions = {};
+       if (field.fieldType == 'TEXTBOX') {
+         delete field.options
+       }
        field?.options?.map((option) => {
          let childOp = {};
          if (option.options && option?.options?.length !== 0) {
            newOptions[option.name] = option.options[0];
            option.options[0]?.options?.map((op) => {
              childOp[op.name] = null;
-           });
-           newOptions[option.name].options = childOp;
+            });
+            newOptions[option.name].options = childOp;
 
-         } else {
-           newOptions[option.name] = null;
-         }
+          } else {
+            newOptions[option.name] = null;
+          }
+          if (
+            option.options && option.options[0] &&
+            option.options[0].fieldType === "TEXTBOX"
+          ) {
+            delete option.options[0].options;
+          }
        });
        if (Object.keys(newOptions).length > 0) {
          field.options = newOptions;
@@ -262,6 +271,7 @@ const FormCreation = () => {
        }
        return field;
      });
+    console.log(form)
       await axios
         .put(
           process.env.REACT_APP_ENDPOINT_URL + `/api/forms/${id}/${revisionNo}`,
@@ -276,7 +286,7 @@ const FormCreation = () => {
         setSnackbarAlertInfo({type:'success', message:'Form submitted successfuly.'})
         setOpen(true)
         setTimeout(() => {
-             navigate("/template");
+             //navigate("/template");
         }, 2000);
 
         })
