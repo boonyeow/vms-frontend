@@ -38,11 +38,12 @@ const RadioButtonComponentV2 = ({
       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
       setValue(tempValue);
       let nextFieldId = fieldData["options"][tempValue];
-      console.log(nextFieldId);
-      console.log("nextfieldId", nextFieldId);
-      let tempDisplayMap = { ...displayMap };
-      tempDisplayMap[nextFieldId] = true;
-      setDisplayMap(tempDisplayMap);
+
+      if (isParent) {
+        let tempDisplayMap = { ...displayMap };
+        tempDisplayMap[nextFieldId] = true;
+        setDisplayMap(tempDisplayMap);
+      }
     }
   }, [fieldData, initialResponses]);
 
@@ -82,11 +83,9 @@ const RadioButtonComponentV2 = ({
         tempDisplayMap[initialNextFieldId] = false;
       }
     }
-    try {
+
+    if (isParent) {
       setDisplayMap(tempDisplayMap);
-    } catch (e) {
-      // console.error("e", e);
-      console.log("error setting displaymap but issok");
     }
   };
 

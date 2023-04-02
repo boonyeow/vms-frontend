@@ -16,7 +16,12 @@ const TextboxComponentV2 = ({
   const [value, setValue] = useState();
 
   useState(() => {
-    if (fieldData !== undefined && initialResponses !== undefined) {
+    if (
+      fieldData !== undefined &&
+      Object.keys(fieldData).length !== 0 &&
+      initialResponses !== undefined &&
+      Object.keys(initialResponses).length !== 0
+    ) {
       setValue(initialResponses[fieldData.id]);
     }
   }, []);

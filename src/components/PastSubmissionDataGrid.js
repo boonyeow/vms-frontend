@@ -102,7 +102,7 @@ const PastSubmissionDataGrid = () => {
           const formid = params.row.formId;
           const revisionNo = params.row.revisionNo;
           console.log("hey row", params.row);
-          navigate(`/formsubmission/${submissionId}`);
+          navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
         };
         return (
           <Button

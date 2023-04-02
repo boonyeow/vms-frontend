@@ -24,7 +24,7 @@ const ViewForm = () => {
   const [formDetails, setFormDetails] = useState({});
   const [formResponse, setFormResponse] = useState({});
   const [initialResponses, setInitialResponses] = useState({});
-
+  const [submissionId, setSubmissionId] = useState("");
   let parentCounter = 0;
   const navigate = useNavigate();
 
@@ -94,6 +94,8 @@ const ViewForm = () => {
       .then((res) => {
         if (res.data.length > 0) {
           let latestSubmission = res.data[res.data.length - 1];
+          // console.log("LATEST SUBMISSON", latestSubmission);
+          setSubmissionId(latestSubmission["id"]);
           setInitialResponses(latestSubmission["fieldResponses"]);
           let tempFieldResponses = { ...fieldResponses };
 
@@ -166,50 +168,97 @@ const ViewForm = () => {
   };
 
   const saveAsDraft = () => {
-    axios
-      .post(
-        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
-        formResponse,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: `Draft has been saved. Redirecting...`,
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(() => navigate("/PastSubmissions"));
-      })
-      .catch((e) => console.log(e));
+    if (submissionId === "") {
+      axios
+        .post(
+          `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
+          formResponse,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: `Draft has been saved. Redirecting...`,
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => navigate("/PastSubmissions"));
+        })
+        .catch((e) => console.log(e));
+    } else {
+      axios
+        .put(
+          `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}/UpdateFormSubmission`,
+          formResponse,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: `Draft has been saved. Redirecting...`,
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => navigate("/PastSubmissions"));
+        })
+        .catch((e) => console.log(e));
+    }
   };
 
   const submitForm = () => {
     formResponse["status"] = "AWAITING_ADMIN";
-    axios
-      .post(
-        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
-        formResponse,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: `Form has been submitted. Redirecting...`,
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(() => navigate("/PastSubmissions"));
-      })
-      .catch((e) => console.log(e));
+
+    if (submissionId === "") {
+      axios
+        .post(
+          `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission`,
+          formResponse,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: `Form has been submitted. Redirecting...`,
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => navigate("/PastSubmissions"));
+        })
+        .catch((e) => console.log(e));
+    } else {
+      axios
+        .put(
+          `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}/UpdateFormSubmission`,
+          formResponse,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: `Draft has been saved. Redirecting...`,
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => navigate("/PastSubmissions"));
+        })
+        .catch((e) => console.log(e));
+    }
   };
 
   return (
@@ -292,6 +341,7 @@ const ViewForm = () => {
                         setFieldResponses={setFieldResponses}
                         isParent={false}
                         show={displayMap[i]}
+                        initialResponses={initialResponses}
                       />
                     );
                   } else if (fieldMap[i].fieldType === "CHECKBOX") {

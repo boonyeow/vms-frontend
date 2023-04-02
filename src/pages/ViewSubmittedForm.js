@@ -7,32 +7,48 @@ import CheckboxComponentV2 from "../components/Form/CheckboxComponentV2";
 import { Button } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "../store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const ViewSubmmittedForm = () => {
-  const { submissionId } = useParams();
+const ViewSubmittedForm = () => {
+  const { id, revisionNo, submissionId } = useParams();
   const { role, token, accountId } = useAuthStore();
+  const [formDetails, setFormDetails] = useState({});
 
   useEffect(() => {
-    console.log("hehehe", submissionId);
+    // console.log("hehehe", submissionId);
+    fetchSubmissionDetails();
   }, []);
 
-  const fetchSubmission = () => {};
+  const fetchSubmissionDetails = () => {
+    axios
+      .get(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/getById?formSubmissionId=${submissionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+      });
+  };
 
-  // const fetchFormDetails = async () => {
-  //   await axios
-  //     .get(
-  //       `${process.env.REACT_APP_ENDPOINT_URL}/api/forms/${id}/${revisionNo}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     )
-  //     .then((res) => {
-  //       setFormDetails(res.data);
-  //     });
-  // };
+  const fetchFormDetails = async () => {
+    await axios
+      .get(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/forms/${id}/${revisionNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        setFormDetails(res.data);
+      });
+  };
 
   // const fetchForm = async () => {
   //   await axios
@@ -175,4 +191,4 @@ const ViewSubmmittedForm = () => {
   );
 };
 
-export default ViewSubmmittedForm;
+export default ViewSubmittedForm;
