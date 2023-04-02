@@ -278,7 +278,10 @@ const ViewForm = () => {
                         fieldResponses={fieldResponses}
                         setFieldResponses={setFieldResponses}
                         isParent={false}
-                        show={displayMap[i]}></TextboxComponentV2>
+                        show={displayMap[i]}
+                        initialResponses={
+                          initialResponses
+                        }></TextboxComponentV2>
                     );
                   } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
                     return (
@@ -288,7 +291,7 @@ const ViewForm = () => {
                         fieldResponses={fieldResponses}
                         setFieldResponses={setFieldResponses}
                         isParent={false}
-                        show={true}
+                        show={displayMap[i]}
                       />
                     );
                   } else if (fieldMap[i].fieldType === "CHECKBOX") {

@@ -98,11 +98,11 @@ const PastSubmissionDataGrid = () => {
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (e) => {
-          const submissionId = params.row.submissionid;
+          const submissionId = params.row.id;
           const formid = params.row.formId;
           const revisionNo = params.row.revisionNo;
           console.log("hey row", params.row);
-          // navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
+          navigate(`/formsubmission/${submissionId}`);
         };
         return (
           <Button
@@ -180,7 +180,7 @@ const PastSubmissionDataGrid = () => {
           (row.form?.id?.id ? row.form.id.id : row.formId) +
           (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
         }
-        checkboxSelection
+        disableRowSelectionOnClick
         slots={{
           toolbar: GridToolbar,
         }}

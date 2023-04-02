@@ -23,11 +23,16 @@ const CheckboxComponentV2 = ({
   );
 
   useEffect(() => {
-    if (fieldData !== undefined && initialResponses !== undefined) {
+    if (
+      fieldData !== undefined &&
+      Object.keys(fieldData).length !== 0 &&
+      initialResponses !== undefined &&
+      Object.keys(initialResponses).length !== 0
+    ) {
       let temp = JSON.parse(initialResponses[fieldData.id]);
       setSelectedOptions(temp.ans);
     }
-  }, []);
+  }, [fieldData, initialResponses]);
 
   const handleChange = (optionIndex, checked) => {
     const updatedSelectedOptions = [...selectedOptions];

@@ -28,19 +28,23 @@ const RadioButtonComponentV2 = ({
   const [value, setValue] = useState("");
 
   useEffect(() => {
-    if (fieldData !== undefined && initialResponses !== undefined) {
-      console.log(initialResponses);
+    if (
+      fieldData !== undefined &&
+      Object.keys(fieldData).length !== 0 &&
+      initialResponses !== undefined &&
+      Object.keys(initialResponses).length !== 0
+    ) {
       let temp = JSON.parse(initialResponses[fieldData.id]);
       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
       setValue(tempValue);
-
       let nextFieldId = fieldData["options"][tempValue];
+      console.log(nextFieldId);
       console.log("nextfieldId", nextFieldId);
       let tempDisplayMap = { ...displayMap };
       tempDisplayMap[nextFieldId] = true;
       setDisplayMap(tempDisplayMap);
     }
-  }, []);
+  }, [fieldData, initialResponses]);
 
   const handleChange = (e) => {
     setValue(e.target.value);
@@ -66,7 +70,10 @@ const RadioButtonComponentV2 = ({
     tempDisplayMap[previousFieldId] = false;
     tempDisplayMap[nextFieldId] = true;
 
-    if (initialResponses !== undefined) {
+    if (
+      initialResponses !== undefined &&
+      Object.keys(initialResponses).length !== 0
+    ) {
       let temp = JSON.parse(initialResponses[fieldData.id]);
       let tempValue = temp.name.find((name, idx) => temp.ans[idx]);
       let initialNextFieldId = fieldData["options"][tempValue];
@@ -75,7 +82,12 @@ const RadioButtonComponentV2 = ({
         tempDisplayMap[initialNextFieldId] = false;
       }
     }
-    setDisplayMap(tempDisplayMap);
+    try {
+      setDisplayMap(tempDisplayMap);
+    } catch (e) {
+      // console.error("e", e);
+      console.log("error setting displaymap but issok");
+    }
   };
 
   let displayStyle = show ? "block" : "none";
