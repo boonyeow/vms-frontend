@@ -34,10 +34,6 @@ const UserList = ({ data, onUserUpdate }) => {
     setOpen(false);
   };
 
-  const removeUser = (id) => {
-    console.log("hiehe");
-  };
-
   const columns = [
     {
       field: "id",
@@ -94,7 +90,40 @@ const UserList = ({ data, onUserUpdate }) => {
               color="error"
               size="small"
               onClick={() => {
-                removeUser(params.row["id"]);
+                axios
+                  .put(
+                    process.env.REACT_APP_ENDPOINT_URL +
+                      "/api/accounts/" +
+                      params.id,
+                    null,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+                  .then((res) => {
+                    console.log(res.data);
+
+                    Swal.fire({
+                      icon: "success",
+                      title: "Archived!",
+                      text: `${params.row.email} account has been archived.`,
+                      showConfirmButton: true,
+                      confirmButtonColor: "#262626",
+                    });
+                    fetchFormsList();
+                  })
+                  .catch((e) => {
+                    console.log(e.message);
+                    Swal.fire({
+                      icon: "error",
+                      title: "Failed to Archive!",
+                      text: "Unexpected Error Occurred. Please contact IT if this persists.",
+                      showConfirmButton: true,
+                      confirmButtonColor: "#262626",
+                    });
+                  });
               }}>
               Delete
             </Button>
