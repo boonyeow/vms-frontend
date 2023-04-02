@@ -257,7 +257,7 @@ const ViewForm = () => {
           Swal.fire({
             icon: "success",
             title: "Success!",
-            text: `Draft has been saved. Redirecting...`,
+            text: `Form has been submitted. Redirecting...`,
             showConfirmButton: false,
             timer: 1500,
           }).then(() => navigate("/PastSubmissions"));
@@ -287,7 +287,8 @@ const ViewForm = () => {
                     setFieldResponses={setFieldResponses}
                     isParent={true}
                     show={true}
-                    initialResponses={initialResponses}></TextboxComponentV2>
+                    initialResponses={initialResponses}
+                  ></TextboxComponentV2>
                 );
               } else if (field.fieldType === "RADIOBUTTON") {
                 parentElement = (
@@ -333,9 +334,8 @@ const ViewForm = () => {
                         setFieldResponses={setFieldResponses}
                         isParent={false}
                         show={displayMap[i]}
-                        initialResponses={
-                          initialResponses
-                        }></TextboxComponentV2>
+                        initialResponses={initialResponses}
+                      ></TextboxComponentV2>
                     );
                   } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
                     return (
@@ -366,7 +366,8 @@ const ViewForm = () => {
               return (
                 <Stack
                   sx={{ bgcolor: "white", p: 5, borderRadius: 2 }}
-                  spacing={2}>
+                  spacing={2}
+                >
                   {parentElement} {childElements?.map((i) => i)}
                 </Stack>
               );

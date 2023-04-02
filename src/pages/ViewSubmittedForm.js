@@ -157,18 +157,18 @@ const ViewSubmittedForm = () => {
         Swal.fire({
           icon: "error",
           title: "Oops!",
-          text: "Unexpected error",
+          text: "Unexpected error. Please make sure forms are reviewed in sequence",
           showConfirmButton: true,
         });
       });
   };
 
-  const handleReject = () => {
+  const handleReject = (status) => {
     axios
       .put(
         `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}`,
         {
-          status: "REJECTED",
+          status: status,
           reviewer: accountId,
         },
         {
@@ -190,7 +190,7 @@ const ViewSubmittedForm = () => {
         Swal.fire({
           icon: "error",
           title: "Oops!",
-          text: "Unexpected error",
+          text: "Unexpected error. Please make sure forms are reviewed in sequence",
           showConfirmButton: true,
         });
       });
@@ -208,7 +208,8 @@ const ViewSubmittedForm = () => {
             navigate(
               `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
             );
-          }}>
+          }}
+        >
           Edit Submission
         </Button>
       );
@@ -222,7 +223,8 @@ const ViewSubmittedForm = () => {
             `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
           );
         }}
-        disabled={true}>
+        disabled={true}
+      >
         Edit Submission
       </Button>;
     }
@@ -245,7 +247,7 @@ const ViewSubmittedForm = () => {
           <Button
             variant="outlined"
             color="error"
-            onClick={handleReject}
+            onClick={() => handleReject("DRAFT")}
             sx={{ mr: 2 }}
           >
             Reject
@@ -309,10 +311,15 @@ const ViewSubmittedForm = () => {
             variant="contained"
             color="action"
             sx={{ mr: 2 }}
-            onClick={() => handleApprove("APPROVED")}>
+            onClick={() => handleApprove("APPROVED")}
+          >
             Approve
           </Button>
-          <Button variant="outlined" color="error" onClick={handleReject}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => handleReject("AWAITING_ADMIN")}
+          >
             Reject
           </Button>
         </Box>
@@ -325,14 +332,16 @@ const ViewSubmittedForm = () => {
             color="action"
             sx={{ mr: 2 }}
             onClick={handleReject}
-            disabled={true}>
+            disabled={true}
+          >
             Approve
           </Button>
           <Button
             variant="outlined"
             color="error"
-            onClick={handleReject}
-            disabled={true}>
+            onClick={() => handleReject("AWAITING_ADMIN")}
+            disabled={true}
+          >
             Reject
           </Button>
         </Box>
@@ -467,13 +476,17 @@ const ViewSubmittedForm = () => {
                 <AdminActions
                   handleApprove={handleApprove}
                   handlePrint={handlePrint}
+                  handleReject={handleReject}
                 />
               </>
             ) : (
               ""
             )}
             {role === "APPROVER" ? (
-              <ApproverActions handleApprove={handleApprove} />
+              <ApproverActions
+                handleApprove={handleApprove}
+                handleReject={handleReject}
+              />
             ) : (
               ""
             )}

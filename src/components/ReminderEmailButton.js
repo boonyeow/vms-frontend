@@ -56,9 +56,9 @@ const SubmissionDataGrid = () => {
       });
 
     setRecipient("");
-    setSubject("Reminder to Submit Form Response");
+    setSubject("Issues with Form Response");
     setMessage(
-      `Greetings from Quantum Leap Team,\n\nYour form response for the following cannot be found: \n\n1) \n\nPlease kindly submit the forms, do contact the point of contact if you have any enquiries or have already submitted them. \n\nHave a nice day, thank you! \n\nRegards, \nQuantum Leap Team \n\n\n**This is an automated email, please do not reply to this email.**`
+      `Greetings from Quantum Leap Team,\n\nYour form response has an issue: \n\n1) \n\nPlease kindly submit the forms, do contact the point of contact if you have any enquiries or have already submitted them. \n\nHave a nice day, thank you! \n\nRegards, \nQuantum Leap Team \n\n\n**This is an automated email, please do not reply to this email.**`
     );
   };
 
