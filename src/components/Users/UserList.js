@@ -16,9 +16,11 @@ import { Subject } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const UserList = ({ data, onUserUpdate }) => {
-  const { email } = useAuthStore();
+  const { email, token } = useAuthStore();
   const [currentUserData, setCurrentUserData] = useState({});
   const [open, setOpen] = useState(false);
 
@@ -105,7 +107,46 @@ const UserList = ({ data, onUserUpdate }) => {
             >
               <EditIcon />
             </IconButton>
-            <IconButton aria-label="delete" color="error" disabled>
+            <IconButton
+              aria-label="delete"
+              color="error"
+              onClick={() => {
+                axios
+                  .put(
+                    process.env.REACT_APP_ENDPOINT_URL +
+                      "/api/accounts/" +
+                      params.id,
+                    null,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+                  .then((res) => {
+                    console.log(res.data);
+
+                    Swal.fire({
+                      icon: "success",
+                      title: "Archived!",
+                      text: `${params.row.email} account has been archived.`,
+                      showConfirmButton: true,
+                      confirmButtonColor: "#262626",
+                    });
+                    fetchFormsList();
+                  })
+                  .catch((e) => {
+                    console.log(e.message);
+                    Swal.fire({
+                      icon: "error",
+                      title: "Failed to Archive!",
+                      text: "Unexpected Error Occurred. Please contact IT if this persists.",
+                      showConfirmButton: true,
+                      confirmButtonColor: "#262626",
+                    });
+                  });
+              }}
+            >
               <DeleteIcon />
             </IconButton>
           </Stack>
