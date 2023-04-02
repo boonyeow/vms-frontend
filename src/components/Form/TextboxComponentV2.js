@@ -28,8 +28,8 @@ const TextboxComponentV2 = ({
   }, []);
 
   const handleInputChange = (e) => {
+    const newValue = e.target.value;
     if (fieldData.regexId) {
-      const newValue = e.target.value;
       const regex = new RegExp(regexMap[fieldData.regexId].pattern);
       const isValid = regex.test(newValue);
       if (!isValid && newValue !== "") {
@@ -42,6 +42,10 @@ const TextboxComponentV2 = ({
         temp[fieldData.id] = newValue;
         setFieldResponses(temp);
       }
+    } else {
+      let temp = { ...fieldResponses };
+      temp[fieldData.id] = newValue;
+      setFieldResponses(temp);
     }
   };
 
