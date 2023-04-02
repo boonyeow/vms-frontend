@@ -25,7 +25,8 @@ const UserList = ({ data, onUserUpdate }) => {
   const [open, setOpen] = useState(false);
 
   const editUser = (userId) => {
-    setCurrentUserData(data[userId]);
+    console.log(data);
+    setCurrentUserData(data.find((x) => x.id === userId));
     setOpen(true);
   };
 
