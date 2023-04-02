@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 
 const ViewSubmittedForm = () => {
   const { id, revisionNo, submissionId } = useParams();
-  const { role, token, accountId } = useAuthStore();
+  const { role, token, accountId, email } = useAuthStore();
   const [formData, setFormData] = useState([]);
   const [fieldMap, setFieldMap] = useState({});
   const [regexMap, setRegexMap] = useState({});
@@ -241,6 +241,24 @@ const ViewSubmittedForm = () => {
             Reject
           </Button>
         </Box>
+      );
+    } else if (
+      submissionDetails &&
+      submissionDetails.status === "DRAFT" &&
+      submissionDetails.submittedBy.email === email
+    ) {
+      component = (
+        <Button
+          variant="contained"
+          color="action"
+          sx={{ mr: 2 }}
+          onClick={() => {
+            navigate(
+              `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
+            );
+          }}>
+          Edit Submission
+        </Button>
       );
     } else {
       component = (

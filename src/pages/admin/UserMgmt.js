@@ -27,7 +27,7 @@ const UserMgmt = () => {
         },
       })
       .then((res) => {
-        console.log(res.data);
+        console.log("users boi", res.data);
         setUserList(res.data);
       })
       .catch((e) => console.error(e));
@@ -51,14 +51,12 @@ const UserMgmt = () => {
             sx={{
               display: "flex",
               justifyContent: "space-between",
-            }}
-          >
+            }}>
             <Typography
               component="h1"
               variant="h4"
               fontWeight="bold"
-              sx={{ color: "action.main", alignSelf: "center" }}
-            >
+              sx={{ color: "action.main", alignSelf: "center" }}>
               Manage Users
             </Typography>
             <Button
@@ -66,8 +64,7 @@ const UserMgmt = () => {
               startIcon={<AddIcon />}
               sx={{ my: 2 }}
               color="action"
-              onClick={handleClickOpen}
-            >
+              onClick={handleClickOpen}>
               Add New User
             </Button>
           </Box>

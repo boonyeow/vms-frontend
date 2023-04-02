@@ -1,4 +1,4 @@
-import { Chip, IconButton, Link } from "@mui/material";
+import { Button, Chip, IconButton, Link } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -22,14 +22,18 @@ const UserList = ({ data, onUserUpdate }) => {
   const [currentUserData, setCurrentUserData] = useState({});
   const [open, setOpen] = useState(false);
 
-  const editUser = (data) => {
-    setCurrentUserData(data);
+  const editUser = (userId) => {
+    setCurrentUserData(data[userId]);
     setOpen(true);
   };
 
   const handleClose = (event, reason) => {
     if (reason && reason == "backdropClick") return;
     setOpen(false);
+  };
+
+  const removeUser = (id) => {
+    console.log("hiehe");
   };
 
   const columns = [
@@ -51,7 +55,7 @@ const UserList = ({ data, onUserUpdate }) => {
     {
       field: "company",
       headerName: "Company",
-      width: 160,
+      flex: 1,
     },
     {
       field: "accountType",
@@ -65,49 +69,33 @@ const UserList = ({ data, onUserUpdate }) => {
       sortable: false,
     },
     {
-      field: "businessNature",
-      headerName: "Nature of Biz",
-      width: 120,
-    },
-    {
-      field: "registrationNo",
-      headerName: "Registration No.",
-      width: 130,
-      sortable: false,
-    },
-    {
-      field: "gstNo",
-      headerName: "GST Reg. No.",
-      width: 130,
-      sortable: false,
-    },
-    {
-      field: "archived",
-      headerName: "Archived",
-      width: 90,
-    },
-    {
       field: "action",
       headerName: "Action",
-      width: 125,
+      minWidth: 200,
       sortable: false,
       disableClickEventBubbling: true,
       renderCell: (params) => {
         return (
           <Stack direction="row" spacing={2}>
-            <IconButton
-              aria-label="edit"
-              color="primary"
+            <Button
+              variant="contained"
+              color="action"
+              size="small"
               disabled={params.email == email ? true : false}
               onClick={() => {
                 editUser(params.id);
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton aria-label="delete" color="error" disabled>
-              <DeleteIcon />
-            </IconButton>
+              }}>
+              Edit
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={() => {
+                removeUser(params.row["id"]);
+              }}>
+              Delete
+            </Button>
           </Stack>
         );
       },
@@ -148,7 +136,6 @@ const UserList = ({ data, onUserUpdate }) => {
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5]}
-          checkboxSelection
           slots={{
             toolbar: GridToolbar,
           }}

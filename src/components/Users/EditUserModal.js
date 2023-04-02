@@ -23,13 +23,31 @@ const EditUserModal = ({ open, onClose, onUserUpdate, data }) => {
           return { ...state, email: action.payload };
         case "company":
           return { ...state, company: action.payload };
+        case "accountType":
+          return { ...state, accountType: action.payload };
+        case "contactNumber":
+          return { ...state, contactNumber: action.payload };
+        case "natureOfBusiness":
+          return { ...state, natureOfBusiness: action.payload };
+        case "registrationNumber":
+          return { ...state, registrationNumber: action.payload };
+        case "gstRegistrationNumber":
+          return { ...state, gstRegistrationNumber: action.payload };
         case "init":
           return action.payload;
         default:
           return state;
       }
     },
-    { email: null, name: null, company: null }
+    {
+      email: null,
+      name: null,
+      company: null,
+      contactNumber: null,
+      natureOfBusiness: null,
+      registrationNumber: null,
+      gstRegistrationNumber: null,
+    }
   );
 
   useEffect(() => {
@@ -124,11 +142,55 @@ const EditUserModal = ({ open, onClose, onUserUpdate, data }) => {
           <TextField
             autoFocus
             margin="dense"
+            id="contactNumber"
+            label="Contact Number"
+            fullWidth
+            variant="standard"
+            value={state.contactNumber ?? ""}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
             id="company"
             label="Company"
             fullWidth
             variant="standard"
             value={state.company ?? ""}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="natureOfBusiness"
+            label="Nature of Business"
+            fullWidth
+            variant="standard"
+            value={state.natureOfBusiness ?? ""}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="registrationNumber"
+            label="Registration Number"
+            fullWidth
+            variant="standard"
+            value={state.registrationNumber ?? ""}
+            onChange={handleInputChange}
+            required
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="gstRegistrationNumber"
+            label="GST Registration Number"
+            fullWidth
+            variant="standard"
+            value={state.gstRegistrationNumber ?? ""}
             onChange={handleInputChange}
             required
           />
