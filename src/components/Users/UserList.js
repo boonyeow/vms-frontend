@@ -54,12 +54,34 @@ const UserList = ({ data, onUserUpdate }) => {
     {
       field: "company",
       headerName: "Company",
-      flex: 1,
+      width: 160,
     },
     {
       field: "accountType",
       headerName: "Account Type",
       width: 120,
+    },
+    {
+      field: "businessNature",
+      headerName: "Nature of Biz",
+      width: 120,
+    },
+    {
+      field: "registrationNo",
+      headerName: "Registration No.",
+      width: 130,
+      sortable: false,
+    },
+    {
+      field: "gstNo",
+      headerName: "GST Reg. No.",
+      width: 130,
+      sortable: false,
+    },
+    {
+      field: "archived",
+      headerName: "Archived",
+      width: 90,
     },
     {
       field: "contactNumber",
@@ -83,7 +105,8 @@ const UserList = ({ data, onUserUpdate }) => {
               disabled={params.email == email ? true : false}
               onClick={() => {
                 editUser(params.id);
-              }}>
+              }}
+            >
               Edit
             </Button>
             <Button
@@ -125,7 +148,8 @@ const UserList = ({ data, onUserUpdate }) => {
                       confirmButtonColor: "#262626",
                     });
                   });
-              }}>
+              }}
+            >
               Delete
             </Button>
           </Stack>

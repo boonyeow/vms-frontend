@@ -157,18 +157,18 @@ const ViewSubmittedForm = () => {
         Swal.fire({
           icon: "error",
           title: "Oops!",
-          text: "Unexpected error",
+          text: "Unexpected error. Please make sure forms are reviewed in sequence",
           showConfirmButton: true,
         });
       });
   };
 
-  const handleReject = () => {
+  const handleReject = (status) => {
     axios
       .put(
         `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}`,
         {
-          status: "REJECTED",
+          status: status,
           reviewer: accountId,
         },
         {
@@ -190,7 +190,7 @@ const ViewSubmittedForm = () => {
         Swal.fire({
           icon: "error",
           title: "Oops!",
-          text: "Unexpected error",
+          text: "Unexpected error. Please make sure forms are reviewed in sequence",
           showConfirmButton: true,
         });
       });
@@ -247,7 +247,7 @@ const ViewSubmittedForm = () => {
           <Button
             variant="outlined"
             color="error"
-            onClick={handleReject}
+            onClick={() => handleReject("DRAFT")}
             sx={{ mr: 2 }}
           >
             Reject
@@ -315,7 +315,11 @@ const ViewSubmittedForm = () => {
           >
             Approve
           </Button>
-          <Button variant="outlined" color="error" onClick={handleReject}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => handleReject("AWAITING_ADMIN")}
+          >
             Reject
           </Button>
         </Box>
@@ -335,7 +339,7 @@ const ViewSubmittedForm = () => {
           <Button
             variant="outlined"
             color="error"
-            onClick={handleReject}
+            onClick={() => handleReject("AWAITING_ADMIN")}
             disabled={true}
           >
             Reject
@@ -479,7 +483,10 @@ const ViewSubmittedForm = () => {
               ""
             )}
             {role === "APPROVER" ? (
-              <ApproverActions handleApprove={handleApprove} />
+              <ApproverActions
+                handleApprove={handleApprove}
+                handleReject={handleReject}
+              />
             ) : (
               ""
             )}
