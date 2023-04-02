@@ -40,6 +40,7 @@ const ViewAllSubmissions = () => {
     },
     {
       field: "status",
+      width: 150,
       headerName: "Status",
       renderCell: (params) => {
         let color = "";
@@ -86,7 +87,8 @@ const ViewAllSubmissions = () => {
             variant="contained"
             color="action"
             size="small"
-            onClick={onClick}>
+            onClick={onClick}
+          >
             View
           </Button>
         );
