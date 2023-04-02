@@ -1,7 +1,6 @@
 import NavBar from "../../components/SharedComponents/NavBar";
 import RegexSelect from "../../components/FormInputs/RegexSelect";
 import FieldTypeMenu from "../../components/FormInputs/FieldTypeMenu";
-import RequiredCheckBox from "../../components/FormInputs/RequiredCheckBox";
 import { useBeforeUnload, useParams } from "react-router-dom";
 import {
   Button,
@@ -675,13 +674,6 @@ const FormCreation = () => {
                                   fieldDataChange={fieldDataChange}
                                 />
                               )}
-                              <RequiredCheckBox
-                                nextField={true}
-                                index={index}
-                                j={j}
-                                value={childField.isRequired}
-                                fieldDataChange={fieldDataChange}
-                              />
                             </Stack>
                           ))}
                         </Stack>
@@ -702,12 +694,7 @@ const FormCreation = () => {
                           fieldDataChange={fieldDataChange}
                         />
                       )}
-                      <RequiredCheckBox
-                        nextField={false}
-                        index={index}
-                        value={field.isRequired}
-                        fieldDataChange={fieldDataChange}
-                      />
+
                     </Stack>
                   </Stack>
 
