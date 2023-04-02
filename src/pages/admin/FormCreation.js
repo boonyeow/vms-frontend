@@ -286,7 +286,7 @@ const FormCreation = () => {
         setSnackbarAlertInfo({type:'success', message:'Form submitted successfuly.'})
         setOpen(true)
         setTimeout(() => {
-             //navigate("/template");
+             navigate("/template");
         }, 2000);
 
         })
