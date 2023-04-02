@@ -91,6 +91,7 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
           title: "Success!",
           text: "Account has been created.",
           confirmButtonColor: "#262626",
+          target: document.getElementById(':r3:'),
         });
       })
       .catch((e) => {
@@ -99,6 +100,7 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
           title: "Oops...",
           text: "Existing account exists.",
           confirmButtonColor: "#262626",
+          target: document.getElementById(':r3:'),
         });
       });
   };
