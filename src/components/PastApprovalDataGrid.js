@@ -96,7 +96,9 @@ const PastApprovalDataGrid = () => {
       renderCell: (params) => {
         const onClick = (e) => {
           const submissionId = params.row.id;
-          navigate(`/formsubmission/${submissionId}`);
+          const formid = params.row.formId;
+          const revisionNo = params.row.revisionNo;
+          navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
         };
         return (
           <Stack direction="row" spacing={2}>
