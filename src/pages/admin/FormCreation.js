@@ -235,27 +235,6 @@ const FormCreation = () => {
       .catch((e) => console.error(e));
   };
 
-
-  // const replaceKey = (obj) => {
-  //   let converedObj = _.cloneDeep(obj);
-  //   console.log(converedObj)
-  //   converedObj.fields.map((field) => {
-  //     if (field.options) {
-  //       if (Object.keys(field.options).length > 0) {
-  //         for (const [key, value] of Object.entries(field.options)) {
-  //           if (value) {
-  //             let nesteddata = value.nextFieldsId;
-  //             field.options[key].options = nesteddata;
-  //             delete field.options[key].nextFieldsId;
-  //           }
-  //         }
-  //       }
-  //     }
-  //   });
-  //   return converedObj;
-  // };
-
-
   const handleSubmitForm = async () => {
     let form = _.cloneDeep(formData);
     if (form.id) {
