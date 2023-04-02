@@ -15,6 +15,7 @@ const CheckboxComponentV2 = ({
   show,
   isParent,
   initialResponses,
+  isSubmission,
 }) => {
   const options = Object.entries(fieldData.options);
   const optionNames = options.map(([name]) => name);
@@ -56,22 +57,40 @@ const CheckboxComponentV2 = ({
         <FormLabel>
           {isParent ? `${idx + "."} ${fieldData.name}` : fieldData.name}
         </FormLabel>
-        {options.map(([name], index) => (
-          <>
-            <FormControlLabel
-              key={name}
-              control={
-                <Checkbox
-                  required={fieldData.isRequired}
-                  inputProps={{ "aria-label": name }}
-                  checked={selectedOptions[index]}
-                  onChange={(e) => handleChange(index, e.target.checked)}
+        {isSubmission
+          ? options.map(([name], index) => (
+              <>
+                <FormControlLabel
+                  key={name}
+                  control={
+                    <Checkbox
+                      required={fieldData.isRequired}
+                      inputProps={{ "aria-label": name }}
+                      checked={selectedOptions[index]}
+                      disabled={true}
+                      onChange={(e) => handleChange(index, e.target.checked)}
+                    />
+                  }
+                  label={name}
                 />
-              }
-              label={name}
-            />
-          </>
-        ))}
+              </>
+            ))
+          : options.map(([name], index) => (
+              <>
+                <FormControlLabel
+                  key={name}
+                  control={
+                    <Checkbox
+                      required={fieldData.isRequired}
+                      inputProps={{ "aria-label": name }}
+                      checked={selectedOptions[index]}
+                      onChange={(e) => handleChange(index, e.target.checked)}
+                    />
+                  }
+                  label={name}
+                />
+              </>
+            ))}
       </FormGroup>
     </Box>
   );

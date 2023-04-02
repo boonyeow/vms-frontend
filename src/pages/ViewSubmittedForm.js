@@ -5,20 +5,64 @@ import RadioButtonComponentV2 from "../components/Form/RadioButtonComponentV2";
 import TextboxComponentV2 from "../components/Form/TextboxComponentV2";
 import CheckboxComponentV2 from "../components/Form/CheckboxComponentV2";
 import { Button } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "../store";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const ViewSubmittedForm = () => {
   const { id, revisionNo, submissionId } = useParams();
   const { role, token, accountId } = useAuthStore();
+  const [formData, setFormData] = useState([]);
+  const [fieldMap, setFieldMap] = useState({});
+  const [regexMap, setRegexMap] = useState({});
+  const [fieldResponses, setFieldResponses] = useState({});
+  const [childFields, setChildFields] = useState({});
+  const [idToIndex, setIdToIndex] = useState({});
+  const [displayMap, setDisplayMap] = useState({});
   const [formDetails, setFormDetails] = useState({});
+  const [formResponse, setFormResponse] = useState({});
+  const [initialResponses, setInitialResponses] = useState({});
+  const [submissionDetails, setSubmissionDetails] = useState({});
+
+  let parentCounter = 0;
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // console.log("hehehe", submissionId);
+    console.log("hehehe", submissionId);
     fetchSubmissionDetails();
+    fetchFormDetails();
+    fetchForm();
   }, []);
+
+  const initializeData = (data) => {
+    let tempChildFields = [];
+    let tempIdToIndex = {};
+    let tempFieldMap = {};
+    let tempDisplayMap = {};
+    data.forEach((item, idx) => {
+      tempIdToIndex[item.id] = idx;
+      tempFieldMap[item.id] = item;
+      tempDisplayMap[item.id] = true;
+      if (item.fieldType === "RADIOBUTTON" || item.fieldType === "CHECKBOX") {
+        let options = item.options;
+
+        let temp = Object.values(options).filter((value) => value != null);
+        tempChildFields = tempChildFields.concat(temp);
+      }
+    });
+
+    tempChildFields.map((id) => {
+      tempDisplayMap[id] = false;
+    });
+    let tempChildFieldsSet = new Set(tempChildFields);
+
+    setChildFields(tempChildFieldsSet);
+    setFieldMap(tempFieldMap);
+    setIdToIndex(tempIdToIndex);
+    setDisplayMap(tempDisplayMap);
+  };
 
   const fetchSubmissionDetails = () => {
     axios
@@ -31,7 +75,11 @@ const ViewSubmittedForm = () => {
         }
       )
       .then((res) => {
-        console.log(res.data);
+        if (res.data.length > 0) {
+          console.log("submission details", res.data[res.data.length - 1]);
+          setInitialResponses(res.data[res.data.length - 1]["fieldResponses"]);
+          setSubmissionDetails(res.data[res.data.length - 1]);
+        }
       });
   };
 
@@ -50,35 +98,219 @@ const ViewSubmittedForm = () => {
       });
   };
 
-  // const fetchForm = async () => {
-  //   await axios
-  //     .get(
-  //       `${process.env.REACT_APP_ENDPOINT_URL}/api/forms/${id}/${revisionNo}/fields`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     )
-  //     .then((res) => {
-  //       setFormData(res.data);
-  //       initializeData(res.data);
+  const fetchForm = async () => {
+    await axios
+      .get(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/forms/${id}/${revisionNo}/fields`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        setFormData(res.data);
+        initializeData(res.data);
 
-  //       console.log("obj key init res", Object.keys(initialResponses));
-  //       if (Object.keys(initialResponses).length == 0) {
-  //         let temp = {};
-  //         for (let i = 0; i < res.data.length; i++) {
-  //           temp[res.data[i].id] = null;
-  //         }
-  //         setFieldResponses(temp);
-  //       }
-  //     });
-  // };
+        console.log("obj key init res", Object.keys(initialResponses));
+        if (Object.keys(initialResponses).length == 0) {
+          let temp = {};
+          for (let i = 0; i < res.data.length; i++) {
+            temp[res.data[i].id] = null;
+          }
+          setFieldResponses(temp);
+        }
+      });
+  };
+
+  const handleApprove = (status) => {
+    console.log("status", status);
+    console.log("accountId", accountId);
+    axios
+      .put(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}`,
+        {
+          status: status,
+          reviewer: accountId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `Form has been approved. Redirecting...`,
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => navigate("/PastApprovals"));
+      })
+      .catch((e) => {
+        console.log(e);
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: "Unexpected error",
+          showConfirmButton: true,
+        });
+      });
+  };
+
+  const handleReject = () => {
+    axios
+      .put(
+        `${process.env.REACT_APP_ENDPOINT_URL}/api/formsubmission/${submissionId}`,
+        {
+          status: "REJECTED",
+          reviewer: accountId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `Form has been rejected. Redirecting...`,
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => navigate("/PastApprovals"));
+      })
+      .catch((e) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: "Unexpected error",
+          showConfirmButton: true,
+        });
+      });
+  };
+
+  const VendorActions = () => {
+    let component;
+    if (submissionDetails && submissionDetails.status === "DRAFT") {
+      component = (
+        <Button
+          variant="contained"
+          color="action"
+          sx={{ mr: 2 }}
+          onClick={() => {
+            navigate(
+              `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
+            );
+          }}>
+          Edit Submission
+        </Button>
+      );
+    } else {
+      <Button
+        variant="contained"
+        color="action"
+        sx={{ mr: 2 }}
+        onClick={() => {
+          navigate(
+            `/form/${id}/${revisionNo}/${submissionDetails["workflow"]["id"]}`
+          );
+        }}
+        disabled={true}>
+        Edit Submission
+      </Button>;
+    }
+    return component;
+  };
+
+  const AdminActions = ({ handleApprove, handleReject }) => {
+    let component;
+    if (submissionDetails && submissionDetails.status === "AWAITING_ADMIN") {
+      component = (
+        <Box>
+          <Button
+            variant="contained"
+            color="action"
+            sx={{ mr: 2 }}
+            onClick={() => handleApprove("AWAITING_APPROVER")}>
+            Approve
+          </Button>
+          <Button variant="outlined" color="error" onClick={handleReject}>
+            Reject
+          </Button>
+        </Box>
+      );
+    } else {
+      component = (
+        <Box>
+          <Button
+            variant="contained"
+            color="action"
+            sx={{ mr: 2 }}
+            onClick={() => handleApprove("APPROVED")}
+            disabled={true}>
+            Approve
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleReject}
+            disabled={true}>
+            Reject
+          </Button>
+        </Box>
+      );
+    }
+    return component;
+  };
+
+  const ApproverActions = () => {
+    let component;
+    if (submissionDetails && submissionDetails.status === "AWAITING_APPROVER") {
+      component = (
+        <Box>
+          <Button
+            variant="contained"
+            color="action"
+            sx={{ mr: 2 }}
+            onClick={() => handleApprove("APPROVED")}>
+            Approve
+          </Button>
+          <Button variant="outlined" color="error" onClick={handleReject}>
+            Reject
+          </Button>
+        </Box>
+      );
+    } else {
+      component = (
+        <Box>
+          <Button
+            variant="contained"
+            color="action"
+            sx={{ mr: 2 }}
+            onClick={handleReject}
+            disabled={true}>
+            Approve
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleReject}
+            disabled={true}>
+            Reject
+          </Button>
+        </Box>
+      );
+    }
+    return component;
+  };
 
   return (
     <Box>
       <NavBar />
-      {/* <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
+      <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
         <Stack spacing={3} sx={{ my: 2, px: 10 }}>
           <FormHeader formDetails={formDetails} />
           {formData?.map((field, idx) => {
@@ -96,7 +328,8 @@ const ViewSubmittedForm = () => {
                     setFieldResponses={setFieldResponses}
                     isParent={true}
                     show={true}
-                    initialResponses={initialResponses}></TextboxComponentV2>
+                    initialResponses={initialResponses}
+                    isSubmission={true}></TextboxComponentV2>
                 );
               } else if (field.fieldType === "RADIOBUTTON") {
                 parentElement = (
@@ -110,6 +343,7 @@ const ViewSubmittedForm = () => {
                     displayMap={displayMap}
                     setDisplayMap={setDisplayMap}
                     initialResponses={initialResponses}
+                    isSubmission={true}
                   />
                 );
               } else {
@@ -122,6 +356,7 @@ const ViewSubmittedForm = () => {
                     isParent={true}
                     show={true}
                     initialResponses={initialResponses}
+                    isSubmission={true}
                   />
                 );
               }
@@ -141,7 +376,9 @@ const ViewSubmittedForm = () => {
                         fieldResponses={fieldResponses}
                         setFieldResponses={setFieldResponses}
                         isParent={false}
-                        show={displayMap[i]}></TextboxComponentV2>
+                        show={displayMap[i]}
+                        initialResponses={initialResponses}
+                        isSubmission={true}></TextboxComponentV2>
                     );
                   } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
                     return (
@@ -151,7 +388,9 @@ const ViewSubmittedForm = () => {
                         fieldResponses={fieldResponses}
                         setFieldResponses={setFieldResponses}
                         isParent={false}
-                        show={true}
+                        show={displayMap[i]}
+                        initialResponses={initialResponses}
+                        isSubmission={true}
                       />
                     );
                   } else if (fieldMap[i].fieldType === "CHECKBOX") {
@@ -163,6 +402,7 @@ const ViewSubmittedForm = () => {
                         setFieldResponses={setFieldResponses}
                         isParent={false}
                         show={displayMap[i]}
+                        isSubmission={true}
                       />
                     );
                   }
@@ -177,16 +417,22 @@ const ViewSubmittedForm = () => {
               );
             }
           })}
+
           <Box sx={{ display: "flex", alignSelf: "end" }}>
-            <Button variant="outlined" sx={{ mr: 2 }} onClick={saveAsDraft}>
-              Save as Draft
-            </Button>
-            <Button variant="contained" color="action" onClick={submitForm}>
-              Submit
-            </Button>
+            {role === "VENDOR" ? <VendorActions /> : ""}
+            {role === "ADMIN" ? (
+              <AdminActions handleApprove={handleApprove} />
+            ) : (
+              ""
+            )}
+            {role === "APPROVER" ? (
+              <ApproverActions handleApprove={handleApprove} />
+            ) : (
+              ""
+            )}
           </Box>
         </Stack>
-      </Container> */}
+      </Container>
     </Box>
   );
 };

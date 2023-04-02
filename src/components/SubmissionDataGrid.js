@@ -188,7 +188,7 @@ const SubmissionDataGrid = () => {
             (row.form?.id?.id ? row.form.id.id : row.formId) +
             (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
           }
-          checkboxSelection
+          disableRowSelectionOnClick
           slots={{
             toolbar: GridToolbar,
           }}

@@ -113,16 +113,13 @@ const ApprovalDataGrid = () => {
           navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
         };
         return (
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              color="warning"
-              size="small"
-              onClick={onClick}
-            >
-              View
-            </Button>
-          </Stack>
+          <Button
+            variant="contained"
+            color="action"
+            size="small"
+            onClick={onClick}>
+            View
+          </Button>
         );
       },
     },
@@ -180,7 +177,7 @@ const ApprovalDataGrid = () => {
             (row.form?.id?.id ? row.form.id.id : row.formId) +
             (row.form?.id?.revisionNo ? row.form.id.revisionNo : row.revisionNo)
           }
-          checkboxSelection
+          disableRowSelectionOnClick
           slots={{
             toolbar: GridToolbar,
           }}
