@@ -15,6 +15,9 @@ const WorkflowTable = ({ data, dataLoaded, fetchWorkflows }) => {
     {
       field: "progress",
       headerName: "Progress",
+      renderCell: (params) => {
+        return params.row.progress + "%";
+      },
     },
     {
       field: "final",
@@ -32,7 +35,8 @@ const WorkflowTable = ({ data, dataLoaded, fetchWorkflows }) => {
                 bgcolor: "#e8f4ff",
                 color: "primary.main",
                 fontWeight: "bold",
-              }}></Chip>
+              }}
+            ></Chip>
           );
         } else {
           return (
@@ -40,7 +44,8 @@ const WorkflowTable = ({ data, dataLoaded, fetchWorkflows }) => {
               label={"Draft"}
               sx={{
                 fontWeight: "bold",
-              }}></Chip>
+              }}
+            ></Chip>
           );
         }
       },
@@ -98,7 +103,8 @@ const WorkflowTable = ({ data, dataLoaded, fetchWorkflows }) => {
               href={"/workflow/" + params.row["id"]}
               variant="contained"
               color="action"
-              size="small">
+              size="small"
+            >
               View
             </Button>
             <Button
@@ -106,7 +112,8 @@ const WorkflowTable = ({ data, dataLoaded, fetchWorkflows }) => {
               color="error"
               size="small"
               disabled={params.row["final"]}
-              onClick={handleDelete}>
+              onClick={handleDelete}
+            >
               Delete
             </Button>
           </Stack>
