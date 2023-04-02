@@ -99,8 +99,6 @@ const PastSubmissionDataGrid = () => {
       renderCell: (params) => {
         const onClick = (e) => {
           const submissionId = params.row.id;
-          const formid = params.row.formId;
-          const revisionNo = params.row.revisionNo;
           console.log("hey row", params.row);
           navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
         };
@@ -109,7 +107,8 @@ const PastSubmissionDataGrid = () => {
             variant="contained"
             color="action"
             size="small"
-            onClick={onClick}>
+            onClick={onClick}
+          >
             View
           </Button>
         );
@@ -166,7 +165,8 @@ const PastSubmissionDataGrid = () => {
       style={{
         height: 500,
         width: "100%",
-      }}>
+      }}
+    >
       <DataGrid
         sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
         rows={formList}

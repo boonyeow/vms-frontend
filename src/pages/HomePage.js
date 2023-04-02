@@ -12,34 +12,6 @@ import ReminderEmailButton from "../components/ReminderEmailButton";
 
 const HomePage = () => {
   const { accountId, token, email, role } = useAuthStore();
-  const [workflowData, setWorkflowData] = useState([]);
-  const [dataLoaded, setDataLoaded] = useState(false); // initialize dataLoaded state variable to false
-  useEffect(() => {
-    fetchWorkflows();
-  }, []);
-
-  const fetchWorkflows = () => {
-    let url = null;
-    if (role !== "VENDOR") {
-      url = process.env.REACT_APP_ENDPOINT_URL + "/api/workflows";
-    } else {
-      url =
-        process.env.REACT_APP_ENDPOINT_URL +
-        "/api/workflows/getWorkflowsByAccountId/" +
-        accountId;
-    }
-    axios
-      .get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setWorkflowData(res.data);
-        setDataLoaded(true);
-      });
-  };
-
   return (
     <Box>
       <NavBar />

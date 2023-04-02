@@ -15,10 +15,9 @@ const ApprovalDataGrid = () => {
   const navigate = useNavigate();
   const columns = [
     {
-      field: "submissionid",
+      field: "id",
       headerName: "ID",
       width: 1,
-      valueGetter: (params) => (params.row.id ? params.row.id : "-"),
     },
     {
       field: "name",
@@ -108,10 +107,8 @@ const ApprovalDataGrid = () => {
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (e) => {
-          const submissionId = params.row.submissionid;
-          const formid = params.row.formId;
-          const revisionNo = params.row.revisionNo;
-          navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
+          const submissionId = params.row.id;
+          navigate(`/formsubmission/${submissionId}`);
         };
         return (
           <Stack direction="row" spacing={2}>
@@ -119,7 +116,8 @@ const ApprovalDataGrid = () => {
               variant="outlined"
               color="warning"
               size="small"
-              onClick={onClick}>
+              onClick={onClick}
+            >
               View
             </Button>
           </Stack>

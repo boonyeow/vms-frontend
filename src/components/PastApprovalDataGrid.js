@@ -95,10 +95,8 @@ const PastApprovalDataGrid = () => {
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (e) => {
-          const submissionId = params.row.submissionid;
-          const formid = params.row.formId;
-          const revisionNo = params.row.revisionNo;
-          navigate(`/formsubmission/${formid}/${revisionNo}/${submissionId}`);
+          const submissionId = params.row.id;
+          navigate(`/formsubmission/${submissionId}`);
         };
         return (
           <Stack direction="row" spacing={2}>
@@ -106,7 +104,8 @@ const PastApprovalDataGrid = () => {
               variant="outlined"
               color="warning"
               size="small"
-              onClick={onClick}>
+              onClick={onClick}
+            >
               View
             </Button>
           </Stack>
@@ -167,7 +166,8 @@ const PastApprovalDataGrid = () => {
       style={{
         height: 500,
         width: "100%",
-      }}>
+      }}
+    >
       <DataGrid
         sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
         rows={formList}

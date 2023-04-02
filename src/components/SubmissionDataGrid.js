@@ -114,7 +114,8 @@ const SubmissionDataGrid = () => {
             variant="contained"
             color="action"
             size="small"
-            onClick={onClick}>
+            onClick={onClick}
+          >
             View
           </Button>
         );
@@ -172,7 +173,8 @@ const SubmissionDataGrid = () => {
         style={{
           height: 500,
           width: "100%",
-        }}>
+        }}
+      >
         <DataGrid
           sx={{ bgcolor: "white", p: 2, borderRadius: 3 }}
           rows={toBeSubmittedList}
