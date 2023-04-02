@@ -17,14 +17,14 @@ const AwaitingSubmissionsDataGrid = () => {
     {
       field: "workflowId",
       headerName: "Workflow ID",
-      width: 100,
+      width: 130,
       valueGetter: (params) =>
         params.row.workflow ? params.row.workflow.id : params.row.workflowId,
     },
     {
       field: "name",
       headerName: "Form Name",
-      width: 160,
+      width: 200,
       valueGetter: (params) =>
         params.row.form && params.row.form.name
           ? params.row.form.name
@@ -33,14 +33,14 @@ const AwaitingSubmissionsDataGrid = () => {
     {
       field: "formid",
       headerName: "Form ID",
-      width: 90,
+      width: 100,
       valueGetter: (params) =>
         params.row.form?.id ? params.row.form.id.id : params.row.formId,
     },
     {
       field: "revisionNumber",
       headerName: "Revision #",
-      width: 90,
+      width: 100,
       valueGetter: (params) =>
         params.row.form?.id?.revisionNo
           ? params.row.form.id.revisionNo
@@ -49,7 +49,7 @@ const AwaitingSubmissionsDataGrid = () => {
     {
       field: "email",
       headerName: "Assigned To",
-      width: 160,
+      width: 180,
       valueGetter: (params) =>
         params.row.submittedBy?.email
           ? params.row.submittedBy.email
@@ -58,7 +58,7 @@ const AwaitingSubmissionsDataGrid = () => {
     {
       field: "company",
       headerName: "Company",
-      width: 160,
+      width: 170,
       valueGetter: (params) =>
         params.row.submittedBy?.company
           ? params.row.submittedBy.company
@@ -68,7 +68,7 @@ const AwaitingSubmissionsDataGrid = () => {
     {
       field: "status",
       headerName: "Status",
-      width: 160,
+      width: 170,
       renderCell: (params) => {
         let color = "";
         let backgroundColor = "";
@@ -95,32 +95,7 @@ const AwaitingSubmissionsDataGrid = () => {
           </div>
         );
       },
-    },
-    {
-      field: "action",
-      headerName: "Action",
-      width: 125,
-      sortable: false,
-      disableClickEventBubbling: true,
-      renderCell: (params) => {
-        const onClick = (e) => {
-          const formId = params.row.formId;
-          const revisionNo = params.row.revisionNo;
-          const workflowId = params.row.workflowId;
-          navigate(`/form/${formId}/${revisionNo}/${workflowId}`);
-        };
-        return (
-          <Button
-            variant="contained"
-            color="action"
-            size="small"
-            onClick={onClick}
-          >
-            View
-          </Button>
-        );
-      },
-    },
+    }
   ];
 
   const [toBeSubmittedList, setToBeSubmittedList] = useState([]);
