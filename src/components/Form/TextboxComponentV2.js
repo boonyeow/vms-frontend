@@ -6,12 +6,14 @@ const TextboxComponentV2 = ({
   fieldData,
   idx,
   regexMap,
+  i,
   fieldResponses,
   setFieldResponses,
   show,
   isParent,
   initialResponses,
   isSubmission,
+  setValidationState,
 }) => {
   const [inputError, setInputError] = useState("");
   const [value, setValue] = useState();
@@ -36,11 +38,19 @@ const TextboxComponentV2 = ({
         setInputError(
           `Please enter a correct ${regexMap[fieldData.regexId].name} format`
         );
+        setValidationState((prevState) => ({
+          ...prevState,
+          [`${i? i +'-'+ idx :idx}`]: isValid,
+        }));;
       } else {
         setInputError("");
         let temp = { ...fieldResponses };
         temp[fieldData.id] = newValue;
         setFieldResponses(temp);
+        setValidationState((prevState) => ({
+          ...prevState,
+          [`${i ? i + "-" + idx : idx}`]: newValue==='' ? true : isValid,
+        }));
       }
     } else {
       let temp = { ...fieldResponses };
@@ -66,7 +76,8 @@ const TextboxComponentV2 = ({
             error={!!inputError}
             onChange={handleInputChange}
             defaultValue={value}
-            disabled={true}></TextField>
+            disabled={true}
+          ></TextField>
         ) : (
           <TextField
             sx={{ mt: 1, width: "100%" }}
@@ -77,7 +88,8 @@ const TextboxComponentV2 = ({
             error={!!inputError}
             onChange={handleInputChange}
             defaultValue={value}
-            disabled={!show}></TextField>
+            disabled={!show}
+          ></TextField>
         )}
       </Box>
     </>

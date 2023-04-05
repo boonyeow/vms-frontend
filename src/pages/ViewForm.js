@@ -4,7 +4,7 @@ import { Box, Container, Stack } from "@mui/system";
 import { Button, Typography } from "@mui/material";
 import { useAuthStore } from "../store";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TextboxComponentV2 from "../components/Form/TextboxComponentV2";
 import CheckboxComponentV2 from "../components/Form/CheckboxComponentV2";
 import RadioButtonComponentV2 from "../components/Form/RadioButtonComponentV2";
@@ -26,7 +26,9 @@ const ViewForm = () => {
   const [formResponse, setFormResponse] = useState({});
   const [initialResponses, setInitialResponses] = useState({});
   const [submissionId, setSubmissionId] = useState("");
+  const [validationState, setValidationState] = useState({});
   let parentCounter = 0;
+  const formRef = useRef();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -218,6 +220,10 @@ const ViewForm = () => {
   };
 
   const submitForm = () => {
+    if (!Object.values(validationState).every((isValid) => isValid)) {
+      return
+    }
+
     let status = "AWAITING_ADMIN";
     if (role == "ADMIN") {
       status = "AWAITING_APPROVER";
@@ -273,126 +279,130 @@ const ViewForm = () => {
   return (
     <Box>
       <NavBar />
-      <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
-        <Stack spacing={3} sx={{ my: 2, px: 10 }}>
-          <FormHeader formDetails={formDetails} />
-          {formData?.map((field, idx) => {
-            if (!childFields.has(field.id)) {
-              parentCounter++;
-              let parentElement;
-              // Proceed to render parent
-              if (field.fieldType === "TEXTBOX") {
-                parentElement = (
-                  <TextboxComponentV2
-                    idx={parentCounter}
-                    fieldData={field}
-                    regexMap={regexMap}
-                    fieldResponses={fieldResponses}
-                    setFieldResponses={setFieldResponses}
-                    isParent={true}
-                    show={true}
-                    initialResponses={initialResponses}
-                  ></TextboxComponentV2>
-                );
-              } else if (field.fieldType === "RADIOBUTTON") {
-                parentElement = (
-                  <RadioButtonComponentV2
-                    idx={parentCounter}
-                    fieldData={field}
-                    fieldResponses={fieldResponses}
-                    setFieldResponses={setFieldResponses}
-                    isParent={true}
-                    show={true}
-                    displayMap={displayMap}
-                    setDisplayMap={setDisplayMap}
-                    initialResponses={initialResponses}
-                  />
-                );
-              } else {
-                parentElement = (
-                  <CheckboxComponentV2
-                    idx={parentCounter}
-                    fieldData={field}
-                    fieldResponses={fieldResponses}
-                    setFieldResponses={setFieldResponses}
-                    isParent={true}
-                    displayMap={displayMap}
-                    setDisplayMap={setDisplayMap}
-                    show={true}
-                    initialResponses={initialResponses}
-                  />
+      <form ref={formRef}>
+        <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
+          <Stack spacing={3} sx={{ my: 2, px: 10 }}>
+            <FormHeader formDetails={formDetails} />
+            {formData?.map((field, idx) => {
+              if (!childFields.has(field.id)) {
+                parentCounter++;
+                let parentElement;
+                // Proceed to render parent
+                if (field.fieldType === "TEXTBOX") {
+                  parentElement = (
+                    <TextboxComponentV2
+                      idx={parentCounter}
+                      setValidationState={setValidationState}
+                      fieldData={field}
+                      regexMap={regexMap}
+                      fieldResponses={fieldResponses}
+                      setFieldResponses={setFieldResponses}
+                      isParent={true}
+                      show={true}
+                      initialResponses={initialResponses}
+                    ></TextboxComponentV2>
+                  );
+                } else if (field.fieldType === "RADIOBUTTON") {
+                  parentElement = (
+                    <RadioButtonComponentV2
+                      idx={parentCounter}
+                      fieldData={field}
+                      fieldResponses={fieldResponses}
+                      setFieldResponses={setFieldResponses}
+                      isParent={true}
+                      show={true}
+                      displayMap={displayMap}
+                      setDisplayMap={setDisplayMap}
+                      initialResponses={initialResponses}
+                    />
+                  );
+                } else {
+                  parentElement = (
+                    <CheckboxComponentV2
+                      idx={parentCounter}
+                      fieldData={field}
+                      fieldResponses={fieldResponses}
+                      setFieldResponses={setFieldResponses}
+                      isParent={true}
+                      displayMap={displayMap}
+                      setDisplayMap={setDisplayMap}
+                      show={true}
+                      initialResponses={initialResponses}
+                    />
+                  );
+                }
+                // Proceed to render child if there are any
+                let childElements;
+                if (field.hasOwnProperty("options")) {
+                  //console.log(field)
+                  let childToRender = Object.values(field.options).filter(
+                    (value) => value != null
+                  );
+                  childElements = childToRender.map((i) => {
+                    //console.log(childToRender);
+                    if (fieldMap[i].fieldType === "TEXTBOX") {
+                      return (
+                        <TextboxComponentV2
+                          fieldData={fieldMap[i]}
+                          regexMap={regexMap}
+                          i={i}
+                          setValidationState={setValidationState}
+                          idx={idToIndex[i]}
+                          fieldResponses={fieldResponses}
+                          setFieldResponses={setFieldResponses}
+                          isParent={false}
+                          show={displayMap[i]}
+                          initialResponses={initialResponses}
+                        ></TextboxComponentV2>
+                      );
+                    } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
+                      return (
+                        <RadioButtonComponentV2
+                          idx={idToIndex[i]}
+                          fieldData={fieldMap[i]}
+                          fieldResponses={fieldResponses}
+                          setFieldResponses={setFieldResponses}
+                          isParent={false}
+                          show={displayMap[i]}
+                          initialResponses={initialResponses}
+                        />
+                      );
+                    } else if (fieldMap[i].fieldType === "CHECKBOX") {
+                      return (
+                        <CheckboxComponentV2
+                          idx={idToIndex[i]}
+                          fieldData={fieldMap[i]}
+                          fieldResponses={fieldResponses}
+                          setFieldResponses={setFieldResponses}
+                          isParent={false}
+                          show={displayMap[i]}
+                          initialResponses={initialResponses}
+                        />
+                      );
+                    }
+                  });
+                }
+                return (
+                  <Stack
+                    sx={{ bgcolor: "white", p: 5, borderRadius: 2 }}
+                    spacing={2}
+                  >
+                    {parentElement} {childElements?.map((i) => i)}
+                  </Stack>
                 );
               }
-              // Proceed to render child if there are any
-              let childElements;
-              if (field.hasOwnProperty("options")) {
-                //console.log(field)
-                let childToRender = Object.values(field.options).filter(
-                  (value) => value != null
-                );
-                childElements = childToRender.map((i) => {
-                  //console.log(childToRender);
-                  if (fieldMap[i].fieldType === "TEXTBOX") {
-                    console.log(fieldMap[i])
-                    return (
-                      <TextboxComponentV2
-                        fieldData={fieldMap[i]}
-                        regexMap={regexMap}
-                        idx={idToIndex[i]}
-                        fieldResponses={fieldResponses}
-                        setFieldResponses={setFieldResponses}
-                        isParent={false}
-                        show={displayMap[i]}
-                        initialResponses={initialResponses}
-                      ></TextboxComponentV2>
-                    );
-                  } else if (fieldMap[i].fieldType === "RADIOBUTTON") {
-                    return (
-                      <RadioButtonComponentV2
-                        idx={idToIndex[i]}
-                        fieldData={fieldMap[i]}
-                        fieldResponses={fieldResponses}
-                        setFieldResponses={setFieldResponses}
-                        isParent={false}
-                        show={displayMap[i]}
-                        initialResponses={initialResponses}
-                      />
-                    );
-                  } else if (fieldMap[i].fieldType === "CHECKBOX") {
-                    return (
-                      <CheckboxComponentV2
-                        idx={idToIndex[i]}
-                        fieldData={fieldMap[i]}
-                        fieldResponses={fieldResponses}
-                        setFieldResponses={setFieldResponses}
-                        isParent={false}
-                        show={displayMap[i]}
-                        initialResponses={initialResponses}
-                      />
-                    );
-                  }
-                });
-              }
-              return (
-                <Stack
-                  sx={{ bgcolor: "white", p: 5, borderRadius: 2 }}
-                  spacing={2}
-                >
-                  {parentElement} {childElements?.map((i) => i)}
-                </Stack>
-              );
-            }
-          })}
-          <Box sx={{ display: "flex", alignSelf: "end" }}>
-            <Button variant="outlined" sx={{ mr: 2 }} onClick={saveAsDraft}>
-              Save as Draft
-            </Button>
-            <Button variant="contained" color="action" onClick={submitForm}>
-              Submit
-            </Button>
-          </Box>
-        </Stack>
-      </Container>
+            })}
+            <Box sx={{ display: "flex", alignSelf: "end" }}>
+              <Button variant="outlined" sx={{ mr: 2 }} onClick={saveAsDraft}>
+                Save as Draft
+              </Button>
+              <Button variant="contained" color="action" onClick={submitForm}>
+                Submit
+              </Button>
+            </Box>
+          </Stack>
+        </Container>
+      </form>
     </Box>
   );
 };
