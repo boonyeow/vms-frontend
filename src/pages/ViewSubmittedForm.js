@@ -26,6 +26,7 @@ const ViewSubmittedForm = () => {
   const [formResponse, setFormResponse] = useState({});
   const [initialResponses, setInitialResponses] = useState({});
   const [submissionDetails, setSubmissionDetails] = useState({});
+  const [editingEnabled, setEditingEnabled] = useState(false);
   const componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -353,12 +354,7 @@ const ViewSubmittedForm = () => {
   return (
     <Box>
       <NavBar />
-      <Container
-        component="main"
-        maxWidth="lg"
-        sx={{ p: 5 }}
-        ref={componentRef}
-      >
+      <Container component="main" maxWidth="lg" sx={{ p: 5 }}>
         <Stack spacing={3} sx={{ my: 2, px: 10 }}>
           <FormHeader formDetails={formDetails} />
           {formData?.map((field, idx) => {
@@ -403,9 +399,9 @@ const ViewSubmittedForm = () => {
                     fieldResponses={fieldResponses}
                     setFieldResponses={setFieldResponses}
                     isParent={true}
-                    show={true}
                     displayMap={displayMap}
                     setDisplayMap={setDisplayMap}
+                    show={true}
                     initialResponses={initialResponses}
                     isSubmission={true}
                   />
@@ -414,11 +410,14 @@ const ViewSubmittedForm = () => {
               // Proceed to render child if there are any
               let childElements;
               if (field.hasOwnProperty("options")) {
+                //console.log(field)
                 let childToRender = Object.values(field.options).filter(
                   (value) => value != null
                 );
                 childElements = childToRender.map((i) => {
+                  //console.log(childToRender);
                   if (fieldMap[i].fieldType === "TEXTBOX") {
+                    console.log(fieldMap[i])
                     return (
                       <TextboxComponentV2
                         fieldData={fieldMap[i]}
@@ -454,6 +453,7 @@ const ViewSubmittedForm = () => {
                         setFieldResponses={setFieldResponses}
                         isParent={false}
                         show={displayMap[i]}
+                        initialResponses={initialResponses}
                         isSubmission={true}
                       />
                     );
